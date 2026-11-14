@@ -1,0 +1,380 @@
+page 32 (
+    name: Comentarios
+    alias: COMENTARIOS
+    title: Comentarios
+    appearance {
+        pageMode: modalDialog
+        dialogTemplate: @/modal-dialog
+        templateOptions: #DEFAULT#
+    }
+    navigation {
+        cursorFocus: doNotFocusCursor
+    }
+    security {
+        pageAccessProtection: argumentsMustHaveChecksum
+        formAutoComplete: false
+    }
+
+    region agregar (
+        name: Agregar
+        type: form
+        source {
+            location: localDatabase
+            tableName: SGT_COMENTARIOS
+            pageItemsToSubmit: [
+                P32_ENTIDAD
+                P32_PK_ID
+            ]
+        }
+        layout {
+            sequence: 20
+            slot: contentBody
+        }
+        appearance {
+            template: @/standard
+            templateOptions: [
+                #DEFAULT#
+                t-Region--noPadding
+                t-Region--removeHeader js-removeLandmark
+                t-Region--noBorder
+                t-Region--scrollBody
+            ]
+        }
+    )
+
+    region comentarios (
+        name: Comentarios
+        type: themeTemplateComponent/comments
+        source {
+            location: localDatabase
+            type: sqlQuery
+            sqlQuery:
+                ```sql
+                select ID,
+                       ENTIDAD,
+                       PK_ID,
+                       COMENTARIO,
+                       CREADO_POR,
+                       SUBSTR(CREADO_POR, 1, 2) iniciales,
+                       CREADO_EL,
+                       actualizado_POR,
+                       actualizado_EL
+                  from SGT_COMENTARIOS
+                 where entidad =:P32_ENTIDAD and pk_id = :P32_PK_ID
+                ```
+            pageItemsToSubmit: [
+                P32_ENTIDAD
+                P32_PK_ID
+            ]
+        }
+        orderBy {
+            type: item
+            item: {
+                itemName: P32_ORDER_BY
+                orderBys: {
+                    CREADO_EL: 1 desc
+                    Comentarios: 2 asc
+                    CREADO_POR: 3 asc
+                }
+            }
+        }
+        layout {
+            sequence: 10
+            slot: contentBody
+        }
+        appearance {
+            template: @/blank-with-attributes
+            templateOptions: #DEFAULT#
+        }
+        accessibility {
+            landmarkType: region
+        }
+        componentAppearance {
+            display: report
+        }
+        settings {
+            commentText: COMENTARIO
+            userName: CREADO_POR
+            date: ACTUALIZADO_EL
+            style: chatSpeechBubbles
+        }
+        plugin-avatar {
+            type: initials
+            initials: INICIALES
+        }
+
+        column ACTUALIZADO_EL (
+            layout {
+                sequence: 110
+            }
+            source {
+                databaseColumn: ACTUALIZADO_EL
+                dataType: timestamp
+            }
+        )
+
+        column ACTUALIZADO_POR (
+            layout {
+                sequence: 100
+            }
+            source {
+                databaseColumn: ACTUALIZADO_POR
+                dataType: varchar2
+            }
+        )
+
+        column COMENTARIO (
+            layout {
+                sequence: 40
+            }
+            source {
+                databaseColumn: COMENTARIO
+                dataType: varchar2
+            }
+        )
+
+        column CREADO_EL (
+            layout {
+                sequence: 60
+            }
+            source {
+                databaseColumn: CREADO_EL
+                dataType: timestamp
+            }
+        )
+
+        column CREADO_POR (
+            layout {
+                sequence: 50
+            }
+            source {
+                databaseColumn: CREADO_POR
+                dataType: varchar2
+            }
+        )
+
+        column ENTIDAD (
+            layout {
+                sequence: 20
+            }
+            source {
+                databaseColumn: ENTIDAD
+                dataType: number
+            }
+        )
+
+        column ID (
+            layout {
+                sequence: 10
+            }
+            source {
+                databaseColumn: ID
+                dataType: number
+                primaryKey: true
+            }
+        )
+
+        column INICIALES (
+            layout {
+                sequence: 90
+            }
+            source {
+                databaseColumn: INICIALES
+                dataType: varchar2
+            }
+        )
+
+        column PK_ID (
+            layout {
+                sequence: 30
+            }
+            source {
+                databaseColumn: PK_ID
+                dataType: number
+            }
+        )
+
+    )
+
+    pageItem P32_COMENTARIO (
+        type: textarea
+        label {
+            label: Comentario
+            alignment: left
+        }
+        layout {
+            sequence: 40
+            region: @agregar
+            slot: regionBody
+            alignment: left
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+            width: 30
+            height: 5
+        }
+        validation {
+            valueRequired: true
+            maxLength: 512
+        }
+        source {
+            formRegion: @agregar
+            column: COMENTARIO
+            dataType: varchar2
+        }
+        security {
+            sessionStateProtection: checksumRequiredSessionLevel
+        }
+    )
+
+    pageItem P32_ENTIDAD (
+        type: hidden
+        layout {
+            sequence: 20
+            region: @agregar
+            slot: regionBody
+        }
+        source {
+            formRegion: @agregar
+            column: ENTIDAD
+            dataType: number
+        }
+    )
+
+    pageItem P32_ID (
+        type: hidden
+        layout {
+            sequence: 10
+            region: @agregar
+            slot: regionBody
+        }
+        source {
+            formRegion: @agregar
+            column: ID
+            dataType: number
+            primaryKey: true
+        }
+        security {
+            sessionStateProtection: checksumRequiredSessionLevel
+        }
+    )
+
+    pageItem P32_ORDER_BY (
+        type: selectList
+        label {
+            label: Order By
+            alignment: left
+        }
+        lov {
+            type: staticValues
+            staticValues: STATIC2:Fecha;CREADO_EL,Comentarios;Comentarios,Usuario;CREADO_POR
+            displayExtraValues: false
+            displayNullValue: false
+        }
+        layout {
+            sequence: 10
+            region: @comentarios
+            slot: regionBody
+            alignment: left
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+            height: 1
+        }
+        validation {
+            valueRequired: true
+        }
+        advanced {
+            warnOnUnsavedChanges: ignore
+        }
+        default {
+            type: static
+            staticValue: CREADO_EL
+        }
+    )
+
+    pageItem P32_PK_ID (
+        type: hidden
+        layout {
+            sequence: 30
+            region: @agregar
+            slot: regionBody
+        }
+        source {
+            formRegion: @agregar
+            column: PK_ID
+            dataType: number
+        }
+    )
+
+    button agregar (
+        buttonName: AGREGAR
+        label: Agregar
+        layout {
+            sequence: 90
+            region: @agregar
+            slot: regionBody
+        }
+        appearance {
+            buttonTemplate: @/text
+            templateOptions: #DEFAULT#
+        }
+        behavior {
+            warnOnUnsavedChanges: doNotCheck
+            databaseAction: insert
+        }
+    )
+
+    process close-dialog (
+        name: Close Dialog
+        type: closeDialog
+        execution {
+            sequence: 20
+        }
+        advanced {
+            executionMappingIdentifier: 22784271533269026
+        }
+    )
+
+    process initialize-form-comemtarios (
+        name: Initialize form Comemtarios
+        type: formInitialization
+        formRegion: @agregar
+        execution {
+            sequence: 10
+            point: beforeHeader
+        }
+        advanced {
+            executionMappingIdentifier: 22782003642269004
+        }
+    )
+
+    process procesar-form (
+        name: PROCESAR-FORM
+        type: formAutoRowProcessing
+        formRegion: @agregar
+        target {
+            targetType: tableView
+            tableName: SGT_COMENTARIOS
+        }
+        execution {
+            sequence: 10
+        }
+        successMessage {
+            successMessage: Agregado
+        }
+        error {
+            errorMessage: No se pudo agregar
+        }
+        advanced {
+            executionMappingIdentifier: 22783934866269023
+        }
+        serverSideCondition {
+            whenButtonPressed: @agregar
+        }
+    )
+
+)
+

@@ -1,0 +1,1948 @@
+dataLoadDefinition agregar_ifaces_me (
+    name: Agregar Interfaces ME
+    target {
+        tableName: SGT_INTERFACES
+    }
+    advanced {
+        commitInterval: 500
+    }
+    dataProfile {
+        name: A
+        format: xlsx
+    }
+    advanced {
+        encoding: utf-8
+        defaultXlsxSheetName: sheet1.xml
+    }
+
+    dataProfileColumn equipo-id (
+        columnName: EQUIPO_ID
+        source {
+            sequence: 17
+            type: sqlExpression
+            dataType: number
+        }
+        computation {
+            sqlExpression: SELECT F_GET_LOVS(1, EQUIPOS) FROM DUAL
+        }
+    )
+
+    dataProfileColumn equipos (
+        columnName: EQUIPOS
+        source {
+            sequence: 1
+            dataType: varchar2
+        }
+        parsing {
+            selector: EQUIPOS
+        }
+    )
+
+    dataProfileColumn estado (
+        columnName: ESTADO
+        source {
+            sequence: 3
+            dataType: varchar2
+            maxLength: 1020
+        }
+        parsing {
+            selector: ESTADO
+        }
+    )
+
+    dataProfileColumn etiqueta (
+        columnName: ETIQUETA
+        source {
+            sequence: 2
+            dataType: varchar2
+            maxLength: 1020
+        }
+        parsing {
+            selector: ETIQUETA
+        }
+    )
+
+    dataProfileColumn mac-address (
+        columnName: MAC_ADDRESS
+        source {
+            sequence: 7
+            dataType: varchar2
+            maxLength: 100
+        }
+        parsing {
+            selector: MAC_ADDRESS
+        }
+    )
+
+    dataProfileColumn nombre (
+        columnName: NOMBRE
+        source {
+            sequence: 2
+            dataType: varchar2
+        }
+        parsing {
+            selector: NOMBRE
+        }
+    )
+
+    dataProfileColumn rx-en-dbm (
+        columnName: RX_EN_DBM
+        source {
+            sequence: 6
+            dataType: varchar2
+            maxLength: 40
+        }
+        parsing {
+            selector: RX_EN_DBM
+        }
+    )
+
+    dataProfileColumn tipo-interface (
+        columnName: TIPO_INTERFACE
+        source {
+            sequence: 5
+            dataType: varchar2
+        }
+        parsing {
+            selector: TIPO_INTERFACE
+        }
+    )
+
+    dataProfileColumn tipo-interface-id (
+        columnName: TIPO_INTERFACE_ID
+        source {
+            sequence: 27
+            type: sqlExpression
+            dataType: number
+        }
+        computation {
+            sqlExpression: SELECT F_GET_LOVS(2, TIPO_INTERFACE) FROM DUAL
+        }
+    )
+
+    dataProfileColumn tx-en-dbm (
+        columnName: TX_EN_DBM
+        source {
+            sequence: 5
+            dataType: varchar2
+            maxLength: 40
+        }
+        parsing {
+            selector: TX_EN_DBM
+        }
+    )
+
+    dataProfileColumn velocidad-mbps (
+        columnName: VELOCIDAD_MBPS
+        source {
+            sequence: 4
+            dataType: number
+        }
+        parsing {
+            selector: VELOCIDAD_MBPS
+        }
+    )
+
+)
+
+dataLoadDefinition agregar_interfaces (
+    name: AGREGAR_INTERFACES
+    target {
+        tableName: SGT_INTERFACES
+    }
+    dataProfile {
+        name: AGREGAR_INTERFACES
+        format: csv
+    }
+    advanced {
+        encoding: utf-8
+        csvEnclosedBy: "
+    }
+
+    dataProfileColumn equipo-id (
+        columnName: EQUIPO_ID
+        source {
+            sequence: 17
+            type: sqlExpression
+            dataType: number
+        }
+        computation {
+            sqlExpression: SELECT F_GET_LOVS(1, EQUIPOS) FROM DUAL
+        }
+    )
+
+    dataProfileColumn equipos (
+        columnName: EQUIPOS
+        source {
+            sequence: 1
+            dataType: varchar2
+        }
+        parsing {
+            selector: EQUIPOS
+        }
+    )
+
+    dataProfileColumn estado (
+        columnName: ESTADO
+        source {
+            sequence: 3
+            dataType: varchar2
+            maxLength: 1020
+        }
+        parsing {
+            selector: ESTADO
+        }
+    )
+
+    dataProfileColumn etiqueta (
+        columnName: ETIQUETA
+        source {
+            sequence: 2
+            dataType: varchar2
+            maxLength: 1020
+        }
+        parsing {
+            selector: ETIQUETA
+        }
+    )
+
+    dataProfileColumn mac-address (
+        columnName: MAC_ADDRESS
+        source {
+            sequence: 7
+            dataType: varchar2
+            maxLength: 100
+        }
+        parsing {
+            selector: MAC_ADDRESS
+        }
+    )
+
+    dataProfileColumn nombre (
+        columnName: NOMBRE
+        source {
+            sequence: 1
+            dataType: varchar2
+            maxLength: 1020
+        }
+        parsing {
+            selector: NOMBRE
+        }
+    )
+
+    dataProfileColumn rx-en-dbm (
+        columnName: RX_EN_DBM
+        source {
+            sequence: 6
+            dataType: varchar2
+            maxLength: 40
+        }
+        parsing {
+            selector: RX_EN_DBM
+        }
+    )
+
+    dataProfileColumn tx-en-dbm (
+        columnName: TX_EN_DBM
+        source {
+            sequence: 5
+            dataType: varchar2
+            maxLength: 40
+        }
+        parsing {
+            selector: TX_EN_DBM
+        }
+    )
+
+    dataProfileColumn velocidad-mbps (
+        columnName: VELOCIDAD_MBPS
+        source {
+            sequence: 4
+            dataType: number
+        }
+        parsing {
+            selector: VELOCIDAD_MBPS
+        }
+    )
+
+)
+
+dataLoadDefinition agregar_interfaces_dl (
+    name: agregar-interfaces-dl
+    target {
+        tableName: SGT_INTERFACES
+    }
+    comments {
+        comments: Prueba para agregar campos via data load
+    }
+    dataProfile {
+        name: dl-interfaces
+        format: xlsx
+    }
+    advanced {
+        encoding: utf-8
+    }
+
+    dataProfileColumn duplex (
+        columnName: DUPLEX
+        source {
+            sequence: 13
+            dataType: varchar2
+        }
+        parsing {
+            selector: DUPLEX
+        }
+    )
+
+    dataProfileColumn estado (
+        columnName: ESTADO
+        source {
+            sequence: 5
+            dataType: varchar2
+        }
+        parsing {
+            selector: ESTADO
+        }
+    )
+
+    dataProfileColumn etiqueta (
+        columnName: ETIQUETA
+        source {
+            sequence: 4
+            dataType: varchar2
+            maxLength: 1020
+        }
+        parsing {
+            selector: ETIQUETA
+        }
+    )
+
+    dataProfileColumn hw-version (
+        columnName: HW_VERSION
+        source {
+            sequence: 11
+            dataType: varchar2
+            maxLength: 400
+        }
+        parsing {
+            selector: HW_VERSION
+        }
+    )
+
+    dataProfileColumn mac-address (
+        columnName: MAC_ADDRESS
+        source {
+            sequence: 9
+            dataType: varchar2
+            maxLength: 100
+        }
+        parsing {
+            selector: MAC_ADDRESS
+        }
+    )
+
+    dataProfileColumn modo (
+        columnName: MODO
+        source {
+            sequence: 14
+            dataType: varchar2
+        }
+        parsing {
+            selector: MODO
+        }
+    )
+
+    dataProfileColumn nombre (
+        columnName: NOMBRE
+        source {
+            sequence: 3
+            dataType: varchar2
+            maxLength: 400
+        }
+        parsing {
+            selector: NOMBRE
+        }
+    )
+
+    dataProfileColumn numero-serie (
+        columnName: NUMERO_SERIE
+        source {
+            sequence: 10
+            dataType: varchar2
+            maxLength: 1020
+        }
+        parsing {
+            selector: NUMERO_SERIE
+        }
+    )
+
+    dataProfileColumn rx-en-dbm (
+        columnName: RX_EN_DBM
+        source {
+            sequence: 8
+            dataType: varchar2
+            maxLength: 40
+        }
+        parsing {
+            selector: RX_EN_DBM
+        }
+    )
+
+    dataProfileColumn sgt-tipo-interface-id (
+        columnName: SGT_TIPO_INTERFACE_ID
+        source {
+            sequence: 6
+            dataType: number
+        }
+        parsing {
+            selector: TIPO_INTERFACE_ID
+        }
+    )
+
+    dataProfileColumn sw-version (
+        columnName: SW_VERSION
+        source {
+            sequence: 12
+            dataType: varchar2
+            maxLength: 400
+        }
+        parsing {
+            selector: SW_VERSION
+        }
+    )
+
+    dataProfileColumn tx-en-dbm (
+        columnName: TX_EN_DBM
+        source {
+            sequence: 7
+            dataType: varchar2
+            maxLength: 40
+        }
+        parsing {
+            selector: TX_EN_DBM
+        }
+    )
+
+)
+
+dataLoadDefinition conexiones_dl (
+    name: CONEXIONES_DL
+    target {
+        tableName: SGT_ENLACES_TRAMOS
+    }
+    dataProfile {
+        name: CONEXIONES_DL
+        format: xlsx
+    }
+    advanced {
+        encoding: utf-8
+        defaultXlsxSheetName: sheet1.xml
+    }
+
+    dataProfileColumn equipo-a (
+        columnName: EQUIPO_A
+        source {
+            sequence: 10
+            dataType: varchar2
+        }
+        parsing {
+            selector: EQUIPO_A
+        }
+    )
+
+    dataProfileColumn equipo-a-id (
+        columnName: EQUIPO_A_ID
+        source {
+            sequence: 60
+            type: sqlExpression
+            dataType: number
+        }
+        computation {
+            sqlExpression: SELECT F_GET_LOVS(1, EQUIPO_A) FROM DUAL
+        }
+    )
+
+    dataProfileColumn equipo-b (
+        columnName: EQUIPO_B
+        source {
+            sequence: 30
+            dataType: varchar2
+        }
+        parsing {
+            selector: EQUIPO_B
+        }
+    )
+
+    dataProfileColumn equipo-b-id (
+        columnName: EQUIPO_B_ID
+        source {
+            sequence: 70
+            type: sqlExpression
+            dataType: number
+        }
+        computation {
+            sqlExpression: SELECT F_GET_LOVS(1, EQUIPO_B) FROM DUAL
+        }
+    )
+
+    dataProfileColumn interfaz-a (
+        columnName: INTERFAZ_A
+        source {
+            sequence: 20
+            dataType: varchar2
+        }
+        parsing {
+            selector: INTERFAZ_A
+        }
+    )
+
+    dataProfileColumn interfaz-a-id (
+        columnName: INTERFAZ_A_ID
+        source {
+            sequence: 100
+            type: sqlExpression
+            dataType: number
+        }
+        computation {
+            sqlExpression:
+                ```sql
+                SELECT 
+                    CASE
+                        WHEN INTERFAZ_A IS NULL THEN NULL
+                        ELSE NVL(
+                                (
+                                    SELECT MAX(ID)
+                                    FROM SGT_INTERFACES
+                                    WHERE EQUIPO_ID = F_GET_LOVS(1, EQUIPO_A)
+                                    AND NOMBRE = INTERFAZ_A
+                                ),
+                                0
+                             )
+                    END AS ID
+                FROM DUAL
+                ```
+        }
+    )
+
+    dataProfileColumn interfaz-b (
+        columnName: INTERFAZ_B
+        source {
+            sequence: 40
+            dataType: varchar2
+        }
+        parsing {
+            selector: INTERFAZ_B
+        }
+    )
+
+    dataProfileColumn interfaz-b-id (
+        columnName: INTERFAZ_B_ID
+        source {
+            sequence: 110
+            type: sqlExpression
+            dataType: number
+        }
+        computation {
+            sqlExpression:
+                ```sql
+                SELECT 
+                    CASE
+                        WHEN INTERFAZ_B IS NULL THEN NULL
+                        else  nvl( (SELECT I2.ID FROM 
+                SGT_INTERFACES I2 WHERE I2.EQUIPO_ID = (
+                SELECT F_GET_LOVS(1,EQUIPO_B) FROM DUAL ) AND I2.NOMBRE = INTERFAZ_B) 
+                , 0) end as ID from dual
+                ```
+        }
+    )
+
+    dataProfileColumn nombre (
+        columnName: NOMBRE
+        source {
+            sequence: 55
+            dataType: varchar2
+        }
+        parsing {
+            selector: OBSERVACIONES
+        }
+    )
+
+    dataProfileColumn tipo-conexion (
+        columnName: TIPO_CONEXION
+        source {
+            sequence: 50
+            dataType: varchar2
+        }
+        parsing {
+            selector: TIPO_DE_CONEXIÓN
+        }
+    )
+
+)
+
+dataLoadDefinition enlaces_fo_dataload (
+    name: enlaces_fo_dataload
+    target {
+        tableName: SGT_ENLACES_FO
+        loadingMethod: merge
+    }
+    dataProfile {
+        name: enlaces_fo_dataload
+        format: xlsx
+    }
+    advanced {
+        encoding: utf-8
+        defaultXlsxSheetName: sheet1.xml
+    }
+
+    dataProfileColumn abs-longitud (
+        columnName: ABS_LONGITUD
+        source {
+            sequence: 9
+            dataType: number
+        }
+        parsing {
+            selector: ABS_LONGITUD
+        }
+    )
+
+    dataProfileColumn actualizado-el (
+        columnName: ACTUALIZADO_EL
+        source {
+            sequence: 23
+            dataType: timestamp
+        }
+        parsing {
+            selector: ACTUALIZADO_EL
+            hasTimeZone: false
+        }
+    )
+
+    dataProfileColumn actualizado-por (
+        columnName: ACTUALIZADO_POR
+        source {
+            sequence: 22
+            dataType: varchar2
+            maxLength: 255
+        }
+        parsing {
+            selector: ACTUALIZADO_POR
+        }
+    )
+
+    dataProfileColumn cantidad-de-pelos (
+        columnName: CANTIDAD_DE_PELOS
+        source {
+            sequence: 10
+            dataType: number
+        }
+        parsing {
+            selector: CANTIDAD_DE_PELOS
+        }
+    )
+
+    dataProfileColumn certificación (
+        columnName: CERTIFICACIÓN
+        source {
+            sequence: 7
+            dataType: number
+        }
+        parsing {
+            selector: CERTIFICACIÓN
+        }
+    )
+
+    dataProfileColumn comentarios (
+        columnName: COMENTARIOS
+        source {
+            sequence: 16
+            dataType: varchar2
+        }
+        parsing {
+            selector: COMENTARIOS
+        }
+    )
+
+    dataProfileColumn conector (
+        columnName: CONECTOR
+        source {
+            sequence: 14
+            dataType: varchar2
+            maxLength: 50
+        }
+        parsing {
+            selector: CONECTOR
+        }
+    )
+
+    dataProfileColumn creado-el (
+        columnName: CREADO_EL
+        source {
+            sequence: 21
+            dataType: timestamp
+        }
+        parsing {
+            selector: CREADO_EL
+            hasTimeZone: false
+        }
+    )
+
+    dataProfileColumn creado-por (
+        columnName: CREADO_POR
+        source {
+            sequence: 20
+            dataType: varchar2
+            maxLength: 255
+        }
+        parsing {
+            selector: CREADO_POR
+        }
+    )
+
+    dataProfileColumn equipo-a-nombre (
+        columnName: EQUIPO_A_NOMBRE
+        source {
+            sequence: 27
+            dataType: varchar2
+            maxLength: 255
+        }
+        parsing {
+            selector: EQUIPO_A_NOMBRE
+        }
+    )
+
+    dataProfileColumn equipo-b-nombre (
+        columnName: EQUIPO_B_NOMBRE
+        source {
+            sequence: 24
+            dataType: varchar2
+            maxLength: 255
+        }
+        parsing {
+            selector: EQUIPO_B_NOMBRE
+        }
+    )
+
+    dataProfileColumn equipo-id-a (
+        columnName: EQUIPO_ID_A
+        source {
+            sequence: 4
+            dataType: number
+        }
+        parsing {
+            selector: EQUIPO_ID_A
+        }
+    )
+
+    dataProfileColumn equipo-id-b (
+        columnName: EQUIPO_ID_B
+        source {
+            sequence: 6
+            dataType: number
+        }
+        parsing {
+            selector: EQUIPO_ID_B
+        }
+    )
+
+    dataProfileColumn estado (
+        columnName: ESTADO
+        source {
+            sequence: 15
+            dataType: varchar2
+            maxLength: 50
+        }
+        parsing {
+            selector: ESTADO
+        }
+    )
+
+    dataProfileColumn fecha-implementación (
+        columnName: FECHA_IMPLEMENTACIÓN
+        source {
+            sequence: 18
+            dataType: timestamp
+        }
+        parsing {
+            selector: FECHA_IMPLEMENTACIÓN
+            hasTimeZone: false
+        }
+    )
+
+    dataProfileColumn id (
+        columnName: ID
+        source {
+            sequence: 1
+            dataType: number
+            primaryKey: true
+        }
+        parsing {
+            selector: ID
+        }
+    )
+
+    dataProfileColumn lt (
+        columnName: LT
+        source {
+            sequence: 13
+            dataType: varchar2
+            maxLength: 50
+        }
+        parsing {
+            selector: LT
+        }
+    )
+
+    dataProfileColumn nombre (
+        columnName: NOMBRE
+        source {
+            sequence: 2
+            dataType: varchar2
+            maxLength: 255
+        }
+        parsing {
+            selector: NOMBRE
+        }
+    )
+
+    dataProfileColumn proyecto-de-implementación (
+        columnName: PROYECTO_DE_IMPLEMENTACIÓN
+        source {
+            sequence: 17
+            dataType: varchar2
+            maxLength: 255
+        }
+        parsing {
+            selector: PROYECTO_DE_IMPLEMENTACIÓN
+        }
+    )
+
+    dataProfileColumn sitio-a-nombre (
+        columnName: SITIO_A_NOMBRE
+        source {
+            sequence: 25
+            dataType: varchar2
+            maxLength: 255
+        }
+        parsing {
+            selector: SITIO_A_NOMBRE
+        }
+    )
+
+    dataProfileColumn sitio-b-nombre (
+        columnName: SITIO_B_NOMBRE
+        source {
+            sequence: 26
+            dataType: varchar2
+            maxLength: 255
+        }
+        parsing {
+            selector: SITIO_B_NOMBRE
+        }
+    )
+
+    dataProfileColumn sitio-id-a (
+        columnName: SITIO_ID_A
+        source {
+            sequence: 3
+            dataType: number
+        }
+        parsing {
+            selector: SITIO_ID_A
+        }
+    )
+
+    dataProfileColumn sitio-id-b (
+        columnName: SITIO_ID_B
+        source {
+            sequence: 5
+            dataType: number
+        }
+        parsing {
+            selector: SITIO_ID_B
+        }
+    )
+
+    dataProfileColumn tipo (
+        columnName: TIPO
+        source {
+            sequence: 12
+            dataType: varchar2
+            maxLength: 50
+        }
+        parsing {
+            selector: TIPO
+        }
+    )
+
+    dataProfileColumn tipo-de-fo (
+        columnName: TIPO_DE_FO
+        source {
+            sequence: 11
+            dataType: varchar2
+            maxLength: 50
+        }
+        parsing {
+            selector: TIPO_DE_FO
+        }
+    )
+
+    dataProfileColumn unidad-encargada-actual (
+        columnName: UNIDAD_ENCARGADA_ACTUAL
+        source {
+            sequence: 19
+            dataType: varchar2
+            maxLength: 255
+        }
+        parsing {
+            selector: UNIDAD_ENCARGADA_ACTUAL
+        }
+    )
+
+    dataProfileColumn unidad-medida (
+        columnName: UNIDAD_MEDIDA
+        source {
+            sequence: 8
+            dataType: varchar2
+            maxLength: 3
+        }
+        parsing {
+            selector: UNIDAD_MEDIDA
+        }
+    )
+
+)
+
+dataLoadDefinition enlaces_tramos_dataload (
+    name: ENLACES_TRAMOS_DATALOAD
+    target {
+        tableName: SGT_ENLACES_TRAMOS
+    }
+    errorHandling {
+        whenOnError: logIntoErrorLog
+    }
+    dataProfile {
+        name: ENLACES_TRAMOS_DATALOAD
+        format: xlsx
+    }
+    advanced {
+        encoding: utf-8
+        defaultXlsxSheetName: sheet5.xml
+    }
+
+    dataProfileColumn enlace-id (
+        columnName: ENLACE_ID
+        source {
+            sequence: 40
+            type: lookup
+            dataType: number
+        }
+        lookup {
+            tableOwner: WKSP_DTESC
+            tableName: SGT_ENLACES_FO
+            returnColumn: ID
+            tableColumn1: NOMBRE
+            dataColumn1: ENLACE_NOMBRE
+        }
+    )
+
+    dataProfileColumn enlace-nombre (
+        columnName: ENLACE_NOMBRE
+        source {
+            sequence: 45
+            dataType: varchar2
+        }
+        parsing {
+            selector: ENLACE_NOMBRE
+        }
+    )
+
+    dataProfileColumn equipo-a-id (
+        columnName: EQUIPO_A_ID
+        source {
+            sequence: 60
+            type: lookup
+            dataType: number
+        }
+        lookup {
+            tableOwner: WKSP_DTESC
+            tableName: SGT_EQUIPOS
+            returnColumn: ID
+            tableColumn1: NOMBRE
+            dataColumn1: EQUIPO_A_NOMBRE
+        }
+    )
+
+    dataProfileColumn equipo-a-nombre (
+        columnName: EQUIPO_A_NOMBRE
+        source {
+            sequence: 65
+            dataType: varchar2
+        }
+        parsing {
+            selector: EQUIPO_A_NOMBRE
+        }
+    )
+
+    dataProfileColumn equipo-b-id (
+        columnName: EQUIPO_B_ID
+        source {
+            sequence: 105
+            type: lookup
+            dataType: number
+        }
+        lookup {
+            tableOwner: WKSP_DTESC
+            tableName: SGT_EQUIPOS
+            returnColumn: ID
+            tableColumn1: NOMBRE
+            dataColumn1: EQUIPO_B_NOMBRE
+        }
+    )
+
+    dataProfileColumn equipo-b-nombre (
+        columnName: EQUIPO_B_NOMBRE
+        source {
+            sequence: 110
+            dataType: varchar2
+        }
+        parsing {
+            selector: EQUIPO_B_NOMBRE
+        }
+    )
+
+    dataProfileColumn id (
+        columnName: ID
+        source {
+            sequence: 10
+            dataType: number
+            primaryKey: true
+        }
+        parsing {
+            selector: ID
+        }
+    )
+
+    dataProfileColumn interfaz-a-id (
+        columnName: INTERFAZ_A_ID
+        source {
+            sequence: 70
+            type: lookup
+            dataType: number
+        }
+        lookup {
+            tableOwner: WKSP_DTESC
+            tableName: SGT_INTERFACES
+            returnColumn: ID
+            tableColumn1: NOMBRE
+            dataColumn1: INTERFAZ_A_NOMBRE
+            tableColumn2: SGT_EQUIPOS_ID
+            dataColumn2: EQUIPO_A_ID
+        }
+    )
+
+    dataProfileColumn interfaz-a-nombre (
+        columnName: INTERFAZ_A_NOMBRE
+        source {
+            sequence: 75
+            dataType: varchar2
+        }
+        parsing {
+            selector: INTERFAZ_A_NOMBRE
+        }
+    )
+
+    dataProfileColumn interfaz-b-id (
+        columnName: INTERFAZ_B_ID
+        source {
+            sequence: 125
+            type: lookup
+            dataType: number
+        }
+        lookup {
+            tableOwner: WKSP_DTESC
+            tableName: SGT_INTERFACES
+            returnColumn: ID
+            tableColumn1: NOMBRE
+            dataColumn1: INTERFAZ_B_NOMBRE
+            tableColumn2: SGT_EQUIPOS_ID
+            dataColumn2: EQUIPO_B_ID
+        }
+    )
+
+    dataProfileColumn interfaz-b-nombre (
+        columnName: INTERFAZ_B_NOMBRE
+        source {
+            sequence: 130
+            dataType: varchar2
+        }
+        parsing {
+            selector: INTERFAZ_B_NOMBRE
+        }
+    )
+
+    dataProfileColumn nombre (
+        columnName: NOMBRE
+        source {
+            sequence: 20
+            dataType: varchar2
+            maxLength: 50
+        }
+        parsing {
+            selector: NOMBRE
+        }
+    )
+
+    dataProfileColumn servicio-id (
+        columnName: SERVICIO_ID
+        source {
+            sequence: 25
+            type: lookup
+            dataType: number
+        }
+        lookup {
+            tableOwner: WKSP_DTESC
+            tableName: SGT_SERVICIOS
+            returnColumn: ID
+            tableColumn1: NOMBRE
+            dataColumn1: SERVICIO_NOMBRE
+        }
+    )
+
+    dataProfileColumn servicio-nombre (
+        columnName: SERVICIO_NOMBRE
+        source {
+            sequence: 30
+            dataType: varchar2
+        }
+        parsing {
+            selector: SERVICIO_NOMBRE
+        }
+    )
+
+    dataProfileColumn sitio-a-id (
+        columnName: SITIO_A_ID
+        source {
+            sequence: 50
+            type: lookup
+            dataType: number
+        }
+        lookup {
+            tableOwner: WKSP_DTESC
+            tableName: SGT_SITIOS
+            returnColumn: ID
+            tableColumn1: SIGLAS
+            dataColumn1: SITIO_A_NOMBRE
+        }
+    )
+
+    dataProfileColumn sitio-a-nombre (
+        columnName: SITIO_A_NOMBRE
+        source {
+            sequence: 55
+            dataType: varchar2
+        }
+        parsing {
+            selector: SITIO_A_NOMBRE
+        }
+    )
+
+    dataProfileColumn sitio-b-id (
+        columnName: SITIO_B_ID
+        source {
+            sequence: 85
+            type: lookup
+            dataType: number
+        }
+        lookup {
+            tableOwner: WKSP_DTESC
+            tableName: SGT_SITIOS
+            returnColumn: ID
+            tableColumn1: SIGLAS
+            dataColumn1: SITIO_B_NOMBRE
+        }
+    )
+
+    dataProfileColumn sitio-b-nombre (
+        columnName: SITIO_B_NOMBRE
+        source {
+            sequence: 90
+            dataType: varchar2
+        }
+        parsing {
+            selector: SITIO_B_NOMBRE
+        }
+    )
+
+)
+
+dataLoadDefinition equipos_dl (
+    name: EQUIPOS_DL
+    target {
+        tableName: SGT_EQUIPOS
+    }
+    comments {
+        comments: Creado para remplazar al metodo de creación de equipos actual
+    }
+    dataProfile {
+        name: EQUIPOS_DL
+        format: xlsx
+    }
+    advanced {
+        encoding: utf-8
+        defaultXlsxSheetName: sheet1.xml
+    }
+
+    dataProfileColumn alimentacion1-id (
+        columnName: ALIMENTACION1_ID
+        source {
+            sequence: 18
+            dataType: varchar2
+        }
+        parsing {
+            selector: ALIMENTACION1
+        }
+    )
+
+    dataProfileColumn alimentacion2-id (
+        columnName: ALIMENTACION2_ID
+        source {
+            sequence: 18
+            dataType: varchar2
+        }
+        parsing {
+            selector: ALIMENTACION2
+        }
+    )
+
+    dataProfileColumn altura-u (
+        columnName: ALTURA_U
+        source {
+            sequence: 5
+            dataType: number
+        }
+        parsing {
+            selector: ALTURA_U
+        }
+    )
+
+    dataProfileColumn estado (
+        columnName: ESTADO
+        source {
+            sequence: 3
+            dataType: varchar2
+            maxLength: 50
+        }
+        parsing {
+            selector: ESTADO
+        }
+    )
+
+    dataProfileColumn fecha-imple (
+        columnName: FECHA_IMPLE
+        source {
+            sequence: 16
+            dataType: date
+        }
+        parsing {
+            selector: FECHA_IMPLE
+            formatMask: YYYY"-"MM"-"DD
+            hasTimeZone: false
+        }
+    )
+
+    dataProfileColumn ip-gestion (
+        columnName: IP_GESTION
+        source {
+            sequence: 8
+            dataType: varchar2
+            maxLength: 50
+        }
+        parsing {
+            selector: IP_GESTION
+        }
+    )
+
+    dataProfileColumn marca (
+        columnName: MARCA
+        source {
+            sequence: 6
+            dataType: varchar2
+            maxLength: 50
+        }
+        parsing {
+            selector: MARCA
+        }
+    )
+
+    dataProfileColumn modelo (
+        columnName: MODELO
+        source {
+            sequence: 7
+            dataType: varchar2
+            maxLength: 255
+        }
+        parsing {
+            selector: MODELO
+        }
+    )
+
+    dataProfileColumn ni-ande (
+        columnName: NI_ANDE
+        source {
+            sequence: 11
+            dataType: varchar2
+            maxLength: 50
+        }
+        parsing {
+            selector: NI_ANDE
+        }
+    )
+
+    dataProfileColumn nombre (
+        columnName: NOMBRE
+        source {
+            sequence: 1
+            dataType: varchar2
+            maxLength: 60
+        }
+        parsing {
+            selector: NOMBRE
+        }
+    )
+
+    dataProfileColumn observaciones (
+        columnName: OBSERVACIONES
+        source {
+            sequence: 9
+            dataType: varchar2
+        }
+        parsing {
+            selector: OBSERVACIONES
+        }
+    )
+
+    dataProfileColumn posicion (
+        columnName: POSICION
+        source {
+            sequence: 6
+            dataType: varchar2
+        }
+        parsing {
+            selector: POSICION
+        }
+    )
+
+    dataProfileColumn proyecto-id (
+        columnName: PROYECTO_ID
+        source {
+            sequence: 17
+            dataType: varchar2
+        }
+        parsing {
+            selector: PROYECTO
+        }
+    )
+
+    dataProfileColumn rack (
+        columnName: RACK
+        source {
+            sequence: 4
+            dataType: varchar2
+        }
+        parsing {
+            selector: RACK
+        }
+    )
+
+    dataProfileColumn rack-id (
+        columnName: RACK_ID
+        source {
+            sequence: 26
+            type: sqlExpression
+            dataType: number
+        }
+        computation {
+            sqlExpression: SELECT F_GET_LOVS(3, RACK) FROM DUAL
+        }
+    )
+
+    dataProfileColumn serial-number (
+        columnName: SERIAL_NUMBER
+        source {
+            sequence: 12
+            dataType: varchar2
+            maxLength: 50
+        }
+        parsing {
+            selector: SERIAL_NUMBER
+        }
+    )
+
+    dataProfileColumn sitio-id (
+        columnName: SITIO_ID
+        source {
+            sequence: 30
+            type: sqlExpression
+            dataType: number
+        }
+        computation {
+            sqlExpression: SELECT F_GET_LOVS(4, RACK) FROM DUAL
+        }
+    )
+
+    dataProfileColumn tipo-equipo (
+        columnName: TIPO_EQUIPO
+        source {
+            sequence: 2
+            dataType: varchar2
+        }
+        parsing {
+            selector: TIPO_EQUIPO
+        }
+    )
+
+    dataProfileColumn tipo-equipo-id (
+        columnName: TIPO_EQUIPO_ID
+        source {
+            sequence: 36
+            type: sqlExpression
+            dataType: number
+        }
+        computation {
+            sqlExpression: SELECT f_GET_LOVS(5,TIPO_EQUIPO) FROM DUAL
+        }
+    )
+
+    dataProfileColumn tipo-red (
+        columnName: TIPO_RED
+        source {
+            sequence: 3
+            dataType: varchar2
+        }
+        parsing {
+            selector: TIPO_RED
+        }
+    )
+
+    dataProfileColumn u (
+        columnName: U
+        source {
+            sequence: 6
+            dataType: number
+        }
+        parsing {
+            selector: U_DE_INICIO
+        }
+    )
+
+    dataProfileColumn unidad-encargada (
+        columnName: UNIDAD_ENCARGADA
+        source {
+            sequence: 10
+            dataType: varchar2
+            maxLength: 50
+        }
+        parsing {
+            selector: UNIDAD_ENCARGADA
+        }
+    )
+
+    dataProfileColumn version-hardware (
+        columnName: VERSION_HARDWARE
+        source {
+            sequence: 13
+            dataType: varchar2
+            maxLength: 50
+        }
+        parsing {
+            selector: VERSION_HARDWARE
+        }
+    )
+
+    dataProfileColumn version-patch (
+        columnName: VERSION_PATCH
+        source {
+            sequence: 15
+            dataType: varchar2
+            maxLength: 50
+        }
+        parsing {
+            selector: VERSION_PATCH
+        }
+    )
+
+    dataProfileColumn version-software (
+        columnName: VERSION_SOFTWARE
+        source {
+            sequence: 14
+            dataType: varchar2
+            maxLength: 50
+        }
+        parsing {
+            selector: VERSION_SOFTWARE
+        }
+    )
+
+)
+
+dataLoadDefinition interfaces_l2 (
+    name: INTERFACES_L2
+    target {
+        tableName: SGT_INTERFACES_L2
+    }
+    dataProfile {
+        name: INTERFACES_L2
+        format: xlsx
+    }
+    advanced {
+        encoding: utf-8
+    }
+
+    dataProfileColumn interface (
+        columnName: INTERFACE
+        source {
+            sequence: 8
+            dataType: varchar2
+        }
+        parsing {
+            selector: INTERFACE
+        }
+    )
+
+    dataProfileColumn interface-id (
+        columnName: INTERFACE_ID
+        source {
+            sequence: 50
+            type: sqlExpression
+            dataType: number
+        }
+        computation {
+            sqlExpression: SELECT F_GET_LOVS(6, INTERFACE) FROM DUAL
+        }
+    )
+
+    dataProfileColumn l2-vc-id (
+        columnName: L2_VC_ID
+        source {
+            sequence: 30
+            dataType: number
+        }
+        parsing {
+            selector: L2_VC_ID
+        }
+    )
+
+    dataProfileColumn ls-tx-rx-label (
+        columnName: LS_TX_RX_LABEL
+        source {
+            sequence: 40
+            dataType: varchar2
+        }
+        parsing {
+            selector: LS_TX_RX_LABEL
+        }
+    )
+
+    dataProfileColumn tipo-vlan (
+        columnName: TIPO_VLAN
+        source {
+            sequence: 10
+            dataType: varchar2
+        }
+        parsing {
+            selector: TIPO_VLAN
+        }
+    )
+
+    dataProfileColumn vlan (
+        columnName: VLAN
+        source {
+            sequence: 20
+            dataType: varchar2
+        }
+        parsing {
+            selector: VLAN
+        }
+    )
+
+)
+
+dataLoadDefinition interfaces_l3 (
+    name: INTERFACES_L3
+    target {
+        tableName: SGT_INTERFACES_L3
+    }
+    dataProfile {
+        name: INTERFACES_L3
+        format: xlsx
+    }
+    advanced {
+        encoding: utf-8
+    }
+
+    dataProfileColumn interface (
+        columnName: INTERFACE
+        source {
+            sequence: 1
+            dataType: varchar2
+        }
+        parsing {
+            selector: INTERFACE
+        }
+    )
+
+    dataProfileColumn interface-id (
+        columnName: INTERFACE_ID
+        source {
+            sequence: 6
+            type: sqlExpression
+            dataType: number
+        }
+        computation {
+            sqlExpression: SELECT F_GET_LOVS(6, INTERFACE) FROM DUAL
+        }
+    )
+
+    dataProfileColumn num-bgp (
+        columnName: NUM_BGP
+        source {
+            sequence: 16
+            dataType: varchar2
+            maxLength: 100
+        }
+        parsing {
+            selector: NUM_BGP
+        }
+    )
+
+    dataProfileColumn ospf-area (
+        columnName: OSPF_AREA
+        source {
+            sequence: 5
+            dataType: varchar2
+            maxLength: 100
+        }
+        parsing {
+            selector: OSPF_AREA
+        }
+    )
+
+    dataProfileColumn proceso-ospf (
+        columnName: PROCESO_OSPF
+        source {
+            sequence: 4
+            dataType: varchar2
+            maxLength: 100
+        }
+        parsing {
+            selector: PROCESO_OSPF
+        }
+    )
+
+    dataProfileColumn router-id (
+        columnName: ROUTER_ID
+        source {
+            sequence: 3
+            dataType: varchar2
+            maxLength: 45
+        }
+        parsing {
+            selector: ROUTER_ID
+        }
+    )
+
+    dataProfileColumn tipo-protocolo (
+        columnName: TIPO_PROTOCOLO
+        source {
+            sequence: 1
+            dataType: varchar2
+            maxLength: 50
+        }
+        parsing {
+            selector: TIPO_PROTOCOLO
+        }
+    )
+
+    dataProfileColumn vpn-instance (
+        columnName: VPN_INSTANCE
+        source {
+            sequence: 2
+            dataType: varchar2
+            maxLength: 50
+        }
+        parsing {
+            selector: VPN_INSTANCE
+        }
+    )
+
+)
+
+dataLoadDefinition ip_adm (
+    name: IP_ADM
+    target {
+        tableName: SGT_IP_ADM
+    }
+    dataProfile {
+        name: IP_ADM
+        format: xlsx
+    }
+    advanced {
+        encoding: utf-8
+    }
+
+    dataProfileColumn estado (
+        columnName: ESTADO
+        source {
+            sequence: 4
+            dataType: varchar2
+            maxLength: 50
+        }
+        parsing {
+            selector: ESTADO
+        }
+    )
+
+    dataProfileColumn gw (
+        columnName: GW
+        source {
+            sequence: 3
+            dataType: varchar2
+            maxLength: 45
+        }
+        parsing {
+            selector: GW
+        }
+    )
+
+    dataProfileColumn interface (
+        columnName: INTERFACE
+        source {
+            sequence: 1
+            dataType: varchar2
+        }
+        parsing {
+            selector: INTERFACE
+        }
+    )
+
+    dataProfileColumn interface-id (
+        columnName: INTERFACE_ID
+        source {
+            sequence: 1
+            type: sqlExpression
+            dataType: number
+        }
+        computation {
+            sqlExpression: SELECT F_GET_LOVS(6, INTERFACE) FROM DUAL
+        }
+    )
+
+    dataProfileColumn ip (
+        columnName: IP
+        source {
+            sequence: 1
+            dataType: varchar2
+            maxLength: 45
+        }
+        parsing {
+            selector: IP
+        }
+    )
+
+    dataProfileColumn mask (
+        columnName: MASK
+        source {
+            sequence: 2
+            dataType: varchar2
+            maxLength: 45
+        }
+        parsing {
+            selector: MASK
+        }
+    )
+
+)
+
+dataLoadDefinition replace_interfaces_dl (
+    name: replace-interfaces-dl
+    target {
+        tableName: SGT_INTERFACES
+        loadingMethod: replace
+    }
+    comments {
+        comments: Prueba para agregar campos via data load
+    }
+    dataProfile {
+        name: Copy of agregar-interfaces-dl
+        format: xlsx
+    }
+    advanced {
+        encoding: utf-8
+    }
+
+    dataProfileColumn duplex (
+        columnName: DUPLEX
+        source {
+            sequence: 13
+            dataType: varchar2
+        }
+        parsing {
+            selector: DUPLEX
+        }
+    )
+
+    dataProfileColumn estado (
+        columnName: ESTADO
+        source {
+            sequence: 5
+            dataType: varchar2
+        }
+        parsing {
+            selector: ESTADO
+        }
+    )
+
+    dataProfileColumn etiqueta (
+        columnName: ETIQUETA
+        source {
+            sequence: 4
+            dataType: varchar2
+            maxLength: 1020
+        }
+        parsing {
+            selector: ETIQUETA
+        }
+    )
+
+    dataProfileColumn hw-version (
+        columnName: HW_VERSION
+        source {
+            sequence: 11
+            dataType: varchar2
+            maxLength: 400
+        }
+        parsing {
+            selector: HW_VERSION
+        }
+    )
+
+    dataProfileColumn id (
+        columnName: ID
+        source {
+            sequence: 1
+            dataType: number
+            primaryKey: true
+        }
+        parsing {
+            selector: id
+        }
+    )
+
+    dataProfileColumn mac-address (
+        columnName: MAC_ADDRESS
+        source {
+            sequence: 9
+            dataType: varchar2
+            maxLength: 100
+        }
+        parsing {
+            selector: MAC_ADDRESS
+        }
+    )
+
+    dataProfileColumn modo (
+        columnName: MODO
+        source {
+            sequence: 14
+            dataType: varchar2
+        }
+        parsing {
+            selector: MODO
+        }
+    )
+
+    dataProfileColumn nombre (
+        columnName: NOMBRE
+        source {
+            sequence: 3
+            dataType: varchar2
+            maxLength: 400
+        }
+        parsing {
+            selector: NOMBRE
+        }
+    )
+
+    dataProfileColumn numero-serie (
+        columnName: NUMERO_SERIE
+        source {
+            sequence: 10
+            dataType: varchar2
+            maxLength: 1020
+        }
+        parsing {
+            selector: NUMERO_SERIE
+        }
+    )
+
+    dataProfileColumn rx-en-dbm (
+        columnName: RX_EN_DBM
+        source {
+            sequence: 8
+            dataType: varchar2
+            maxLength: 40
+        }
+        parsing {
+            selector: RX_EN_DBM
+        }
+    )
+
+    dataProfileColumn sgt-equipos-id (
+        columnName: SGT_EQUIPOS_ID
+        source {
+            sequence: 2
+            dataType: number
+        }
+        parsing {
+            selector: SGT_EQUIPOS_ID
+        }
+    )
+
+    dataProfileColumn sw-version (
+        columnName: SW_VERSION
+        source {
+            sequence: 12
+            dataType: varchar2
+            maxLength: 400
+        }
+        parsing {
+            selector: SW_VERSION
+        }
+    )
+
+    dataProfileColumn tipo-interface-id (
+        columnName: TIPO_INTERFACE_ID
+        source {
+            sequence: 6
+            dataType: number
+        }
+        parsing {
+            selector: TIPO_INTERFACE_ID
+        }
+    )
+
+    dataProfileColumn tx-en-dbm (
+        columnName: TX_EN_DBM
+        source {
+            sequence: 7
+            dataType: varchar2
+            maxLength: 40
+        }
+        parsing {
+            selector: TX_EN_DBM
+        }
+    )
+
+)
+

@@ -1,0 +1,341 @@
+page 167 (
+    name: Registrar subtarea
+    alias: REGISTRAR-SUBTAREA
+    title: Registrar subtarea
+    appearance {
+        pageMode: modalDialog
+        dialogTemplate: @/modal-dialog
+        templateOptions: #DEFAULT#
+    }
+    navigation {
+        cursorFocus: doNotFocusCursor
+    }
+    security {
+        pageAccessProtection: argumentsMustHaveChecksum
+        formAutoComplete: false
+    }
+
+    pageItem P167_ACCION_DESC (
+        type: displayOnly
+        label {
+            label: Tarea
+            alignment: left
+        }
+        layout {
+            sequence: 10
+            slot: contentBody
+            alignment: left
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+        }
+        config {
+            buildOption: @commented-out
+        }
+    )
+
+    pageItem P167_ACCION_ID (
+        type: selectList
+        label {
+            label: Acción/Tarea
+            alignment: left
+        }
+        lov {
+            type: sqlQuery
+            sqlQuery:
+                ```sql
+                SELECT A.ACCION || ' (' ||
+                           CASE TA.CODIGO
+                               WHEN 'SERVICIO' THEN (SELECT S.NOMBRE FROM SGT_SERVICIOS S WHERE S.ID = EA.ACTIVO_ID)
+                               WHEN 'EQUIPO'   THEN (SELECT E.NOMBRE FROM SGT_EQUIPOS E WHERE E.ID = EA.ACTIVO_ID)
+                               WHEN 'SITIO'    THEN (SELECT SI.NOMBRE FROM SGT_SITIOS SI WHERE SI.ID = EA.ACTIVO_ID)
+                               WHEN 'SALA'     THEN (SELECT SA.NOMBRE FROM SGT_SALAS SA WHERE SA.ID = EA.ACTIVO_ID)
+                               WHEN 'RACK'      THEN (SELECT R.NOMBRE FROM SGT_RACKS R WHERE R.ID = EA.ACTIVO_ID)
+                               WHEN 'ENLACE_FO' THEN (SELECT EFO.NOMBRE FROM SGT_ENLACES_FO EFO WHERE EFO.ID = EA.ACTIVO_ID)                
+                               ELSE TO_CHAR(EA.ACTIVO_ID)
+                           END || ')' AS d,
+                       A.ID AS r
+                  FROM SGT_EVENTO_ACCION A
+                  JOIN SGT_EVENTO_ACTIVO EA ON EA.ID = A.EVENTO_ACTIVO_ID
+                  LEFT JOIN SGT_CAT_TIPO_ACTIVO_EVENTO TA ON TA.ID = EA.TIPO_ACTIVO_ID
+                 WHERE EA.EVENTO_ID = :P167_EVENTO_ID
+                 ORDER BY A.SECUENCIA
+                ```
+        }
+        layout {
+            sequence: 40
+            slot: contentBody
+            alignment: left
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+            height: 1
+        }
+    )
+
+    pageItem P167_DETALLE (
+        type: textarea
+        label {
+            label: Detalle
+            alignment: left
+        }
+        layout {
+            sequence: 70
+            slot: contentBody
+            alignment: left
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+            width: 30
+            height: 5
+        }
+    )
+
+    pageItem P167_EVENTO_ID (
+        type: hidden
+        layout {
+            sequence: 30
+            slot: contentBody
+        }
+    )
+
+    pageItem P167_RESULTADO (
+        type: selectList
+        label {
+            label: Resultado
+            alignment: left
+        }
+        lov {
+            type: staticValues
+            staticValues: STATIC:PENDIENTE;PENDIENTE,Funcionamiento OK;EXITOSO,Falla detectada;FALLIDO
+        }
+        layout {
+            sequence: 60
+            slot: contentBody
+            alignment: left
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+            height: 1
+        }
+    )
+
+    pageItem P167_SUBTAREA (
+        type: textarea
+        label {
+            label: Sub tarea
+            alignment: left
+        }
+        layout {
+            sequence: 50
+            slot: contentBody
+            alignment: left
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+            width: 30
+            height: 5
+        }
+        validation {
+            valueRequired: true
+        }
+    )
+
+    pageItem P167_SUBTAREA_ID (
+        type: hidden
+        layout {
+            sequence: 20
+            slot: contentBody
+        }
+    )
+
+    pageItem P167_TIEMPO_MIN (
+        type: hidden
+        layout {
+            sequence: 80
+            slot: contentBody
+        }
+    )
+
+    button cancelar (
+        buttonName: CANCELAR
+        label: Cancelar
+        layout {
+            sequence: 100
+            slot: contentBody
+            startNewRow: false
+            newColumn: false
+        }
+        appearance {
+            buttonTemplate: @/text
+            templateOptions: #DEFAULT#
+        }
+        behavior {
+            action: definedByDynamicAction
+        }
+    )
+
+    button guardar (
+        buttonName: GUARDAR
+        label: Guardar
+        layout {
+            sequence: 90
+            slot: contentBody
+        }
+        appearance {
+            buttonTemplate: @/text
+            templateOptions: #DEFAULT#
+        }
+        behavior {
+            warnOnUnsavedChanges: doNotCheck
+        }
+    )
+
+    dynamicAction cancelar (
+        name: CANCELAR
+        execution {
+            sequence: 10
+        }
+        when {
+            event: click
+            selectionType: button
+            button: @cancelar
+        }
+
+        action cancel (
+            name: CANCEL
+            action: cancelDialog
+            execution {
+                sequence: 10
+                fireOnInit: false
+            }
+        )
+
+    )
+
+    process cargar-descripcion-de-la-tarea (
+        name: Cargar descripcion de la tarea
+        type: executeCode
+        source {
+            plsqlCode:
+                ```plsql
+                BEGIN
+                    SELECT A.ACCION
+                      INTO :P167_ACCION_DESC
+                      FROM SGT_EVENTO_ACCION A
+                     WHERE A.ID = :P167_ACCION_ID;
+                END;
+                ```
+        }
+        execution {
+            sequence: 20
+            point: beforeHeader
+        }
+        advanced {
+            executionMappingIdentifier: 27326954558871828
+        }
+        serverSideCondition {
+            type: itemIsNotNull
+            item: P167_ACCION_ID
+        }
+    )
+
+    process cargar-subtarea-existente (
+        name: Cargar subtarea existente
+        type: executeCode
+        source {
+            plsqlCode:
+                ```plsql
+                BEGIN
+                    SELECT S.EVENTO_ACCION_ID, S.SUBTAREA, S.RESULTADO,
+                           S.DETALLE, S.TIEMPO_EMPLEADO_MIN
+                      INTO :P167_ACCION_ID, :P167_SUBTAREA, :P167_RESULTADO,
+                           :P167_DETALLE, :P167_TIEMPO_MIN
+                      FROM SGT_EVENTO_SUBTAREA S
+                     WHERE S.ID = :P167_SUBTAREA_ID;
+                END;
+                ```
+        }
+        execution {
+            sequence: 10
+            point: beforeHeader
+        }
+        advanced {
+            executionMappingIdentifier: 27013933293115621
+        }
+        serverSideCondition {
+            type: itemIsNotNull
+            item: P167_SUBTAREA_ID
+        }
+    )
+
+    process cerrar-dialogo (
+        name: CERRAR_DIALOGO
+        type: closeDialog
+        execution {
+            sequence: 20
+        }
+        advanced {
+            executionMappingIdentifier: 27016464817115646
+        }
+        serverSideCondition {
+            whenButtonPressed: @guardar
+        }
+    )
+
+    process prc-guardar-subtarea (
+        name: PRC_GUARDAR_SUBTAREA
+        type: executeCode
+        source {
+            plsqlCode:
+                ```plsql
+                DECLARE
+                    V_SUBTAREA_ID NUMBER;
+                BEGIN
+                    IF :P167_ACCION_ID IS NULL THEN
+                        RAISE_APPLICATION_ERROR(-20014, 'No se indicó la acción padre. Volvé a P163 y filtrá por acción.');
+                    END IF;
+                
+                    IF :P167_SUBTAREA_ID IS NULL THEN
+                        -- CREAR
+                        SGT_EVENTO_PKG.REGISTRAR_SUBTAREA(
+                            P_EVENTO_ACCION_ID    => :P167_ACCION_ID,
+                            P_SUBTAREA            => :P167_SUBTAREA,
+                            P_RESULTADO           => NVL(:P167_RESULTADO, 'PENDIENTE'),
+                            P_DETALLE             => :P167_DETALLE,
+                            P_TIEMPO_EMPLEADO_MIN => :P167_TIEMPO_MIN,
+                            P_EJECUTADO_POR       => :APP_USER,
+                            P_EVENTO_SUBTAREA_ID  => V_SUBTAREA_ID
+                        );
+                    ELSE
+                        -- EDITAR
+                        SGT_EVENTO_PKG.EDITAR_SUBTAREA(
+                            P_EVENTO_SUBTAREA_ID  => :P167_SUBTAREA_ID,
+                            P_SUBTAREA            => :P167_SUBTAREA,
+                            P_RESULTADO           => :P167_RESULTADO,
+                            P_DETALLE             => :P167_DETALLE,
+                            P_TIEMPO_EMPLEADO_MIN => :P167_TIEMPO_MIN,
+                            P_EVENTO_ACCION_ID    => :P167_ACCION_ID
+                        );
+                    END IF;
+                END;
+                ```
+        }
+        execution {
+            sequence: 10
+        }
+        advanced {
+            executionMappingIdentifier: 27014009601115622
+        }
+        serverSideCondition {
+            whenButtonPressed: @guardar
+        }
+    )
+
+)
+

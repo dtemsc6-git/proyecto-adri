@@ -1,0 +1,763 @@
+page 6 (
+    name: DL_EQUIPOS
+    alias: DL-EQUIPOS
+    title: SUBIR EQUIPOS
+    appearance {
+        pageMode: modalDialog
+        dialogTemplate: @/modal-dialog
+        templateOptions: #DEFAULT#
+    }
+    navigation {
+        cursorFocus: doNotFocusCursor
+    }
+    security {
+        authorizationScheme: @implementador-rights
+        pageAccessProtection: argumentsMustHaveChecksum
+        formAutoComplete: false
+    }
+
+    region button-bar (
+        name: Button Bar
+        type: staticContent
+        layout {
+            sequence: 30
+            slot: contentBody
+        }
+        appearance {
+            template: @/buttons-container
+            templateOptions: [
+                #DEFAULT#
+                t-ButtonRegion--noUI
+            ]
+        }
+        serverSideCondition {
+            type: itemIsNotNull
+            item: P6_FILE
+        }
+        settings {
+            outputAs: text
+        }
+    )
+
+    region data-source (
+        name: Data Source
+        type: staticContent
+        layout {
+            sequence: 40
+            slot: contentBody
+        }
+        appearance {
+            template: @/standard
+            templateOptions: [
+                #DEFAULT#
+                t-Region--hideHeader js-addHiddenHeadingRoleDesc
+                t-Region--noUI
+                t-Region--scrollBody
+            ]
+        }
+        settings {
+            outputAs: text
+        }
+    )
+
+    region loaded-file (
+        name: Loaded File
+        type: staticContent
+        layout {
+            sequence: 40
+            parentRegion: @data-source
+            slot: regionBody
+        }
+        appearance {
+            template: @/blank-with-attributes
+            templateOptions: #DEFAULT#
+        }
+        serverSideCondition {
+            type: itemIsNotNull
+            item: P6_FILE
+        }
+        settings {
+            outputAs: text
+        }
+    )
+
+    region new (
+        name: New
+        type: staticContent
+        source {
+            htmlCode: &P6_LOGGER.
+        }
+        layout {
+            sequence: 20
+            slot: contentBody
+        }
+        appearance {
+            template: @/standard
+            templateOptions: [
+                #DEFAULT#
+                t-Region--scrollBody
+            ]
+        }
+        config {
+            buildOption: @commented-out
+        }
+    )
+
+    region preview (
+        name: Preview
+        type: classicReport
+        source {
+            location: localDatabase
+            type: sqlQuery
+            sqlQuery:
+                ```sql
+                SELECT  
+                       p.col001, p.col002, p.col003, p.col004, p.col005, p.col006
+                       --, p.col007, p.col008, p.col009, p.col010
+                       -- add more columns (col011 to col300) here.
+                  from apex_application_temp_files f, 
+                       table( apex_data_parser.parse(
+                                  p_content           => f.blob_content,
+                                  p_file_name         => f.filename,
+                                  p_xlsx_sheet_name   => case when :P6_XLSX_WORKSHEET is not null then :P6_XLSX_WORKSHEET end,
+                                  --p_file_profile      => apex_data_loading.get_file_profile( p_static_id => 'sgt_dl_equipos' ),
+                                  p_max_rows          => 100 ) ) p
+                 where f.name = :P6_FILE 
+                 
+                 order by line_number
+                
+                ```
+        }
+        layout {
+            sequence: 50
+            slot: contentBody
+        }
+        appearance {
+            template: @/standard
+            templateOptions: [
+                #DEFAULT#
+                t-Region--noPadding
+            ]
+        }
+        headerAndFooter {
+            headerText: Si los datos son nulos en la columna 2 o columna 6 del archivo, son omitidos para la carga ya que esos datos son obligatorios.
+        }
+        serverSideCondition {
+            type: itemIsNotNull
+            item: P6_FILE
+        }
+        reportLayout {
+            numberOfRows: 50
+        }
+        componentAppearance {
+            template: @/standard
+            templateOptions: [
+                #DEFAULT#
+                t-Report--stretch
+                t-Report--staticRowColors
+                t-Report--rowHighlight
+                t-Report--horizontalBorders
+                t-Report--hideNoPagination
+            ]
+        }
+        pagination {
+            type: nextAndPreviousLinks
+        }
+        performance {
+            maxRowsToProcess: 500
+        }
+        messages {
+            whenNoDataFound: no data found
+        }
+        heading {
+            type: none
+        }
+
+        column COL001 (
+            reportColumnQueryId: 1
+            derivedColumn: N
+            heading {
+                heading: Col001
+            }
+            layout {
+                sequence: 2
+            }
+            sorting {
+                sortable: false
+            }
+        )
+
+        column COL002 (
+            reportColumnQueryId: 2
+            derivedColumn: N
+            heading {
+                heading: Col002
+            }
+            layout {
+                sequence: 3
+            }
+            sorting {
+                sortable: false
+            }
+        )
+
+        column COL003 (
+            reportColumnQueryId: 3
+            derivedColumn: N
+            heading {
+                heading: Col003
+            }
+            layout {
+                sequence: 4
+            }
+            sorting {
+                sortable: false
+            }
+        )
+
+        column COL004 (
+            reportColumnQueryId: 4
+            derivedColumn: N
+            heading {
+                heading: Col004
+            }
+            layout {
+                sequence: 5
+            }
+            sorting {
+                sortable: false
+            }
+        )
+
+        column COL005 (
+            reportColumnQueryId: 5
+            derivedColumn: N
+            heading {
+                heading: Col005
+            }
+            layout {
+                sequence: 6
+            }
+            sorting {
+                sortable: false
+            }
+        )
+
+        column COL006 (
+            reportColumnQueryId: 6
+            derivedColumn: N
+            heading {
+                heading: Col006
+            }
+            layout {
+                sequence: 7
+            }
+            sorting {
+                sortable: false
+            }
+        )
+
+    )
+
+    region upload-a-file (
+        name: Upload a File
+        type: staticContent
+        layout {
+            sequence: 30
+            parentRegion: @data-source
+            slot: regionBody
+        }
+        appearance {
+            template: @/blank-with-attributes
+            templateOptions: #DEFAULT#
+        }
+        headerAndFooter {
+            headerText:
+                ```html
+                Puede subir archivos XLSX que contengan datos de equipos, el nombre del rack debe estar en la convención establecida dentro del sistema (Sitio.Sala.Rack). <a href="https://docs.google.com/spreadsheets/d/1Vtdk4v2ZNKK7kj6CT6L8nxqdyJSiwTkY/edit?usp=sharing&ouid=108343838433037799136&rtpof=true&sd=true" target="_blank">Descargar Plantilla Modelo Aquí</a>.
+                Se permite hasta 100 registros por archivo.
+                ```
+        }
+        serverSideCondition {
+            type: itemIsNull
+            item: P6_FILE
+        }
+        settings {
+            outputAs: text
+        }
+    )
+
+    pageItem P6_ERROR_ROW_COUNT (
+        type: hidden
+        layout {
+            sequence: 20
+            region: @upload-a-file
+            slot: regionBody
+        }
+    )
+
+    pageItem P6_FILE (
+        type: fileUpload
+        label {
+            label: Upload a File
+            alignment: left
+        }
+        display {
+            displayAs: blockDropzone
+            dropzoneDesc: Supported formats XLSX
+        }
+        storage {
+            type: appTempFiles
+            fileTypes: .xlsx
+            maxFileSize: 200
+        }
+        layout {
+            sequence: 10
+            region: @upload-a-file
+            slot: regionBody
+            alignment: left
+            labelColumnSpan: 0
+        }
+        appearance {
+            template: @/hidden
+            templateOptions: [
+                #DEFAULT#
+                t-Form-fieldContainer--stretchInputs
+            ]
+        }
+        help {
+            inlineHelpText: Soportado XLSX, hasta 100 registros
+        }
+    )
+
+    pageItem P6_FILE_NAME (
+        type: displayOnly
+        label {
+            label: Loaded File
+            alignment: left
+        }
+        layout {
+            sequence: 20
+            region: @loaded-file
+            slot: regionBody
+            alignment: left
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+        }
+        default {
+            type: static
+            staticValue: Pasted Data
+        }
+    )
+
+    pageItem P6_LOGGER (
+        type: hidden
+        settings {
+            valueProtected: false
+        }
+        layout {
+            sequence: 10
+            region: @new
+            slot: regionBody
+        }
+    )
+
+    pageItem P6_RACKS (
+        type: popupLov
+        label {
+            label: Racks
+            alignment: left
+        }
+        lov {
+            type: sharedComponent
+            lov: @racks-nombre-compuesto
+        }
+        layout {
+            sequence: 10
+            slot: contentBody
+            alignment: left
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+            width: 30
+        }
+        config {
+            buildOption: @commented-out
+        }
+    )
+
+    pageItem P6_XLSX_WORKSHEET (
+        type: selectList
+        label {
+            label: XLSX Worksheet
+            alignment: left
+        }
+        lov {
+            type: sqlQuery
+            sqlQuery:
+                ```sql
+                select p.sheet_display_name,
+                       p.sheet_file_name
+                  from apex_application_temp_files f,
+                       table( apex_data_parser.get_xlsx_worksheets( p_content => f.blob_content ) ) p
+                 where f.name = :P6_FILE
+                ```
+            displayExtraValues: false
+            displayNullValue: false
+        }
+        layout {
+            sequence: 30
+            region: @loaded-file
+            slot: regionBody
+            alignment: left
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+            height: 1
+        }
+        serverSideCondition {
+            type: functionBody
+            plsqlFunctionBody:
+                ```plsql
+                declare
+                    l_sheet_count number;
+                begin
+                    select count(*)
+                      into l_sheet_count
+                      from apex_application_temp_files f,
+                           table( apex_data_parser.get_xlsx_worksheets( p_content => f.blob_content ) ) p
+                     where f.name = :P6_FILE;
+                    
+                     -- display if the XSLX file contains multiple worksheets
+                    return ( l_sheet_count > 1 );
+                exception
+                    when others then 
+                        return false;
+                end;
+                ```
+        }
+    )
+
+    button clear (
+        buttonName: CLEAR
+        label: Clear
+        layout {
+            sequence: 10
+            region: @button-bar
+            slot: next
+        }
+        appearance {
+            buttonTemplate: @/text
+            templateOptions: #DEFAULT#
+        }
+        behavior {
+            warnOnUnsavedChanges: doNotCheck
+        }
+    )
+
+    button load (
+        buttonName: LOAD
+        label: Insertar
+        layout {
+            sequence: 20
+            region: @button-bar
+            slot: next
+        }
+        appearance {
+            buttonTemplate: @/text
+            hot: true
+            templateOptions: #DEFAULT#
+        }
+        behavior {
+            warnOnUnsavedChanges: doNotCheck
+        }
+    )
+
+    dynamicAction submit-worksheet-on-change (
+        name: Submit worksheet on change
+        execution {
+            sequence: 20
+        }
+        when {
+            selectionType: items
+            items: P6_XLSX_WORKSHEET
+        }
+
+        action native-submit-page (
+            action: submitPage
+            execution {
+                sequence: 10
+                fireOnInit: false
+            }
+        )
+
+    )
+
+    dynamicAction upload-a-file (
+        name: Upload a File
+        execution {
+            sequence: 10
+        }
+        when {
+            selectionType: items
+            items: P6_FILE
+        }
+        clientSideCondition {
+            type: itemIsNotNull
+            item: P6_FILE
+        }
+
+        action native-submit-page (
+            action: submitPage
+            execution {
+                sequence: 10
+                fireOnInit: false
+            }
+        )
+
+    )
+
+    validation is-valid-file-type (
+        name: Is valid file type
+        execution {
+            sequence: 10
+        }
+        validation {
+            type: functionBodyReturningBoolean
+            plsqlFunctionBody:
+                ```plsql
+                if apex_data_parser.assert_file_type(
+                       p_file_name => :P6_FILE_NAME,
+                       p_file_type => apex_data_parser.c_file_type_xlsx )
+                then
+                    return true;
+                else
+                    :P6_FILE := null;
+                    return false;
+                end if;
+                ```
+        }
+        error {
+            errorMessage: Invalid file type. Supported file types XLSX.
+            associatedItem: @P6_FILE
+        }
+    )
+
+    computation p6-file-name (
+        itemName: P6_FILE_NAME
+        execution {
+            sequence: 10
+            point: afterSubmit
+        }
+        computation {
+            sqlQuery:
+                ```sql
+                select filename
+                  from apex_application_temp_files 
+                 where name = :P6_FILE
+                ```
+        }
+        serverSideCondition {
+            type: itemIsNotNull
+            item: P6_FILE
+        }
+    )
+
+    process clear-cache (
+        name: Clear Cache
+        type: clearSessionState
+        execution {
+            sequence: 30
+        }
+        advanced {
+            executionMappingIdentifier: 82218623769668414774
+        }
+        serverSideCondition {
+            type: expression
+            plsqlExpression: :REQUEST = 'CLEAR' or :P6_ERROR_ROW_COUNT = 0
+        }
+    )
+
+    process close-dialog (
+        name: Close Dialog
+        type: closeDialog
+        execution {
+            sequence: 40
+        }
+        advanced {
+            executionMappingIdentifier: 11735844006772624
+        }
+        serverSideCondition {
+            whenButtonPressed: @load
+        }
+    )
+
+    process load-data (
+        name: Load Data
+        type: dataLoading
+        dataLoading {
+            dataLoadDefinition: @equipos_dl
+        }
+        sourceData {
+            fileBrowseItem: P6_FILE
+            xlsxSheetNameItem: P6_XLSX_WORKSHEET
+        }
+        processingResult {
+            errorRowCountItem: P6_ERROR_ROW_COUNT
+        }
+        execution {
+            sequence: 10
+        }
+        advanced {
+            executionMappingIdentifier: 82218623306911414774
+        }
+        serverSideCondition {
+            whenButtonPressed: @load
+        }
+    )
+
+    process procesar-xls (
+        name: PROCESAR_XLS
+        type: executeCode
+        source {
+            plsqlCode:
+                ```plsql
+                DECLARE
+                    v_filas_insertadas NUMBER := 0;
+                    v_count_parseo NUMBER := 0;
+                    v_count NUMBER := 0;
+                    v_error_count NUMBER := 0;
+                    v_fila NUMBER :=0;
+                BEGIN
+                    -- Información de depuración
+                    apex_debug.info('Mod: Equipos: Func: DL: File Name: ' || :P6_FILE_NAME);
+                    apex_debug.info('Mod: Equipos: Func: DL: Archivo: '   || :P6_XLSX_WORKSHEET);
+                
+                    -- Bucle por cada fila del archivo
+                    -- Seleccionar los campos que son importantes y que no pueden ser nulos
+                    FOR p IN (
+                        SELECT *
+                        FROM apex_application_temp_files f,
+                             TABLE(apex_data_parser.parse(
+                                 p_content   => f.blob_content,
+                                 p_file_name => f.filename,
+                                 p_xlsx_sheet_name => NVL(:P6_XLSX_WORKSHEET, NULL),
+                                 p_skip_rows => 1
+                             )) tab
+                        WHERE f.name = :P6_FILE
+                          AND col002 IS NOT NULL 
+                          AND col006 is not NULL
+                    ) LOOP
+                
+                        BEGIN
+                            -- Intentar insertar cada fila
+                            INSERT INTO SGT_EQUIPOS (
+                                UNIDAD_ENCARGADA,
+                                RACK_ID,
+                                U,
+                                TIPO_RED,
+                                NOMBRE,
+                                TIPO_EQUIPO_ID,
+                                --SUB_TIPO_EQUIPO,
+                
+                                MARCA,
+                                MODELO,
+                                ESTADO,
+                                OBSERVACIONES,
+                                NI_ANDE,
+                                SERIAL_NUMBER,
+                                VERSION_HARDWARE,
+                
+                                VERSION_SOFTWARE,
+                                VERSION_PATCH,
+                                IP_GESTION,
+                                ALIMENTACION1_ID,
+                                ALIMENTACION2_ID,
+                                PROYECTO_ID,
+                                FECHA_IMPLE,
+                
+                                ALTURA_U,
+                                POSICION, 
+                                SITIO_ID
+                                
+                
+                
+                            ) VALUES (
+                                p.col001, --UNIDAD
+                                F_GET_LOVS(3, p.col002), --RACK
+                                p.col003, --u
+                                p.col004, --tipo RED
+                                (p.col005), --NOMBRE
+                                F_GET_LOVS(5, p.col006), --tIPO eQUIPO
+                                --LOWER(p.col007), --sub_tipo_equipo
+                
+                                (p.col007), --marca
+                                (p.col008), --modelo
+                                (p.col009),  --estado
+                                p.col010, --observaciones
+                                p.col011, --ni_ande
+                                p.col012, --serial_number
+                                p.col013, --version_hard
+                
+                                p.col014, --version_soft
+                                p.col015, --patch_ver
+                                p.col016, --ip_gestion
+                                p.col017, --ali1
+                                p.col018, --ali2
+                                p.col019, --pro_id
+                                parse_flexible_date(p.col020), --fecha_imple
+                
+                                (p.col021), -- altura
+                                (p.col022), --posicion,
+                                F_GET_LOVS(4, p.col002) --SITIO  
+                            );
+                
+                            v_count := v_count + 1;
+                
+                        EXCEPTION
+                            
+                            WHEN OTHERS THEN
+                                v_error_count := v_error_count + 1;
+                                apex_debug.error('Mod: Equipos: Func DL: Error en fila: '|| TO_CHAR(v_count + v_error_count) || ': ' || SQLERRM);
+                                CONTINUE;
+                        END;
+                
+                    END LOOP;
+                
+                    :P6_ERROR_ROW_COUNT := v_error_count;
+                    :P6_LOGGER := 'Registros insertados: ' || v_count || ', Errores: ' || v_error_count;
+                
+                    apex_debug.info('Registros insertados: ' || v_count);
+                    apex_debug.info('Errores: ' || v_error_count);
+                
+                   
+                END;
+                
+                ```
+        }
+        execution {
+            sequence: 20
+        }
+        successMessage {
+            successMessage: &P6_LOGGER.
+        }
+        error {
+            errorMessage: &P6_LOGGER.
+        }
+        advanced {
+            executionMappingIdentifier: 11735509929772621
+        }
+        serverSideCondition {
+            whenButtonPressed: @load
+        }
+        config {
+            buildOption: @commented-out
+        }
+    )
+
+)
+

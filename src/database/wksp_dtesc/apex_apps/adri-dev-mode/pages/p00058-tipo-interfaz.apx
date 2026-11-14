@@ -1,0 +1,243 @@
+page 58 (
+    name: TIPO INTERFAZ
+    alias: TIPO-INTERFAZ
+    title: TIPO INTERFAZ
+    appearance {
+        pageTemplate: @/standard
+        templateOptions: #DEFAULT#
+    }
+    navigation {
+        cursorFocus: doNotFocusCursor
+    }
+    security {
+        pageAccessProtection: argumentsMustHaveChecksum
+        formAutoComplete: false
+    }
+
+    region breadcrumb (
+        name: Breadcrumb
+        type: breadcrumb
+        source {
+            breadcrumb: @breadcrumb
+        }
+        layout {
+            sequence: 10
+            slot: breadcrumbBar
+        }
+        appearance {
+            template: @/title-bar
+            templateOptions: [
+                #DEFAULT#
+                t-BreadcrumbRegion--useBreadcrumbTitle
+            ]
+        }
+        config {
+            buildOption: @commented-out
+        }
+        componentAppearance {
+            breadcrumbTemplate: @/breadcrumb
+            templateOptions: #DEFAULT#
+        }
+    )
+
+    region tipo-interfaz (
+        name: TIPO INTERFAZ
+        type: interactiveGrid
+        source {
+            location: localDatabase
+            tableName: SGT_TIPO_INTERFAZ
+        }
+        layout {
+            sequence: 20
+            slot: body
+            startNewRow: false
+            newColumn: false
+        }
+        appearance {
+            template: @/interactive-report
+            templateOptions: [
+                #DEFAULT#
+                t-IRR-region--hideHeader js-addHiddenHeadingRoleDesc
+            ]
+        }
+        accessibility {
+            useLandmark: false
+        }
+        edit {
+            enabled: true
+            allowedOperations: [
+                add
+                update
+                delete
+            ]
+        }
+        toolbar {
+            controls: [
+                searchCol
+                searchField
+                actionsMenu
+                resetButton
+                saveButton
+            ]
+        }
+        download {
+            formats: [
+                csv
+                html
+                pdf
+                excel
+            ]
+        }
+        advanced {
+            savedReportMappingIdentifier: 17314230506524812
+        }
+
+        savedReport 173147 (
+            visibility: primary
+            view {
+                default: grid
+            }
+            singleRowView {
+                displayedColumns: true
+            }
+
+            displayColumn (
+                column: @APEX$ROW_ACTION
+                layout {
+                    sequence: 0
+                }
+            )
+
+            displayColumn (
+                column: @ID
+                layout {
+                    sequence: 1
+                }
+            )
+
+            displayColumn (
+                column: @NOMBRE
+                layout {
+                    sequence: 2
+                }
+            )
+
+            displayColumn (
+                column: @DESCRIPCION
+                layout {
+                    sequence: 4
+                }
+            )
+
+        )
+
+        column APEX$ROW_ACTION (
+            type: actionsMenu
+            layout {
+                sequence: 20
+            }
+        )
+
+        column APEX$ROW_SELECTOR (
+            type: rowSelector
+            layout {
+                sequence: 10
+            }
+        )
+
+        column DESCRIPCION (
+            type: textarea
+            heading {
+                heading: Descripción
+                alignment: center
+            }
+            layout {
+                sequence: 60
+            }
+            validation {
+                maxLength: 1000
+            }
+            source {
+                databaseColumn: DESCRIPCION
+                dataType: varchar2
+            }
+            columnFilter {
+                performanceImpactingOperators: [
+                    contains
+                    startsWith
+                    caseInsensitive
+                    regexp
+                ]
+                lovType: none
+            }
+            enableUsersTo {
+                sort: false
+            }
+        )
+
+        column ID (
+            type: hidden
+            layout {
+                sequence: 30
+            }
+            source {
+                databaseColumn: ID
+                dataType: number
+                queryOnly: true
+                primaryKey: true
+            }
+            exportPrinting {
+                includeInExportPrint: false
+            }
+        )
+
+        column NOMBRE (
+            type: textField
+            heading {
+                heading: Nombre
+                alignment: center
+            }
+            layout {
+                sequence: 40
+            }
+            validation {
+                valueRequired: true
+                maxLength: 64
+            }
+            source {
+                databaseColumn: NOMBRE
+                dataType: varchar2
+            }
+            columnFilter {
+                performanceImpactingOperators: [
+                    contains
+                    startsWith
+                    caseInsensitive
+                    regexp
+                ]
+            }
+        )
+
+        page {
+            borderWidth: 0.5
+            borderColor: #666666
+        }
+        pageHeader {
+            pageHeaderText: 50 - TIPO INTERFAZ
+        }
+    )
+
+    process 50-tipo-interfaz-save-interactive-grid-data (
+        name: 50 - TIPO INTERFAZ - Save Interactive Grid Data
+        type: interactiveGridAutoRowProcessing
+        editableRegion: @tipo-interfaz
+        execution {
+            sequence: 10
+        }
+        advanced {
+            executionMappingIdentifier: 17320552869524821
+        }
+    )
+
+)
+

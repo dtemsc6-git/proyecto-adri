@@ -1,0 +1,333 @@
+page 51 (
+    name: Step 2
+    alias: STEP-2
+    title: Seleccionar Nodos Transito
+    pageGroup: @implementadores
+    appearance {
+        pageMode: modalDialog
+        dialogTemplate: @/wizard-modal-dialog
+        templateOptions: #DEFAULT#
+    }
+    dialog {
+        height: 400
+    }
+    navigation {
+        cursorFocus: doNotFocusCursor
+    }
+    javaScript {
+        functionAndGlobalVariableDeclaration:
+            ```javascript-browser
+            function filtrarShuttle() {
+            var filtro = $("#P51_BUSCAR_SITIOS").val();
+                var filtroLower = filtro.toLowerCase();
+                var opciones = document.querySelectorAll("#P51_SITIOS_TRANSITO_LEFT option");
+            
+                opciones.forEach(function (opt) {
+                    if (opt.text.toLowerCase().includes(filtroLower)) {
+                        opt.style.display = "";   // mostrar
+                    } else {
+                        opt.style.display = "none"; // ocultar
+                    }
+                });
+            }
+                
+            ```
+    }
+    headerAndFooter {
+        headerText: <div class="">Seleccione los sitios por donde pasa el servicio a ser creado, desde un origen a un destino. <br/> </div>
+    }
+    security {
+        pageAccessProtection: argumentsMustHaveChecksum
+        formAutoComplete: false
+    }
+
+    region buttons (
+        name: Buttons
+        type: staticContent
+        layout {
+            sequence: 10
+            slot: wizardButtons
+        }
+        appearance {
+            template: @/buttons-container
+            templateOptions: #DEFAULT#
+        }
+    )
+
+    region step (
+        name: Step 2
+        title: Crear Enlace Lógico
+        type: staticContent
+        layout {
+            sequence: 10
+            slot: wizardBody
+        }
+        appearance {
+            template: @/blank-with-attributes
+            templateOptions: #DEFAULT#
+        }
+    )
+
+    region wizard-progress (
+        name: Wizard Progress
+        type: list
+        source {
+            list: @asistente-servicios
+        }
+        layout {
+            sequence: 10
+            slot: wizardProgressBar
+        }
+        appearance {
+            template: @/blank-with-attributes
+            templateOptions: #DEFAULT#
+        }
+        componentAppearance {
+            listTemplate: @/wizard-progress
+        }
+    )
+
+    pageItem P51_BUSCAR_SITIOS (
+        type: textField
+        label {
+            label: Buscar Sitios
+            alignment: left
+        }
+        layout {
+            sequence: 30
+            region: @step
+            slot: regionBody
+            alignment: left
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+            width: 30
+        }
+    )
+
+    pageItem P51_SITIOS_TRANSITO (
+        type: shuttle
+        label {
+            label: Sitios Transito
+            alignment: left
+        }
+        lov {
+            type: sqlQuery
+            sqlQuery:
+                ```sql
+                SELECT S.SIGLAS, S.ID FROM SGT_SITIOS S
+                
+                --where s.id not in (:P50_LADO_A, :P50_LADO_Z)
+                --WHERE 1=1 and S.SIGLAS LIKE '%' || upper(:P51_BUSCAR_SITIOS )|| '%'
+                /*
+                where 
+                
+                (
+                :P51_BUSCAR_SITIOS IS NULL 
+                       OR S.SIGLAS LIKE '%' || upper(:P51_BUSCAR_SITIOS )|| '%')
+                   OR id IN (SELECT column_value 
+                             FROM TABLE(apex_string.split(:P51_SITIOS_TRANSITO, ':')))*/
+                ```
+        }
+        multipleValues {
+            separator: ,
+        }
+        layout {
+            sequence: 50
+            region: @step
+            slot: regionBody
+            alignment: left
+        }
+        appearance {
+            template: @/required-floating
+            templateOptions: #DEFAULT#
+            height: 5
+        }
+        validation {
+            valueRequired: true
+        }
+        source {
+            type: sqlQueryMultipleValues
+            sqlQuery:
+                ```sql
+                select sitio_id from sgt_sitios_servicio
+                where servicio_id = :P50_ID
+                order by seq
+                ```
+        }
+    )
+
+    button cancel (
+        buttonName: CANCEL
+        label: Cancel
+        layout {
+            sequence: 10
+            region: @buttons
+            slot: close
+        }
+        appearance {
+            buttonTemplate: @/text
+            templateOptions: #DEFAULT#
+        }
+        behavior {
+            action: definedByDynamicAction
+        }
+    )
+
+    button next (
+        buttonName: NEXT
+        label: Next
+        layout {
+            sequence: 30
+            region: @buttons
+            slot: next
+        }
+        appearance {
+            buttonTemplate: @/text-with-icon
+            hot: true
+            templateOptions: t-Button--iconRight
+            icon: fa-chevron-right
+        }
+        behavior {
+            warnOnUnsavedChanges: doNotCheck
+        }
+    )
+
+    button previous (
+        buttonName: PREVIOUS
+        label: Previous
+        layout {
+            sequence: 20
+            region: @buttons
+            slot: previous
+        }
+        appearance {
+            buttonTemplate: @/icon
+            templateOptions: #DEFAULT#
+            icon: fa-chevron-left
+        }
+        behavior {
+            executeValidations: false
+            warnOnUnsavedChanges: doNotCheck
+        }
+    )
+
+    dynamicAction cancel-dialog (
+        name: Cancel Dialog
+        execution {
+            sequence: 10
+        }
+        when {
+            event: click
+            selectionType: button
+            button: @cancel
+        }
+
+        action native-dialog-cancel (
+            action: cancelDialog
+            execution {
+                sequence: 10
+                fireOnInit: false
+            }
+        )
+
+    )
+
+    dynamicAction filtrar (
+        name: Filtrar
+        execution {
+            sequence: 20
+        }
+        when {
+            selectionType: items
+            items: P51_BUSCAR_SITIOS
+        }
+
+        action native-javascript-code (
+            action: executeJsCode
+            settings {
+                jsCode:
+                    ```javascript-browser
+                    //function filtrarShuttle(filtro) {
+                      console.log("filtrar datos")
+                      filtrarShuttle();
+                    //}
+                    ```
+            }
+            execution {
+                sequence: 10
+                fireOnInit: false
+            }
+        )
+
+    )
+
+    dynamicAction nosubmit (
+        name: NoSubmit
+        execution {
+            sequence: 30
+        }
+        when {
+            event: keypress
+            selectionType: items
+            items: P51_BUSCAR_SITIOS
+        }
+
+        action filtrar (
+            name: Filtrar
+            action: executeJsCode
+            settings {
+                jsCode:
+                    ```javascript-browser
+                    if (event.key === "Enter") {
+                    
+                        filtrarShuttle();
+                    
+                    
+                    
+                        event.preventDefault(); // evita el submit
+                        return false;
+                    }
+                    ```
+            }
+            execution {
+                sequence: 10
+                fireOnInit: false
+            }
+        )
+
+    )
+
+    branch (
+        execution {
+            sequence: 10
+            point: validating
+        }
+        behavior {
+            target: {
+                page: 50
+            }
+        }
+        serverSideCondition {
+            whenButtonPressed: @previous
+        }
+    )
+
+    branch (
+        name: Go To Page 53
+        execution {
+            sequence: 20
+        }
+        behavior {
+            target: {
+                page: 53
+            }
+        }
+        serverSideCondition {
+            whenButtonPressed: @next
+        }
+    )
+
+)
+

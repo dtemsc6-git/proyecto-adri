@@ -1,0 +1,55 @@
+file dev_team.jpeg (
+    mimeType: image/jpeg
+    charSet: utf-8
+)
+
+file dev_team2.jpeg (
+    mimeType: image/jpeg
+    charSet: utf-8
+)
+
+file "icons/app-icon-144-rounded.png" (
+    mimeType: image/png
+    charSet: utf-8
+)
+
+file "icons/app-icon-192.png" (
+    mimeType: image/png
+    charSet: utf-8
+)
+
+file "icons/app-icon-256-rounded.png" (
+    mimeType: image/png
+    charSet: utf-8
+)
+
+file "icons/app-icon-32.png" (
+    mimeType: image/png
+    charSet: utf-8
+)
+
+file "icons/app-icon-512.png" (
+    mimeType: image/png
+    charSet: utf-8
+)
+
+file p400_vista_conexiones.js (
+    mimeType: text/javascript
+    charSet: utf-8
+)
+
+file p400_vista_conexiones.min.js (
+    mimeType: text/javascript
+    charSet: utf-8
+)
+
+file racks.css (
+    mimeType: text/css
+    charSet: utf-8
+)
+
+file racks.min.css (
+    mimeType: text/css
+    charSet: utf-8
+)
+

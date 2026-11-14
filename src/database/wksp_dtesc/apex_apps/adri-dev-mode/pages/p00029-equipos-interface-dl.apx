@@ -1,0 +1,223 @@
+page 29 (
+    name: equipos_interface_dl
+    alias: EQUIPOS-INTERFACE-DL
+    title: Conexiones de Interfaces
+    appearance {
+        pageMode: modalDialog
+        dialogTemplate: @/modal-dialog
+        templateOptions: #DEFAULT#
+    }
+    navigation {
+        cursorFocus: doNotFocusCursor
+    }
+    css {
+        fileUrls: #APP_FILES#racks#MIN#.css
+    }
+    security {
+        authorizationScheme: @implementador-rights
+        pageAccessProtection: argumentsMustHaveChecksum
+        formAutoComplete: false
+    }
+
+    region interfaces-libres (
+        name: INTERFACES_LIBRES
+        title: Interfaces sin conexiones
+        type: classicReport
+        source {
+            location: localDatabase
+            type: sqlQuery
+            sqlQuery:
+                ```sql
+                SELECT nombre AS interfaz, etiqueta
+                FROM sgt_interfaces
+                WHERE equipo_id = :P29_EQUIPO
+                AND id NOT IN (
+                
+                    SELECT interfaz_a_id FROM sgt_enlaces_tramos WHERE equipo_a_id = :P29_EQUIPO and interfaz_a_id is not null 
+                    UNION 
+                    SELECT interfaz_b_id FROM sgt_enlaces_tramos WHERE equipo_b_id = :P29_EQUIPO and interfaz_b_id is not null 
+                
+                )
+                
+                ORDER BY interfaz;
+                ```
+        }
+        layout {
+            sequence: 40
+            parentRegion: @new
+            slot: subRegions
+            startNewRow: false
+        }
+        appearance {
+            template: @/standard
+            templateOptions: [
+                #DEFAULT#
+                t-Region--scrollBody
+            ]
+        }
+        reportLayout {
+            numberOfRows: 72
+        }
+        componentAppearance {
+            template: @/standard
+            templateOptions: [
+                #DEFAULT#
+                t-Report--altRowsDefault
+                t-Report--rowHighlight
+            ]
+            cssClasses: tabla-front
+        }
+
+        column ETIQUETA (
+            reportColumnQueryId: 2
+            derivedColumn: N
+            heading {
+                heading: Etiqueta
+            }
+            layout {
+                sequence: 20
+            }
+            sorting {
+                sortable: false
+            }
+        )
+
+        column INTERFAZ (
+            reportColumnQueryId: 1
+            derivedColumn: N
+            heading {
+                heading: Interfaz
+                alignment: end
+            }
+            layout {
+                sequence: 10
+                columnAlignment: end
+            }
+            sorting {
+                sortable: false
+            }
+        )
+
+    )
+
+    region interfaces-usadas (
+        name: INTERFACES_USADAS
+        title: Interfaces con conexiones
+        type: classicReport
+        source {
+            location: localDatabase
+            type: sqlQuery
+            sqlQuery:
+                ```sql
+                SELECT nombre interfaz, etiqueta
+                FROM sgt_interfaces i
+                WHERE i.id IN (
+                    SELECT interfaz_a_id FROM sgt_enlaces_tramos WHERE equipo_a_id = :P29_EQUIPO and interfaz_a_id is not null 
+                    UNION 
+                    SELECT interfaz_b_id FROM sgt_enlaces_tramos WHERE equipo_b_id = :P29_EQUIPO and interfaz_b_id is not null 
+                )
+                ORDER BY interfaz;
+                ```
+        }
+        layout {
+            sequence: 30
+            parentRegion: @new
+            slot: subRegions
+        }
+        appearance {
+            template: @/standard
+            templateOptions: [
+                #DEFAULT#
+                t-Region--scrollBody
+            ]
+            cssClasses: table-front
+        }
+        reportLayout {
+            numberOfRows: 72
+        }
+        componentAppearance {
+            template: @/standard
+            templateOptions: [
+                #DEFAULT#
+                t-Report--altRowsDefault
+                t-Report--rowHighlight
+            ]
+            cssClasses: tabla-front
+        }
+
+        column ETIQUETA (
+            reportColumnQueryId: 2
+            derivedColumn: N
+            heading {
+                heading: Etiqueta
+            }
+            layout {
+                sequence: 20
+            }
+            sorting {
+                sortable: false
+            }
+        )
+
+        column INTERFAZ (
+            reportColumnQueryId: 1
+            derivedColumn: N
+            heading {
+                heading: Interfaz
+                alignment: end
+            }
+            layout {
+                sequence: 10
+                columnAlignment: end
+            }
+            sorting {
+                sortable: false
+            }
+        )
+
+    )
+
+    region new (
+        name: New
+        type: staticContent
+        layout {
+            sequence: 25
+            slot: contentBody
+        }
+        appearance {
+            template: @/standard
+            templateOptions: [
+                #DEFAULT#
+                t-Region--removeHeader js-removeLandmark
+                t-Region--scrollBody
+            ]
+            cssClasses: racks
+        }
+    )
+
+    pageItem P29_EQUIPO (
+        type: displayOnly
+        label {
+            label: Equipo
+            alignment: left
+        }
+        settings {
+            basedOn: lov
+        }
+        lov {
+            type: sharedComponent
+            lov: @equipos-nombre-compuesto
+        }
+        layout {
+            sequence: 20
+            slot: contentBody
+            alignment: left
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+        }
+    )
+
+)
+

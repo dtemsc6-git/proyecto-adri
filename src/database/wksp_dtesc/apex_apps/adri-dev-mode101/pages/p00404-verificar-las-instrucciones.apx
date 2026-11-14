@@ -1,0 +1,789 @@
+page 404 (
+    name: Verificar las instrucciones
+    alias: VERIFICAR-LAS-INSTRUCCIONES
+    title: Verificar las instrucciones
+    pageGroup: @wzrd-wan
+    appearance {
+        pageTemplate: @/standard
+        templateOptions: #DEFAULT#
+    }
+    navigation {
+        cursorFocus: doNotFocusCursor
+    }
+    javaScript {
+        fileUrls: https://unpkg.com/vis-network/standalone/umd/vis-network.min.js
+        functionAndGlobalVariableDeclaration:
+            ```javascript-browser
+            /*
+            Para crear el grafo en esta ventana siempre sera una union del primero con el siguiente. si la cantidad de 
+            nodos es mayor a dos ver si vale la pena crear un enlace entre el primero y el ultimo
+             */
+            
+            apex.server.process(
+            
+                //'CONEXIONES_PUERTOS', { pageItems: '' },
+                'DATOS_GRAFO', { pageItems: '' },
+                {
+                    success: function (apiData) {
+                        console.log(apiData.data); // Acceder a los datos
+            
+                        const nodes = [];
+                        const edges = [];
+                        var destino = null;
+            
+                        apiData.data.forEach(connection => {
+            
+                            console.log(connection);
+                            nodes.push({
+                                id: connection.ORIGEN_ID,
+                                label: connection.ORIGEN,
+                                group: "sitios",
+                                shape: "box", //
+                                color: "#FF9900"
+                            });
+            
+                            if (destino != null) {
+                                edges.push({
+                                    from: destino.ORIGEN_ID,
+                                    to: connection.ORIGEN_ID ,
+                                    arrows: "to", // Flecha indica dirección
+                                    color: "#848484" // Color de la línea
+                                });
+                            }
+                            destino = connection;
+            
+                        });
+                        
+                        nodes.reverse();
+            
+                        var data = { nodes: nodes, edges: edges };
+                        
+            
+                        var container = document.getElementById("network");
+                        var network = new vis.Network(container, data, {
+                            layout: { hierarchical: { enabled: true, direction: "RL" }, },
+                            physics: { enabled: false, solver: "forceAtlas2Based" }
+                        });
+                    }
+            
+            
+                    ,
+                    error: function (pError) {
+                        console.error('Error:', pError);
+                    }
+                }
+            );
+            
+            ```
+    }
+    css {
+        inline:
+            ```css
+            .summary-label {
+                font-weight: bold;
+                color: #1a5276;
+                display: inline-block;
+                
+            }
+            .summary-list {
+                list-style-type: none;
+                padding: 0;
+            }
+            .summary-list li {
+                padding: 8px 0;
+                border-bottom: 1px solid #f0f0f0;
+            }
+            
+            .ocultable {
+               display: none;
+            }
+            
+            .capitalize {
+                text-transform: capitalize;
+                font-weight: bold;
+                color: #6624bd;
+            }
+            ```
+    }
+    security {
+        authorizationScheme: @implementador-rights
+        pageAccessProtection: argumentsMustHaveChecksum
+        formAutoComplete: false
+    }
+
+    region buttons (
+        name: Buttons
+        type: staticContent
+        layout {
+            sequence: 10
+            parentRegion: @verificar-las-instrucciones
+            slot: subRegions
+        }
+        appearance {
+            template: @/buttons-container
+            templateOptions: #DEFAULT#
+        }
+        config {
+            buildOption: @commented-out
+        }
+    )
+
+    region conexiones (
+        name: CONEXIONES
+        title: Conexiones
+        type: staticContent
+        layout {
+            sequence: 40
+            parentRegion: @verificar-las-instrucciones
+            slot: subRegions
+        }
+        appearance {
+            template: @/standard
+            templateOptions: [
+                #DEFAULT#
+                t-Region--noPadding
+                t-Region--scrollBody
+            ]
+        }
+    )
+
+    region conexiones-2 (
+        name: CONEXIONES
+        title: Conexiones
+        type: interactiveReport
+        source {
+            location: localDatabase
+            type: sqlQuery
+            sqlQuery:
+                ```sql
+                with seleccionados as (
+                    SELECT column_value tramo_id
+                        FROM TABLE(apex_string.split_numbers(:P403_CONEXIONES, ','))
+                        ORDER BY ROWNUM
+                )
+                SELECT 
+                    
+                   t.equipo_a || ':'|| t.interfaz_a ||'►'|| t.equipo_b || ':'|| t.interfaz_b Conexión
+                    
+                FROM 
+                    V_TRAMOS_NOMBRES t join seleccionados s on t.id = s.tramo_id
+                order by rownum
+                
+                
+                ```
+        }
+        layout {
+            sequence: 10
+            parentRegion: @conexiones
+            slot: subRegions
+        }
+        appearance {
+            template: @/interactive-report
+            templateOptions: [
+                #DEFAULT#
+                t-IRR-region--hideHeader js-addHiddenHeadingRoleDesc
+            ]
+        }
+        pagination {
+            type: rowRangesXToY
+        }
+        performance {
+            maxRowsToProcess: 1000000
+        }
+        searchBar {
+            includeSearchBar: false
+        }
+        advanced {
+            savedReportMappingIdentifier: 85693681809874747625
+        }
+
+        column CONEXIÓN (
+            type: plainText
+            heading {
+                heading: Conexión
+            }
+            layout {
+                sequence: 20
+            }
+            source {
+                dataType: STRING
+            }
+            advanced {
+                endUserAlias: D
+            }
+        )
+
+        savedReport 857338393 (
+            visibility: primaryDefault
+            view {
+                rowsPerPage: 50
+            }
+
+            displayColumn CONEXIÓN (
+                sequence: 1
+            )
+
+        )
+
+    )
+
+    region enlace-wan (
+        name: ENLACE_WAN
+        type: staticContent
+        source {
+            htmlCode:
+                ```html
+                <div class="summary-container">
+                    
+                    <h3> <span class="summary-label">Enlace WAN: </span></h3>
+                       <ul class="summary-list">
+                           <li >Nombre: <span class="capitalize">&P401_NOMBRE.</span></li> 
+                           <li>Grupo de Red: <span class="capitalize">&P401_GRUPO_RED.</span></li>
+                       </ul>
+                </div>
+                
+                ```
+        }
+        layout {
+            sequence: 10
+            parentRegion: @verificar-las-instrucciones
+            slot: subRegions
+        }
+        appearance {
+            template: @/standard
+            templateOptions: [
+                #DEFAULT#
+                t-Region--removeHeader js-removeLandmark
+                t-Region--scrollBody
+            ]
+        }
+    )
+
+    region equipos (
+        name: Equipos
+        type: staticContent
+        layout {
+            sequence: 30
+            parentRegion: @verificar-las-instrucciones
+            slot: subRegions
+        }
+        appearance {
+            template: @/standard
+            templateOptions: [
+                #DEFAULT#
+                t-Region--scrollBody
+            ]
+        }
+    )
+
+    region equipos-2 (
+        name: EQUIPOS
+        title: Equipos
+        type: classicReport
+        source {
+            location: localDatabase
+            type: sqlQuery
+            sqlQuery:
+                ```sql
+                with seleccionados as (
+                    SELECT column_value equipo_id
+                        FROM TABLE(apex_string.split_numbers(:P405_EQUIPOS, ','))
+                        ORDER BY ROWNUM
+                )
+                SELECT 
+                    
+                   te.nombre ||' : '||e.nombre  Equipos  
+                FROM 
+                    sgt_equipos e
+                    join seleccionados s on e.id = s.equipo_id
+                    join sgt_tipo_equipos te on e.tipo_equipo_id = te.id
+                
+                order by rownum
+                ```
+        }
+        layout {
+            sequence: 10
+            parentRegion: @equipos
+            slot: subRegions
+        }
+        appearance {
+            template: @/interactive-report
+            templateOptions: [
+                #DEFAULT#
+                t-IRR-region--hideHeader js-addHiddenHeadingRoleDesc
+            ]
+        }
+        componentAppearance {
+            template: @/standard
+            templateOptions: [
+                #DEFAULT#
+                t-Report--altRowsDefault
+                t-Report--rowHighlight
+            ]
+        }
+        pagination {
+            type: nextAndPreviousLinks
+        }
+
+        column EQUIPOS (
+            reportColumnQueryId: 1
+            derivedColumn: N
+            heading {
+                heading: Equipos
+            }
+            layout {
+                sequence: 10
+            }
+            sorting {
+                sortable: false
+            }
+        )
+
+    )
+
+    region sitios (
+        name: SITIOS
+        title: Sitios
+        type: staticContent
+        source {
+            htmlCode:
+                ```html
+                <div id="network">
+                </div>
+                ```
+        }
+        layout {
+            sequence: 20
+            parentRegion: @verificar-las-instrucciones
+            slot: subRegions
+        }
+        appearance {
+            template: @/standard
+            templateOptions: [
+                #DEFAULT#
+                t-Region--scrollBody
+            ]
+        }
+    )
+
+    region verificar-las-instrucciones (
+        name: Verificar las instrucciones
+        type: staticContent
+        layout {
+            sequence: 10
+            parentRegion: @wizard-progress
+            slot: wizardSubRegions
+        }
+        appearance {
+            template: @/blank-with-attributes
+            templateOptions: #DEFAULT#
+        }
+    )
+
+    region wizard-progress (
+        name: Wizard Progress
+        type: list
+        source {
+            list: @wzrd-conexiones-wan
+        }
+        layout {
+            sequence: 10
+            slot: breadcrumbBar
+        }
+        appearance {
+            template: @/wizard-container
+            templateOptions: [
+                #DEFAULT#
+                t-Wizard--hideStepsXSmall
+            ]
+        }
+        componentAppearance {
+            listTemplate: @/wizard-progress
+            templateOptions: [
+                #DEFAULT#
+                t-WizardSteps--displayLabels
+            ]
+        }
+    )
+
+    button cancel (
+        buttonName: CANCEL
+        label: Cancel
+        layout {
+            sequence: 20
+            region: @wizard-progress
+            slot: close
+        }
+        appearance {
+            buttonTemplate: @/text
+            templateOptions: #DEFAULT#
+        }
+        behavior {
+            action: redirectThisApp
+            target: {
+                page: 34
+                clearCache: 405
+            }
+            warnOnUnsavedChanges: doNotCheck
+        }
+    )
+
+    button delete (
+        buttonName: DELETE
+        label: &APP_TEXT$BTN_BORRAR!RAW.
+        layout {
+            sequence: 10
+            region: @wizard-progress
+            slot: close
+        }
+        appearance {
+            buttonTemplate: @/text
+            hot: true
+            templateOptions: [
+                #DEFAULT#
+                t-Button--danger
+            ]
+        }
+        behavior {
+            warnOnUnsavedChanges: doNotCheck
+            requiresConfirmation: true
+        }
+        confirmation {
+            message: &APP_TEXT$DELETE_MSG!RAW.
+        }
+        serverSideCondition {
+            type: itemIsNotNull
+            item: P401_ID
+        }
+        security {
+            authorizationScheme: @implementador-rights
+        }
+    )
+
+    button finish (
+        buttonName: FINISH
+        label: Finish
+        layout {
+            sequence: 40
+            region: @wizard-progress
+            slot: next
+        }
+        appearance {
+            buttonTemplate: @/text
+            hot: true
+            templateOptions: #DEFAULT#
+        }
+        behavior {
+            warnOnUnsavedChanges: doNotCheck
+        }
+    )
+
+    button previous (
+        buttonName: PREVIOUS
+        label: Previous
+        layout {
+            sequence: 20
+            region: @wizard-progress
+            slot: previous
+        }
+        appearance {
+            buttonTemplate: @/icon
+            templateOptions: #DEFAULT#
+            icon: fa-chevron-left
+        }
+        behavior {
+            executeValidations: false
+            warnOnUnsavedChanges: doNotCheck
+        }
+    )
+
+    process borrar (
+        name: BORRAR
+        type: executeCode
+        source {
+            plsqlCode:
+                ```plsql
+                BEGIN
+                    -- ===========================================
+                    -- 1. BORRAR datos relacionados existentes
+                    -- ===========================================
+                    DELETE FROM sgt_sitios_enlace_wan
+                    WHERE enlace_wan_id = :P401_ID;
+                
+                    DELETE FROM sgt_conexiones_enlace_wan
+                    WHERE enlace_wan_id = :P401_ID;
+                
+                    ---Borrar el servicio
+                    DELETE FROM SGT_ENLACES_WAN
+                    WHERE ID = :P401_ID;
+                
+                 END;  
+                ```
+        }
+        execution {
+            sequence: 10
+        }
+        successMessage {
+            successMessage: Se ha borrado el enlace WAN
+        }
+        error {
+            errorMessage: Error al intentar borrar el enlace WAN
+        }
+        advanced {
+            executionMappingIdentifier: 88034739652343770439
+        }
+        serverSideCondition {
+            whenButtonPressed: @delete
+        }
+        security {
+            authorizationScheme: @implementador-rights
+        }
+    )
+
+    process clear-cache (
+        name: CLEAR_CACHE
+        type: clearSessionState
+        clear {
+            type: pages
+            pages: [
+                401
+                402
+                403
+                405
+            ]
+        }
+        execution {
+            sequence: 30
+        }
+        advanced {
+            executionMappingIdentifier: 85693683597011747642
+        }
+    )
+
+    process conexiones-puertos (
+        name: CONEXIONES_PUERTOS
+        type: executeCode
+        source {
+            plsqlCode:
+                ```plsql
+                declare
+                L_NODES CLOB;
+                l_edges CLOB;
+                
+                begin
+                    
+                      apex_debug.message('dmf: CONEXIONES_PUERTOS: %s', :P403_CONEXIONES); 
+                
+                        L_NODES := GET_NODOS_IFACE_WAN(:P403_CONEXIONES);
+                      --L_EDGES := GET_EDGES_IFACE(:P400_SERVICIO_ID);
+                
+                      htp.p(
+                      JSON_OBJECT(
+                        'nodes' VALUE L_NODES FORMAT JSON,
+                        'edges' VALUE l_edges FORMAT JSON
+                      )
+                      );
+                
+                    end;
+                ```
+        }
+        execution {
+            sequence: 20
+            point: ajaxCallback
+        }
+        advanced {
+            executionMappingIdentifier: 18949393389977208
+        }
+    )
+
+    process datos-grafo (
+        name: DATOS_GRAFO
+        type: executeCode
+        source {
+            plsqlCode:
+                ```plsql
+                declare
+                l_cursor SYS_REFCURSOR;
+                begin
+                
+                open l_cursor for
+                
+                select s.id ORIGEN_ID, s.siglas ORIGEN
+                from sgt_sitios s 
+                where s.id in (SELECT column_value 
+                        FROM apex_string.split_numbers(:P402_SITIOS, ',')
+                );
+                
+                APEX_JSON.OPEN_OBJECT;
+                    APEX_JSON.WRITE('data', l_cursor); -- Convierte el cursor a JSON array
+                    APEX_JSON.CLOSE_OBJECT;
+                
+                    end;
+                ```
+        }
+        execution {
+            sequence: 10
+            point: ajaxCallback
+        }
+        advanced {
+            executionMappingIdentifier: 85693682171725747628
+        }
+    )
+
+    process procesar-datos (
+        name: PROCESAR_DATOS
+        type: executeCode
+        source {
+            plsqlCode:
+                ```plsql
+                DECLARE
+                    l_seq NUMBER := 10;
+                BEGIN
+                    -- ===========================================
+                    -- 1. BORRAR datos relacionados existentes
+                    -- ===========================================
+                    DELETE FROM sgt_sitios_enlace_wan
+                    WHERE enlace_wan_id = :P401_ID;
+                
+                    DELETE FROM sgt_conexiones_enlace_wan
+                    WHERE enlace_wan_id = :P401_ID;
+                
+                    DELETE FROM sgt_equipos_wan
+                    WHERE wan_id = :P401_ID;
+                
+                    -- ===========================================
+                    -- 2. INSERTAR o ACTUALIZAR datos del ENLACE_WAN
+                    -- ===========================================
+                    IF :P401_ID IS NULL THEN
+                    -- Nuevo registro
+                    INSERT INTO sgt_enlaces_wan (nombre, grupo_red)
+                    VALUES (:P401_NOMBRE, :P401_GRUPO_RED)
+                    RETURNING id INTO :P401_ID;
+                ELSE
+                    -- Actualizar existente
+                    UPDATE sgt_enlaces_wan
+                    SET nombre    = :P401_NOMBRE,
+                        grupo_red = :P401_GRUPO_RED
+                    WHERE id = :P401_ID;
+                END IF;
+                
+                
+                    -- ===========================================
+                    -- 3. INSERTAR datos en SITIOS_ENLACE_WAN
+                    -- ===========================================
+                    l_seq := 10;
+                    FOR rec IN (
+                        SELECT column_value AS sitio_id
+                        FROM TABLE(apex_string.split_numbers(:P402_SITIOS, ','))
+                        ORDER BY ROWNUM
+                    )
+                    LOOP
+                        INSERT INTO sgt_sitios_enlace_wan (
+                            sitio_id,
+                            enlace_wan_id,
+                            seq
+                        ) VALUES (
+                            rec.sitio_id,
+                            :P401_ID,
+                            l_seq
+                        );
+                        l_seq := l_seq + 10;
+                    END LOOP;
+                
+                    -- ===========================================
+                    -- 4. INSERTAR datos en CONEXIONES_ENLACE_WAN
+                    -- ===========================================
+                    l_seq := 10;
+                    FOR rec IN (
+                        SELECT column_value tramo_id
+                        FROM TABLE(apex_string.split_numbers(:P403_CONEXIONES, ','))
+                        ORDER BY ROWNUM
+                    )
+                    LOOP
+                        INSERT INTO sgt_conexiones_enlace_wan (
+                            enlace_tramo_id,
+                            enlace_wan_id,
+                            secuencia
+                        ) VALUES (
+                            rec.tramo_id,
+                            :P401_ID,
+                            l_seq
+                        );
+                        l_seq := l_seq + 10;
+                    END LOOP;
+                
+                    --======================================= 
+                    --.5 Insertar datos en sgt_equipos_wan
+                    --=======================================
+                     l_seq := 10;
+                    FOR rec IN (
+                        SELECT column_value equipo_id
+                        FROM TABLE(apex_string.split_numbers(:P405_EQUIPOS, ','))
+                        ORDER BY ROWNUM
+                    )
+                    LOOP
+                        INSERT INTO sgt_equipos_wan (
+                            equipo_id,
+                            wan_id,
+                            seq
+                        ) VALUES (
+                            rec.equipo_id,
+                            :P401_ID,
+                            l_seq
+                        );
+                        l_seq := l_seq + 10;
+                    END LOOP;
+                
+                END;
+                
+                ```
+        }
+        execution {
+            sequence: 20
+        }
+        successMessage {
+            successMessage: Se ha creado el enlace WAN
+        }
+        error {
+            errorMessage: No se pudo crear el enlace WAN
+        }
+        advanced {
+            executionMappingIdentifier: 85693683290250747639
+        }
+        serverSideCondition {
+            whenButtonPressed: @finish
+        }
+        security {
+            authorizationScheme: @implementador-rights
+        }
+    )
+
+    branch (
+        name: PAG_34
+        execution {
+            sequence: 10
+        }
+        behavior {
+            target: {
+                page: 34
+            }
+        }
+    )
+
+    branch (
+        execution {
+            sequence: 10
+            point: validating
+        }
+        behavior {
+            target: {
+                page: 403
+            }
+        }
+        serverSideCondition {
+            whenButtonPressed: @previous
+        }
+    )
+
+)
+

@@ -1,0 +1,447 @@
+page 47 (
+    name: MAPA_SITIOS
+    alias: MAPA-SITIOS
+    title: Mapa Sitios
+    appearance {
+        pageTemplate: @/left-side-column
+        templateOptions: #DEFAULT#
+    }
+    navigation {
+        cursorFocus: doNotFocusCursor
+        warnOnUnsavedChanges: false
+    }
+    security {
+        pageAccessProtection: argumentsMustHaveChecksum
+        formAutoComplete: false
+    }
+
+    region filtro-mapa (
+        name: FILTRO_MAPA
+        title: Filtro Mapa
+        type: facetedSearch
+        source {
+            filteredRegion: @mapa-sitios
+        }
+        layout {
+            sequence: 10
+            slot: leftColumn
+        }
+        appearance {
+            template: @/standard
+            templateOptions: [
+                #DEFAULT#
+                t-Region--removeHeader js-removeLandmark
+                t-Region--scrollBody
+            ]
+        }
+        settings {
+            compactNosThreshold: 10000
+            displayChartForTopNValues: 10
+        }
+
+        facet P47_CIUDAD (
+            type: checkboxGroup
+            label {
+                label: Ciudad
+            }
+            lov {
+                type: distinctValues
+            }
+            layout {
+                sequence: 60
+            }
+            listEntries {
+                maxDisplayedEntries: 7
+            }
+            source {
+                databaseColumn: CIUDAD
+            }
+        )
+
+        facet P47_DEPARTAMENTO (
+            type: checkboxGroup
+            label {
+                label: Departamento
+            }
+            lov {
+                type: distinctValues
+            }
+            layout {
+                sequence: 50
+            }
+            listEntries {
+                maxDisplayedEntries: 7
+            }
+            source {
+                databaseColumn: DEPARTAMENTO
+            }
+        )
+
+        facet P47_SEARCH (
+            type: search
+            label {
+                label: Search
+            }
+            layout {
+                sequence: 10
+            }
+            config {
+                buildOption: @commented-out
+            }
+        )
+
+        facet P47_SIGLAS (
+            type: checkboxGroup
+            label {
+                label: Siglas Sitio
+            }
+            lov {
+                type: distinctValues
+            }
+            layout {
+                sequence: 80
+            }
+            listEntries {
+                maxDisplayedEntries: 7
+            }
+            source {
+                databaseColumn: SIGLAS
+            }
+        )
+
+        facet P47_TIPO_SITIO (
+            type: checkboxGroup
+            label {
+                label: Tipo de Sitio
+            }
+            lov {
+                type: distinctValues
+            }
+            layout {
+                sequence: 70
+            }
+            listEntries {
+                maxDisplayedEntries: 7
+            }
+            source {
+                databaseColumn: TIPO_SITIO
+            }
+        )
+
+        facet P47_ZONA (
+            type: checkboxGroup
+            label {
+                label: Zona
+            }
+            lov {
+                type: distinctValues
+            }
+            layout {
+                sequence: 40
+            }
+            listEntries {
+                maxDisplayedEntries: 7
+            }
+            source {
+                databaseColumn: ZONA
+            }
+        )
+
+    )
+
+    region mapa-sitios (
+        name: MAPA_SITIOS
+        type: map
+        source {
+            location: localDatabase
+            tableName: V_SITIOS_GPS
+            pageItemsToSubmit: P47_ZONAS
+        }
+        layout {
+            sequence: 50
+            slot: body
+        }
+        appearance {
+            template: @/blank-with-attributes-no-grid
+            templateOptions: #DEFAULT#
+        }
+        map {
+            height: 800
+        }
+        controls {
+            options: [
+                mousewheelZoom
+                rectangleZoom
+                scaleBar
+                infiniteMap
+                getBrowserLocation
+            ]
+        }
+        legend {
+            position: start
+        }
+        attributes {
+            messagesPosition: below
+        }
+
+        layer centro-control (
+            name: Centro Control
+            layout {
+                sequence: 40
+            }
+            source {
+                location: regionSource
+            }
+            rowAssignment {
+                column: TIPO_SITIO
+                valueForThisLayer: Centro de Control
+            }
+            columnMapping {
+                geometryColumnDataType: longitudeLatitude
+                longitudeColumn: LON
+                latitudeColumn: LAT
+            }
+            appearance {
+                fillColor: #5856d6
+            }
+            link {
+                type: redirectThisApp
+                target: {
+                    page: 26
+                    items: {
+                        P26_ID: &ID.
+                    }
+                }
+            }
+            config {
+                buildOption: @commented-out
+            }
+        )
+
+        layer es-y-se (
+            name: ES y SE
+            layout {
+                sequence: 30
+            }
+            source {
+                location: regionSource
+            }
+            rowAssignment {
+                column: TIPO_SITIO
+                valueForThisLayer: Estación/Subestación Eléctrica
+            }
+            columnMapping {
+                geometryColumnDataType: longitudeLatitude
+                longitudeColumn: LON
+                latitudeColumn: LAT
+            }
+            appearance {
+                fillColor: #ff3b30
+            }
+            link {
+                type: redirectThisApp
+                target: {
+                    page: 26
+                    items: {
+                        P26_ID: &ID.
+                    }
+                }
+            }
+            config {
+                buildOption: @commented-out
+            }
+        )
+
+        layer repetidoras (
+            name: Repetidoras
+            layout {
+                sequence: 50
+            }
+            source {
+                location: regionSource
+            }
+            rowAssignment {
+                column: TIPO_SITIO
+                valueForThisLayer: %Caseta Repetidora%
+            }
+            columnMapping {
+                geometryColumnDataType: longitudeLatitude
+                longitudeColumn: LON
+                latitudeColumn: LAT
+            }
+            appearance {
+                fillColor: #c7c7cc
+            }
+            link {
+                type: redirectThisApp
+                target: {
+                    page: 26
+                    items: {
+                        P26_ID: &ID.
+                    }
+                }
+            }
+            config {
+                buildOption: @commented-out
+            }
+        )
+
+        layer sitios (
+            name: Sitios
+            layout {
+                sequence: 20
+            }
+            source {
+                location: regionSource
+            }
+            columnMapping {
+                geometryColumnDataType: longitudeLatitude
+                longitudeColumn: LON
+                latitudeColumn: LAT
+            }
+            appearance {
+                fillColor: #34aadc
+                strokeColor: #5856d6
+            }
+            tooltip {
+                column: SIGLAS
+            }
+            link {
+                type: redirectThisApp
+                target: {
+                    page: 9
+                    items: {
+                        P9_ID: &ID.
+                    }
+                }
+            }
+        )
+
+        layer zonas (
+            name: Zonas
+            layout {
+                sequence: 10
+            }
+            source {
+                location: regionSource
+            }
+            columnMapping {
+                geometryColumnDataType: longitudeLatitude
+                longitudeColumn: LON
+                latitudeColumn: LAT
+            }
+            appearance {
+                fillColor: #007aff
+            }
+            tooltip {
+                column: SIGLAS
+            }
+            infoWindow {
+                titleColumn: ZONA
+                bodyColumn: SIGLAS
+            }
+            config {
+                buildOption: @commented-out
+            }
+        )
+
+    )
+
+    pageItem P47_ZONAS (
+        type: popupLov
+        label {
+            label: Zonas
+            alignment: left
+        }
+        lov {
+            type: sharedComponent
+            lov: @lov-sgt-zonas
+            displayExtraValues: false
+            displayNullValue: false
+        }
+        layout {
+            sequence: 40
+            slot: body
+            alignment: left
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+            width: 30
+        }
+        config {
+            buildOption: @commented-out
+        }
+    )
+
+    button mapa-enlaces-fo (
+        buttonName: MAPA_ENLACES_FO
+        label: Ir a Mapa Enlaces Fo
+        layout {
+            sequence: 10
+            slot: body
+        }
+        appearance {
+            buttonTemplate: @/text-with-icon
+            templateOptions: [
+                #DEFAULT#
+                t-Button--iconLeft
+            ]
+            icon: fa-line-map
+        }
+        behavior {
+            action: redirectThisApp
+            target: {
+                page: 65
+            }
+            warnOnUnsavedChanges: doNotCheck
+        }
+    )
+
+    button mapa-enlaces-wan (
+        buttonName: Mapa_enlaces_wan
+        label: Ir a Mapa Enlaces Wan
+        layout {
+            sequence: 20
+            slot: body
+            startNewRow: false
+        }
+        appearance {
+            buttonTemplate: @/text
+            templateOptions: #DEFAULT#
+        }
+        behavior {
+            action: redirectThisApp
+            target: {
+                page: 420
+            }
+            warnOnUnsavedChanges: doNotCheck
+        }
+    )
+
+    dynamicAction new (
+        name: New
+        execution {
+            sequence: 10
+        }
+        when {
+            selectionType: items
+            items: P47_ZONAS
+        }
+
+        action native-refresh (
+            action: refresh
+            affectedElements {
+                selectionType: region
+                region: @mapa-sitios
+            }
+            execution {
+                sequence: 10
+                fireOnInit: false
+            }
+        )
+
+    )
+
+)
+

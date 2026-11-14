@@ -1,0 +1,575 @@
+page 41 (
+    name: FORM_AGREGAR_CONEXIONES
+    alias: FORM-AGREGAR-CONEXIONES
+    title: Agregar conexiones
+    pageGroup: @implementadores
+    appearance {
+        pageMode: modalDialog
+        dialogTemplate: @/modal-dialog
+        templateOptions: #DEFAULT#
+    }
+    navigation {
+        cursorFocus: doNotFocusCursor
+    }
+    security {
+        authorizationScheme: @implementador-rights
+        pageAccessProtection: argumentsMustHaveChecksum
+        formAutoComplete: false
+    }
+
+    region form-agregar-conexiones (
+        name: FORM_AGREGAR_CONEXIONES
+        type: interactiveGrid
+        source {
+            location: localDatabase
+            tableName: SGT_ENLACES_TRAMOS
+            whereClause: 1=0
+        }
+        layout {
+            sequence: 20
+            slot: contentBody
+        }
+        appearance {
+            template: @/interactive-report
+            templateOptions: [
+                #DEFAULT#
+                t-IRR-region--hideHeader js-addHiddenHeadingRoleDesc
+            ]
+        }
+        edit {
+            enabled: true
+            allowedOperations: add
+            addRowIfEmpty: false
+        }
+        toolbar {
+            controls: [
+                resetButton
+                saveButton
+            ]
+        }
+        enableUsersTo {
+            flashback: false
+            defineChartView: false
+            download: false
+        }
+        heading {
+            fixedTo: region
+            fixedReportHeight: 450
+        }
+        advanced {
+            savedReportMappingIdentifier: 45026336728716169076
+        }
+
+        savedReport 450263372 (
+            visibility: primary
+            view {
+                default: grid
+            }
+            singleRowView {
+                displayedColumns: true
+            }
+
+            displayColumn (
+                column: @ID
+                layout {
+                    sequence: 1
+                }
+            )
+
+            displayColumn (
+                column: @NOMBRE
+                layout {
+                    sequence: 2
+                }
+            )
+
+            displayColumn (
+                column: @ENLACE_ID
+                layout {
+                    sequence: 3
+                }
+            )
+
+            displayColumn (
+                column: @SITIO
+                layout {
+                    sequence: 7
+                }
+            )
+
+            displayColumn (
+                column: @EQUIPO_A_ID
+                layout {
+                    sequence: 8
+                }
+            )
+
+            displayColumn (
+                column: @INTERFAZ_A_ID
+                layout {
+                    sequence: 10
+                }
+            )
+
+            displayColumn (
+                column: @EQUIPO_B_ID
+                layout {
+                    sequence: 12
+                }
+            )
+
+            displayColumn (
+                column: @INTERFAZ_B_ID
+                layout {
+                    sequence: 14
+                }
+            )
+
+            displayColumn (
+                column: @CREADO_POR
+                layout {
+                    sequence: 16
+                }
+            )
+
+            displayColumn (
+                column: @CREADO_EL
+                layout {
+                    sequence: 17
+                }
+            )
+
+            displayColumn (
+                column: @ACTUALIZADO_POR
+                layout {
+                    sequence: 18
+                }
+            )
+
+            displayColumn (
+                column: @ACTUALIZADO_EL
+                layout {
+                    sequence: 19
+                }
+            )
+
+            displayColumn (
+                column: @APEX$ROW_ACTION
+                layout {
+                    sequence: 0
+                }
+            )
+
+            displayColumn (
+                column: @TIPO_CONEXION
+                layout {
+                    sequence: 20
+                }
+            )
+
+        )
+
+        column ACTUALIZADO_EL (
+            type: datePicker
+            heading {
+                heading: Actualizado El
+            }
+            layout {
+                sequence: 180
+            }
+            source {
+                databaseColumn: ACTUALIZADO_EL
+                dataType: date
+            }
+            config {
+                buildOption: @commented-out
+            }
+        )
+
+        column ACTUALIZADO_POR (
+            type: textField
+            heading {
+                heading: Actualizado Por
+            }
+            layout {
+                sequence: 170
+            }
+            validation {
+                maxLength: 50
+            }
+            source {
+                databaseColumn: ACTUALIZADO_POR
+                dataType: varchar2
+            }
+            columnFilter {
+                performanceImpactingOperators: [
+                    contains
+                    startsWith
+                    caseInsensitive
+                    regexp
+                ]
+            }
+            config {
+                buildOption: @commented-out
+            }
+        )
+
+        column APEX$ROW_ACTION (
+            type: actionsMenu
+            layout {
+                sequence: 20
+            }
+        )
+
+        column APEX$ROW_SELECTOR (
+            type: rowSelector
+            layout {
+                sequence: 10
+            }
+        )
+
+        column CREADO_EL (
+            type: datePicker
+            heading {
+                heading: Creado El
+            }
+            layout {
+                sequence: 160
+            }
+            source {
+                databaseColumn: CREADO_EL
+                dataType: date
+            }
+            config {
+                buildOption: @commented-out
+            }
+        )
+
+        column CREADO_POR (
+            type: textField
+            heading {
+                heading: Creado Por
+            }
+            layout {
+                sequence: 150
+            }
+            validation {
+                maxLength: 50
+            }
+            source {
+                databaseColumn: CREADO_POR
+                dataType: varchar2
+            }
+            columnFilter {
+                performanceImpactingOperators: [
+                    contains
+                    startsWith
+                    caseInsensitive
+                    regexp
+                ]
+            }
+            config {
+                buildOption: @commented-out
+            }
+        )
+
+        column ENLACE_ID (
+            type: popupLov
+            heading {
+                heading: Enlace
+            }
+            lov {
+                type: sharedComponent
+                lov: @enlaces-fo-nombre
+            }
+            layout {
+                sequence: 80
+            }
+            source {
+                databaseColumn: ENLACE_ID
+                dataType: varchar2
+            }
+            columnFilter {
+                performanceImpactingOperators: [
+                    contains
+                    startsWith
+                    caseInsensitive
+                    regexp
+                ]
+                lovType: none
+            }
+            config {
+                buildOption: @commented-out
+            }
+        )
+
+        column EQUIPO_A_ID (
+            type: popupLov
+            heading {
+                heading: Equipo A
+            }
+            lov {
+                type: sharedComponent
+                lov: @equipos-nombre-compuesto
+            }
+            layout {
+                sequence: 110
+            }
+            validation {
+                valueRequired: true
+            }
+            source {
+                databaseColumn: EQUIPO_A_ID
+                dataType: number
+            }
+            columnFilter {
+                performanceImpactingOperators: [
+                    contains
+                    startsWith
+                    caseInsensitive
+                    regexp
+                ]
+            }
+        )
+
+        column EQUIPO_B_ID (
+            type: popupLov
+            heading {
+                heading: Equipo B
+            }
+            lov {
+                type: sharedComponent
+                lov: @equipos-nombre-compuesto
+            }
+            layout {
+                sequence: 130
+            }
+            validation {
+                valueRequired: true
+            }
+            source {
+                databaseColumn: EQUIPO_B_ID
+                dataType: number
+            }
+            columnFilter {
+                performanceImpactingOperators: [
+                    contains
+                    startsWith
+                    caseInsensitive
+                    regexp
+                ]
+            }
+        )
+
+        column ID (
+            type: hidden
+            layout {
+                sequence: 30
+            }
+            source {
+                databaseColumn: ID
+                dataType: number
+                queryOnly: true
+                primaryKey: true
+            }
+            exportPrinting {
+                includeInExportPrint: false
+            }
+        )
+
+        column INTERFAZ_A_ID (
+            type: popupLov
+            heading {
+                heading: Interfaz A
+            }
+            lov {
+                type: sqlQuery
+                sqlQuery:
+                    ```sql
+                    SELECT NOMBRE, ID FROM SGT_INTERFACES I
+                    WHERE I.EQUIPO_ID =:EQUIPO_A_ID;
+                    ```
+            }
+            cascadingLov {
+                parentColumns: EQUIPO_A_ID
+                itemsToSubmit: EQUIPO_A_ID
+            }
+            layout {
+                sequence: 120
+            }
+            validation {
+                valueRequired: true
+            }
+            source {
+                databaseColumn: INTERFAZ_A_ID
+                dataType: number
+            }
+        )
+
+        column INTERFAZ_B_ID (
+            type: popupLov
+            heading {
+                heading: Interfaz B
+            }
+            lov {
+                type: sqlQuery
+                sqlQuery:
+                    ```sql
+                    SELECT NOMBRE, ID FROM SGT_INTERFACES I
+                    WHERE I.EQUIPO_ID =:EQUIPO_B_ID;
+                    ```
+            }
+            cascadingLov {
+                parentColumns: EQUIPO_B_ID
+                itemsToSubmit: EQUIPO_B_ID
+            }
+            layout {
+                sequence: 140
+            }
+            validation {
+                valueRequired: true
+            }
+            source {
+                databaseColumn: INTERFAZ_B_ID
+                dataType: number
+            }
+        )
+
+        column NOMBRE (
+            type: textField
+            heading {
+                heading: Nombre
+            }
+            layout {
+                sequence: 40
+            }
+            validation {
+                maxLength: 50
+            }
+            source {
+                databaseColumn: NOMBRE
+                dataType: varchar2
+            }
+            columnFilter {
+                performanceImpactingOperators: [
+                    contains
+                    startsWith
+                    caseInsensitive
+                    regexp
+                ]
+            }
+            config {
+                buildOption: @commented-out
+            }
+        )
+
+        column SITIO (
+            type: popupLov
+            heading {
+                heading: Sitio
+            }
+            lov {
+                type: sharedComponent
+                lov: @sgt-sitios-siglas
+            }
+            layout {
+                sequence: 100
+            }
+            source {
+                databaseColumn: LADO_ID
+                dataType: number
+            }
+            columnFilter {
+                performanceImpactingOperators: [
+                    contains
+                    startsWith
+                    caseInsensitive
+                    regexp
+                ]
+            }
+            config {
+                buildOption: @commented-out
+            }
+        )
+
+        column TIPO_CONEXION (
+            type: selectList
+            heading {
+                heading: Tipo Conexion
+            }
+            lov {
+                type: staticValues
+                staticValues: STATIC:Física;Física,Lógica;Lógica
+            }
+            layout {
+                sequence: 90
+            }
+            source {
+                databaseColumn: TIPO_CONEXION
+                dataType: varchar2
+            }
+            columnFilter {
+                performanceImpactingOperators: [
+                    contains
+                    startsWith
+                    caseInsensitive
+                    regexp
+                ]
+                lovType: useLov
+            }
+        )
+
+    )
+
+    button cerrar (
+        buttonName: CERRAR
+        label: Cerrar
+        layout {
+            sequence: 30
+            slot: contentBody
+        }
+        appearance {
+            buttonTemplate: @/text
+            hot: true
+            templateOptions: #DEFAULT#
+        }
+        behavior {
+            action: definedByDynamicAction
+        }
+    )
+
+    dynamicAction close (
+        name: Close
+        execution {
+            sequence: 10
+        }
+        when {
+            event: click
+            selectionType: button
+            button: @cerrar
+        }
+
+        action native-dialog-cancel (
+            action: cancelDialog
+            execution {
+                sequence: 10
+                fireOnInit: false
+            }
+        )
+
+    )
+
+    process form-agregar-conexiones-save-interactive-grid-data (
+        name: FORM_AGREGAR_CONEXIONES - Save Interactive Grid Data
+        type: interactiveGridAutoRowProcessing
+        editableRegion: @form-agregar-conexiones
+        execution {
+            sequence: 10
+        }
+        advanced {
+            executionMappingIdentifier: 45026639499827173704
+        }
+    )
+
+)
+

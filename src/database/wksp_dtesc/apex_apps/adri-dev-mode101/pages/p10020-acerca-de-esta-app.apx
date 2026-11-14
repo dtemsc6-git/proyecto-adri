@@ -1,0 +1,120 @@
+page 10020 (
+    name: Acerca de esta App
+    alias: ACERCA-DE-ESTA-APP
+    title: Acerca de esta App
+    appearance {
+        pageTemplate: @/standard
+        templateOptions: #DEFAULT#
+    }
+    navigation {
+        warnOnUnsavedChanges: false
+    }
+    security {
+        pageAccessProtection: argumentsMustHaveChecksum
+        formAutoComplete: false
+    }
+    help {
+        helpText: All application help text can be accessed from this page. The links in the "Documentation" region give a much more in-depth explanation of the application's features and functionality.
+    }
+    config {
+        buildOption: @feature-about-page
+    }
+
+    region acerca-de (
+        name: Acerca de
+        type: staticContent
+        source {
+            htmlCode:
+                ```html
+                </br>
+                ADRI - Administrador de Redes Integradas de la ANDE:<br/> 
+                Surge de la necesidad de contar con información centralizada de los activos de comunicación gestionados por la DTE.<br/>
+                Innovando la gestión de la infraestructura de comunicaciones de la ANDE <br/>
+                
+                ```
+        }
+        layout {
+            sequence: 20
+            slot: body
+        }
+        appearance {
+            template: @/hero
+            templateOptions: #DEFAULT#
+            icon: fa-laptop
+        }
+    )
+
+    region dev-team (
+        name: DEV_TEAM
+        title: Dev Team
+        type: staticContent
+        source {
+            htmlCode:
+                ```html
+                </br>
+                DTE/DIC: Ing. Cecilia Vega. <br/>
+                DTE/MCO: Ing. Pablo A. Núñez.<br/>
+                DTE/MSC: Ing. Donald Marcelo Flores.<br/>
+                Hecho con ❤️ en APEX -> para ANDE <br/>
+                Todos los derechos reservados © 2026<br/>
+                ```
+        }
+        layout {
+            sequence: 30
+            slot: body
+            columnSpan: 4
+        }
+        appearance {
+            template: @/hero
+            templateOptions: #DEFAULT#
+            icon: fa-american-sign-language-interpreting
+        }
+    )
+
+    region imagen (
+        name: IMAGEN
+        type: staticContent
+        layout {
+            sequence: 40
+            slot: body
+            startNewRow: false
+        }
+        appearance {
+            template: @/content-block
+            templateOptions: [
+                #DEFAULT#
+                t-ContentBlock--h1
+                t-Region--removeHeader js-removeLandmark
+            ]
+        }
+    )
+
+    pageItem P10020_NEW (
+        type: displayImage
+        label {
+            alignment: left
+        }
+        settings {
+            basedOn: url
+            altText: Equipo
+        }
+        layout {
+            sequence: 10
+            region: @imagen
+            slot: regionBody
+            alignment: left
+            startNewRow: false
+            columnSpan: 6
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+        }
+        default {
+            type: static
+            staticValue: #APP_FILES#dev_team2.jpeg
+        }
+    )
+
+)
+

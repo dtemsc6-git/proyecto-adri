@@ -1,0 +1,779 @@
+page 28 (
+    name: DL_INTERFACE
+    alias: DL-INTERFACE
+    title: Cargar interfaces
+    appearance {
+        pageMode: modalDialog
+        dialogTemplate: @/modal-dialog
+        templateOptions: #DEFAULT#
+    }
+    navigation {
+        cursorFocus: doNotFocusCursor
+    }
+    security {
+        authorizationScheme: @implementador-rights
+        pageAccessProtection: argumentsMustHaveChecksum
+        formAutoComplete: false
+    }
+
+    region button-bar (
+        name: Button Bar
+        type: staticContent
+        layout {
+            sequence: 20
+            slot: contentBody
+        }
+        appearance {
+            template: @/buttons-container
+            templateOptions: [
+                #DEFAULT#
+                t-ButtonRegion--noUI
+            ]
+        }
+        serverSideCondition {
+            type: itemIsNotNull
+            item: P28_FILE
+        }
+        settings {
+            outputAs: text
+        }
+    )
+
+    region data-source (
+        name: Data Source
+        type: staticContent
+        layout {
+            sequence: 30
+            slot: contentBody
+        }
+        appearance {
+            template: @/standard
+            templateOptions: [
+                #DEFAULT#
+                t-Region--hideHeader js-addHiddenHeadingRoleDesc
+                t-Region--noUI
+                t-Region--scrollBody
+            ]
+        }
+        settings {
+            outputAs: text
+        }
+    )
+
+    region loaded-file (
+        name: Loaded File
+        type: staticContent
+        layout {
+            sequence: 40
+            parentRegion: @data-source
+            slot: regionBody
+        }
+        appearance {
+            template: @/blank-with-attributes
+            templateOptions: #DEFAULT#
+        }
+        headerAndFooter {
+            headerText: Tenga en cuenta los valores posibles para cada campo requerido, puede chequear estos valores en el formulario de agregar.
+        }
+        serverSideCondition {
+            type: itemIsNotNull
+            item: P28_FILE
+        }
+        settings {
+            outputAs: text
+        }
+    )
+
+    region log-eventos (
+        name: Log eventos
+        type: staticContent
+        source {
+            htmlCode: &P28_LOGGER.
+        }
+        layout {
+            sequence: 10
+            slot: contentBody
+        }
+        appearance {
+            template: @/standard
+            templateOptions: [
+                #DEFAULT#
+                t-Region--scrollBody
+            ]
+        }
+        serverSideCondition {
+            type: itemIsNotNull
+            item: P28_ERROR_ROW_COUNT
+        }
+    )
+
+    region preview (
+        name: Preview
+        type: classicReport
+        source {
+            location: localDatabase
+            type: sqlQuery
+            sqlQuery:
+                ```sql
+                select p.line_number,
+                       p.col001,p.col002, p.col003, p.col004, p.col005, p.col006
+                       --, p.col007, p.col008, p.col009, p.col010
+                       --, p.col011,p.col012,p.col013,p.col014
+                       -- add more columns (col011 to col300) here.
+                  from apex_application_temp_files f, 
+                       table( apex_data_parser.parse(
+                                  p_content           => f.blob_content,
+                                  p_file_name         => f.filename,
+                                  p_xlsx_sheet_name   => case when :P28_XLSX_WORKSHEET is not null then :P28_XLSX_WORKSHEET end,
+                                  --p_file_profile      => apex_data_loading.get_file_profile( p_static_id => 'dl_interfaces' ),
+                                  p_max_rows          => 100 ) ) p
+                 where f.name = :P28_FILE
+                
+                order by line_number
+                ```
+        }
+        layout {
+            sequence: 40
+            slot: contentBody
+        }
+        appearance {
+            template: @/standard
+            templateOptions: [
+                #DEFAULT#
+                t-Region--noPadding
+            ]
+        }
+        serverSideCondition {
+            type: itemIsNotNull
+            item: P28_FILE
+        }
+        reportLayout {
+            numberOfRows: 50
+        }
+        componentAppearance {
+            template: @/standard
+            templateOptions: [
+                #DEFAULT#
+                t-Report--stretch
+                t-Report--staticRowColors
+                t-Report--rowHighlight
+                t-Report--horizontalBorders
+                t-Report--hideNoPagination
+            ]
+        }
+        pagination {
+            type: nextAndPreviousLinks
+        }
+        performance {
+            maxRowsToProcess: 500
+        }
+        messages {
+            whenNoDataFound: no data found
+        }
+        heading {
+            type: none
+        }
+
+        column COL001 (
+            reportColumnQueryId: 2
+            derivedColumn: N
+            heading {
+                heading: Col001
+            }
+            layout {
+                sequence: 2
+            }
+            sorting {
+                sortable: false
+            }
+        )
+
+        column COL002 (
+            reportColumnQueryId: 3
+            derivedColumn: N
+            heading {
+                heading: Col002
+            }
+            layout {
+                sequence: 12
+            }
+            sorting {
+                sortable: false
+            }
+        )
+
+        column COL003 (
+            reportColumnQueryId: 4
+            derivedColumn: N
+            heading {
+                heading: Col003
+            }
+            layout {
+                sequence: 22
+            }
+            sorting {
+                sortable: false
+            }
+        )
+
+        column COL004 (
+            reportColumnQueryId: 5
+            derivedColumn: N
+            heading {
+                heading: Col004
+            }
+            layout {
+                sequence: 32
+            }
+            sorting {
+                sortable: false
+            }
+        )
+
+        column COL005 (
+            reportColumnQueryId: 6
+            derivedColumn: N
+            heading {
+                heading: Col005
+            }
+            layout {
+                sequence: 42
+            }
+            sorting {
+                sortable: false
+            }
+        )
+
+        column COL006 (
+            reportColumnQueryId: 7
+            derivedColumn: N
+            heading {
+                heading: Col006
+            }
+            layout {
+                sequence: 52
+            }
+            sorting {
+                sortable: false
+            }
+        )
+
+        column LINE_NUMBER (
+            reportColumnQueryId: 1
+            derivedColumn: N
+            heading {
+                heading: Line Number
+                alignment: end
+            }
+            layout {
+                sequence: 1
+                columnAlignment: end
+            }
+            sorting {
+                sortable: false
+            }
+        )
+
+    )
+
+    region upload-a-file (
+        name: Upload a File
+        type: staticContent
+        layout {
+            sequence: 30
+            parentRegion: @data-source
+            slot: regionBody
+        }
+        appearance {
+            template: @/blank-with-attributes
+            templateOptions: #DEFAULT#
+        }
+        headerAndFooter {
+            headerText: Puede subir un archivo XLSX con los datos de las interfaces de un equipo, la cantidad máxima de registros soportados es de 100. Asocie el archivo subido a un equipo en particular. Se muestran los primeros 6 campos del archivo subido.
+        }
+        serverSideCondition {
+            type: itemIsNull
+            item: P28_FILE
+        }
+        settings {
+            outputAs: text
+        }
+    )
+
+    pageItem P28_EQUIPOS (
+        type: popupLov
+        label {
+            label: Equipos
+            alignment: left
+        }
+        lov {
+            type: sharedComponent
+            lov: @equipos-nombre-compuesto
+        }
+        layout {
+            sequence: 10
+            region: @loaded-file
+            slot: regionBody
+            alignment: left
+            startNewRow: false
+            newColumn: false
+        }
+        appearance {
+            template: @/required-floating
+            templateOptions: #DEFAULT#
+            width: 30
+            valuePlaceholder: Seleccione un item
+        }
+        validation {
+            valueRequired: true
+        }
+    )
+
+    pageItem P28_ERRORES (
+        type: hidden
+        settings {
+            valueProtected: false
+        }
+        layout {
+            sequence: 50
+            region: @loaded-file
+            slot: regionBody
+        }
+    )
+
+    pageItem P28_ERROR_ROW_COUNT (
+        type: hidden
+        layout {
+            sequence: 20
+            region: @upload-a-file
+            slot: regionBody
+        }
+    )
+
+    pageItem P28_FILE (
+        type: fileUpload
+        label {
+            label: Upload a File
+            alignment: left
+        }
+        display {
+            displayAs: blockDropzone
+            dropzoneTitle: Suba un archivo con interfaces
+            dropzoneDesc: Formato soportado: XLSX
+        }
+        storage {
+            type: appTempFiles
+            fileTypes: .xlsx
+            maxFileSize: 100
+        }
+        layout {
+            sequence: 10
+            region: @upload-a-file
+            slot: regionBody
+            alignment: left
+            labelColumnSpan: 0
+        }
+        appearance {
+            template: @/hidden
+            templateOptions: [
+                #DEFAULT#
+                t-Form-fieldContainer--stretchInputs
+            ]
+        }
+        help {
+            inlineHelpText: Archivo XLS, hasta 100 registros
+            helpText: Puede subir un archivo con el formato sugerido, soporta hasta 100 registros, seleccione el equipo de la lista de equipos
+        }
+    )
+
+    pageItem P28_FILE_NAME (
+        type: displayOnly
+        label {
+            label: Loaded File
+            alignment: left
+        }
+        layout {
+            sequence: 30
+            region: @loaded-file
+            slot: regionBody
+            alignment: left
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+        }
+        default {
+            type: static
+            staticValue: Pasted Data
+        }
+    )
+
+    pageItem P28_LOGGER (
+        type: hidden
+        settings {
+            valueProtected: false
+        }
+        layout {
+            sequence: 10
+            region: @log-eventos
+            slot: regionBody
+        }
+    )
+
+    pageItem P28_TIPO_INTERFAZ (
+        type: popupLov
+        label {
+            label: Tipo Interfaz
+            alignment: left
+        }
+        lov {
+            type: sharedComponent
+            lov: @tipo-interfaz-nombre
+        }
+        layout {
+            sequence: 20
+            region: @loaded-file
+            slot: regionBody
+            alignment: left
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+            width: 30
+        }
+        config {
+            buildOption: @commented-out
+        }
+    )
+
+    pageItem P28_XLSX_WORKSHEET (
+        type: selectList
+        label {
+            label: XLSX Worksheet
+            alignment: left
+        }
+        lov {
+            type: sqlQuery
+            sqlQuery:
+                ```sql
+                select p.sheet_display_name,
+                       p.sheet_file_name
+                  from apex_application_temp_files f,
+                       table( apex_data_parser.get_xlsx_worksheets( p_content => f.blob_content ) ) p
+                 where f.name = :P28_FILE
+                ```
+            displayExtraValues: false
+            displayNullValue: false
+        }
+        layout {
+            sequence: 40
+            region: @loaded-file
+            slot: regionBody
+            alignment: left
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+            height: 1
+        }
+        serverSideCondition {
+            type: functionBody
+            plsqlFunctionBody:
+                ```plsql
+                declare
+                    l_sheet_count number;
+                begin
+                    select count(*)
+                      into l_sheet_count
+                      from apex_application_temp_files f,
+                           table( apex_data_parser.get_xlsx_worksheets( p_content => f.blob_content ) ) p
+                     where f.name = :P28_FILE;
+                    
+                     -- display if the XSLX file contains multiple worksheets
+                    return ( l_sheet_count > 1 );
+                exception
+                    when others then 
+                        return false;
+                end;
+                ```
+        }
+    )
+
+    button clear (
+        buttonName: CLEAR
+        label: Clear
+        layout {
+            sequence: 10
+            region: @button-bar
+            slot: next
+        }
+        appearance {
+            buttonTemplate: @/text
+            templateOptions: #DEFAULT#
+        }
+        behavior {
+            warnOnUnsavedChanges: doNotCheck
+        }
+    )
+
+    button function-load (
+        buttonName: FUNCTION_LOAD
+        label: Function Load
+        layout {
+            sequence: 30
+            region: @button-bar
+            slot: next
+        }
+        appearance {
+            buttonTemplate: @/text
+            templateOptions: #DEFAULT#
+        }
+        behavior {
+            warnOnUnsavedChanges: doNotCheck
+        }
+        config {
+            buildOption: @commented-out
+        }
+    )
+
+    button load (
+        buttonName: LOAD
+        label: Insertar
+        layout {
+            sequence: 20
+            region: @button-bar
+            slot: next
+        }
+        appearance {
+            buttonTemplate: @/text
+            hot: true
+            templateOptions: #DEFAULT#
+        }
+        behavior {
+            warnOnUnsavedChanges: doNotCheck
+        }
+    )
+
+    dynamicAction submit-worksheet-on-change (
+        name: Submit worksheet on change
+        execution {
+            sequence: 20
+        }
+        when {
+            selectionType: items
+            items: P28_XLSX_WORKSHEET
+        }
+
+        action native-submit-page (
+            action: submitPage
+            execution {
+                sequence: 10
+                fireOnInit: false
+            }
+        )
+
+    )
+
+    dynamicAction upload-a-file (
+        name: Upload a File
+        execution {
+            sequence: 10
+        }
+        when {
+            selectionType: items
+            items: P28_FILE
+        }
+        clientSideCondition {
+            type: itemIsNotNull
+            item: P28_FILE
+        }
+
+        action native-submit-page (
+            action: submitPage
+            execution {
+                sequence: 10
+                fireOnInit: false
+            }
+        )
+
+    )
+
+    validation is-valid-file-type (
+        name: Is valid file type
+        execution {
+            sequence: 10
+        }
+        validation {
+            type: functionBodyReturningBoolean
+            plsqlFunctionBody:
+                ```plsql
+                if apex_data_parser.assert_file_type(
+                       p_file_name => :P28_FILE_NAME,
+                       p_file_type => apex_data_parser.c_file_type_xlsx )
+                then
+                    return true;
+                else
+                    :P28_FILE := null;
+                    return false;
+                end if;
+                ```
+        }
+        error {
+            errorMessage: Invalid file type. Supported file types XLSX.
+            associatedItem: @P28_FILE
+        }
+    )
+
+    computation p28-file-name (
+        itemName: P28_FILE_NAME
+        execution {
+            sequence: 10
+            point: afterSubmit
+        }
+        computation {
+            sqlQuery:
+                ```sql
+                select filename
+                  from apex_application_temp_files 
+                 where name = :P28_FILE
+                ```
+        }
+        serverSideCondition {
+            type: itemIsNotNull
+            item: P28_FILE
+        }
+    )
+
+    process clear-cache (
+        name: Clear Cache
+        type: clearSessionState
+        execution {
+            sequence: 30
+        }
+        advanced {
+            executionMappingIdentifier: 38501680708706165446
+        }
+        serverSideCondition {
+            type: expression
+            plsqlExpression: :REQUEST = 'CLEAR' or :P28_ERROR_ROW_COUNT = 0
+        }
+    )
+
+    process close-dialog (
+        name: Close Dialog
+        type: closeDialog
+        execution {
+            sequence: 50
+        }
+        advanced {
+            executionMappingIdentifier: 11734436296772610
+        }
+        serverSideCondition {
+            whenButtonPressed: @load
+        }
+    )
+
+    process procesar-xls (
+        name: PROCESAR_XLS
+        type: executeCode
+        source {
+            plsqlCode:
+                ```plsql
+                DECLARE
+                
+                    v_filas_insertadas NUMBER := 0;
+                    v_count_parseo NUMBER := 0;
+                    v_count NUMBER := 0;
+                    v_error_count NUMBER := 0;
+                    v_fila NUMBER :=0;
+                
+                BEGIN
+                    -- Información de depuración
+                    apex_debug.info('File Name: ' || :P28_FILE_NAME);
+                    apex_debug.info('Archivo: ' || :P28_XLSX_WORKSHEET);
+                
+                    -- Bucle por cada fila del archivo
+                    FOR p IN (
+                        SELECT *
+                        FROM apex_application_temp_files f,
+                             TABLE(apex_data_parser.parse(
+                                 p_content   => f.blob_content,
+                                 p_file_name => f.filename,
+                                 p_xlsx_sheet_name => NVL(:P28_XLSX_WORKSHEET, NULL),
+                                 p_skip_rows => 1
+                             )) tab
+                        WHERE f.name = :P28_FILE
+                          AND col004 IS NOT NULL
+                    ) LOOP
+                
+                        BEGIN
+                            -- Intentar insertar cada fila
+                            INSERT INTO SGT_INTERFACES (
+                                EQUIPO_ID,
+                                NOMBRE,
+                                ETIQUETA,
+                                ESTADO,
+                                TIPO_INTERFACE_ID,
+                                VELOCIDAD_MBPS,
+                                TX_EN_DBM,
+                                RX_EN_DBM,
+                                MAC_ADDRESS
+                               
+                            ) VALUES (
+                                :P28_EQUIPOS,
+                                p.col001,
+                                p.col002,
+                                UPPER(p.col003),
+                                F_GET_LOVS(2, p.col004),
+                                p.col005,
+                                p.col006,
+                                p.col007,
+                                p.col008
+                            );
+                
+                            v_count := v_count + 1;
+                
+                        EXCEPTION
+                            WHEN DUP_VAL_ON_INDEX THEN
+                                v_error_count := v_error_count + 1;
+                                apex_debug.error('Fila duplicada: ' || SQLERRM);
+                                CONTINUE;
+                
+                            WHEN OTHERS THEN
+                                v_error_count := v_error_count + 1;
+                                apex_debug.error('Error en fila ' || TO_CHAR(v_count + v_error_count) || ': ' || SQLERRM);
+                                CONTINUE;
+                        END;
+                
+                    END LOOP;
+                
+                    :P28_ERROR_ROW_COUNT := v_error_count;
+                    :P28_LOGGER := 'Registros insertados: ' || v_count || ', Errores: ' || v_error_count;
+                
+                    apex_debug.info('Registros insertados: ' || v_count);
+                    apex_debug.info('Errores: ' || v_error_count);
+                END;
+                ```
+        }
+        execution {
+            sequence: 20
+        }
+        successMessage {
+            successMessage: &P28_LOGGER.
+        }
+        error {
+            errorMessage: &P28_LOGGER.
+        }
+        advanced {
+            executionMappingIdentifier: 11734351338772609
+        }
+        serverSideCondition {
+            whenButtonPressed: @load
+        }
+        security {
+            authorizationScheme: @implementador-rights
+        }
+    )
+
+)
+

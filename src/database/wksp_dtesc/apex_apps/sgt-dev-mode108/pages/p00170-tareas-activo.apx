@@ -1,0 +1,478 @@
+page 170 (
+    name: TAREAS_ACTIVO
+    alias: TAREAS-ACTIVO
+    title: Tareas de &P170_ACTIVO_LABEL.
+    appearance {
+        pageTemplate: @/standard
+        templateOptions: #DEFAULT#
+    }
+    navigation {
+        cursorFocus: doNotFocusCursor
+    }
+    css {
+        inline:
+            ```css
+            .est-badge{padding:2px 9px;border-radius:10px;font-size:11px;font-weight:700;letter-spacing:.3px;}
+            .est-PENDIENTE{background:#fdecc8;color:#7a5b00;}
+            .est-REALIZADO{background:#cde3b4;color:#33691e;}
+            .est-RECHAZADO{background:#f3b0b0;color:#b71c1c;}
+            ```
+    }
+    security {
+        pageAccessProtection: argumentsMustHaveChecksum
+        formAutoComplete: false
+    }
+
+    region breadcrumb (
+        name: Breadcrumb
+        title: Tareas del activo &P170_ACTIVO_LABEL.
+        type: breadcrumb
+        source {
+            breadcrumb: @breadcrumb
+        }
+        layout {
+            sequence: 10
+            slot: breadcrumbBar
+        }
+        appearance {
+            template: @/standard
+            templateOptions: [
+                #DEFAULT#
+                t-Region--scrollBody
+            ]
+        }
+        componentAppearance {
+            breadcrumbTemplate: @/breadcrumb
+            templateOptions: #DEFAULT#
+        }
+    )
+
+    region nuevo (
+        name: Tareas
+        title: Tareas de &P170_ACTIVO_LABEL.
+        type: interactiveReport
+        source {
+            location: localDatabase
+            type: sqlQuery
+            sqlQuery:
+                ```sql
+                SELECT t.ID,
+                       ct.NOMBRE                      AS TIPO_TAREA,
+                       SUBSTR(t.DESCRIPCION, 1, 80) AS DESCRIPCION,
+                       NVL(t.ESTADO, '-')             AS ESTADO,
+                       -- ultimo comentario del hilo de la tarea, o 'Ver' si no hay ninguno
+                       -- (mismo patron que la columna COMENTARIOS de la pagina 13 / equipos)
+                       NVL(c.COMENTARIO, 'Ver')       AS COMENTARIOS,
+                       t.EVENTO_ID,
+                       t.CREADO_POR,
+                       t.CREADO_EL,
+                       t.ACTUALIZADO_POR,
+                       t.ACTUALIZADO_EL,
+                       -- link Editar -> 169
+                       APEX_PAGE.GET_URL(
+                           p_page   => 169,
+                           p_items  => 'P169_ID,P169_ENTIDAD,P169_PK_ID,P169_ACTIVO_LABEL',
+                           p_values => t.ID ||','|| t.ENTIDAD ||','|| t.PK_ID ||','|| :P170_ACTIVO_LABEL
+                       )                              AS URL_EDITAR
+                  FROM SGT_TAREA t
+                  JOIN SGT_CAT_TIPO_ACCION_EVENTO ct ON ct.ID = t.TIPO_TAREA_ID
+                  -- ultimo comentario por tarea (ENTIDAD 10). Patron "ultima fila por grupo".
+                  LEFT JOIN (
+                      SELECT PK_ID, COMENTARIO,
+                             ROW_NUMBER() OVER (PARTITION BY PK_ID ORDER BY CREADO_EL DESC) AS rn
+                        FROM SGT_COMENTARIOS
+                       WHERE ENTIDAD = 10
+                  ) c ON c.PK_ID = t.ID AND c.rn = 1
+                 WHERE t.ENTIDAD = :P170_ENTIDAD
+                   AND t.PK_ID   = :P170_PK_ID
+                 ORDER BY t.CREADO_EL DESC
+                ```
+        }
+        layout {
+            sequence: 50
+            slot: body
+        }
+        appearance {
+            template: @/interactive-report
+            templateOptions: [
+                #DEFAULT#
+                t-IRR-region--hideHeader js-addHiddenHeadingRoleDesc
+            ]
+        }
+        pagination {
+            type: rowRangesXToY
+        }
+        advanced {
+            savedReportMappingIdentifier: 27378657198115532
+        }
+
+        column ACTUALIZADO_EL (
+            type: plainText
+            heading {
+                heading: Actualizado El
+            }
+            layout {
+                sequence: 120
+            }
+            source {
+                dataType: DATE
+            }
+            advanced {
+                endUserAlias: J
+            }
+        )
+
+        column ACTUALIZADO_POR (
+            type: plainText
+            heading {
+                heading: Actualizado Por
+            }
+            layout {
+                sequence: 110
+            }
+            source {
+                dataType: STRING
+            }
+            advanced {
+                endUserAlias: I
+            }
+        )
+
+        column COMENTARIOS (
+            type: link
+            heading {
+                heading: Comentarios
+            }
+            layout {
+                sequence: 70
+            }
+            link {
+                target: {
+                    page: 32
+                    items: {
+                        P32_ENTIDAD: 10
+                        P32_PK_ID: #ID#
+                    }
+                }
+                linkText: #COMENTARIOS#
+            }
+            source {
+                dataType: STRING
+            }
+            advanced {
+                endUserAlias: M
+            }
+        )
+
+        column CREADO_EL (
+            type: plainText
+            heading {
+                heading: Creado El
+            }
+            layout {
+                sequence: 100
+            }
+            source {
+                dataType: DATE
+            }
+            advanced {
+                endUserAlias: H
+            }
+        )
+
+        column CREADO_POR (
+            type: plainText
+            heading {
+                heading: Creado Por
+            }
+            layout {
+                sequence: 90
+            }
+            source {
+                dataType: STRING
+            }
+            advanced {
+                endUserAlias: G
+            }
+        )
+
+        column DESCRIPCION (
+            type: plainText
+            heading {
+                heading: Descripcion
+            }
+            layout {
+                sequence: 30
+            }
+            source {
+                dataType: STRING
+            }
+            advanced {
+                endUserAlias: C
+            }
+        )
+
+        column ESTADO (
+            type: plainText
+            heading {
+                heading: Estado
+            }
+            layout {
+                sequence: 40
+            }
+            columnFormatting {
+                htmlExpression: <span class="est-badge est-#ESTADO#">#ESTADO#</span>
+            }
+            source {
+                dataType: STRING
+            }
+            advanced {
+                endUserAlias: D
+            }
+        )
+
+        column EVENTO_ID (
+            type: hidden
+            heading {
+                heading: Evento Id
+            }
+            layout {
+                sequence: 80
+            }
+            source {
+                dataType: NUMBER
+            }
+            advanced {
+                endUserAlias: F
+            }
+        )
+
+        column ID (
+            type: hidden
+            heading {
+                heading: Id
+            }
+            layout {
+                sequence: 10
+            }
+            source {
+                dataType: NUMBER
+            }
+            advanced {
+                endUserAlias: A
+            }
+        )
+
+        column TIPO_TAREA (
+            type: plainText
+            heading {
+                heading: Tipo Tarea
+            }
+            layout {
+                sequence: 20
+            }
+            source {
+                dataType: STRING
+            }
+            advanced {
+                endUserAlias: B
+            }
+        )
+
+        column URL_EDITAR (
+            type: link
+            heading {
+                heading: Editar
+            }
+            layout {
+                sequence: 60
+            }
+            link {
+                target: {
+                    type: url
+                    url: #URL_EDITAR#
+                }
+                linkText: <span class="fa fa-pencil" aria-hidden="true"></span>
+            }
+            source {
+                dataType: STRING
+            }
+            advanced {
+                endUserAlias: K
+            }
+        )
+
+        page {
+            size: a4
+            units: millimeters
+            width: 297
+            height: 210
+            borderWidth: 0.5
+            borderColor: #666666
+        }
+        pageHeader {
+            pageHeaderText: Tareas de &P170_ACTIVO_LABEL.
+        }
+
+        savedReport primary (
+            visibility: primaryDefault
+            view {
+                rowsPerPage: 50
+            }
+
+            displayColumn ACTUALIZADO_EL (
+                sequence: 8
+            )
+
+            displayColumn ACTUALIZADO_POR (
+                sequence: 7
+            )
+
+            displayColumn COMENTARIOS (
+                sequence: 4
+            )
+
+            displayColumn CREADO_EL (
+                sequence: 6
+            )
+
+            displayColumn CREADO_POR (
+                sequence: 5
+            )
+
+            displayColumn DESCRIPCION (
+                sequence: 2
+            )
+
+            displayColumn ESTADO (
+                sequence: 3
+            )
+
+            displayColumn TIPO_TAREA (
+                sequence: 1
+            )
+
+            displayColumn URL_EDITAR (
+                sequence: 9
+            )
+
+        )
+
+    )
+
+    pageItem P170_ACTIVO_LABEL (
+        type: hidden
+        layout {
+            sequence: 40
+            slot: body
+        }
+    )
+
+    pageItem P170_ENTIDAD (
+        type: hidden
+        layout {
+            sequence: 20
+            slot: body
+        }
+    )
+
+    pageItem P170_PK_ID (
+        type: hidden
+        layout {
+            sequence: 30
+            slot: body
+        }
+    )
+
+    button btn-vincular-evento (
+        buttonName: BTN_VINCULAR_EVENTO
+        label: Vincular a Evento
+        layout {
+            sequence: 10
+            region: @nuevo
+            slot: rightOfInteractiveReportSearchBar
+        }
+        appearance {
+            buttonTemplate: @/text
+            templateOptions: #DEFAULT#
+        }
+        behavior {
+            warnOnUnsavedChanges: doNotCheck
+        }
+    )
+
+    button crear-tarea_1 (
+        buttonName: Crear_Tarea
+        label: Crear Tarea
+        layout {
+            sequence: 20
+            region: @nuevo
+            slot: rightOfInteractiveReportSearchBar
+        }
+        appearance {
+            buttonTemplate: @/text
+            templateOptions: #DEFAULT#
+        }
+        behavior {
+            action: redirectThisApp
+            target: {
+                page: 169
+                items: {
+                    P169_ID:
+                    P169_ENTIDAD: &P170_ENTIDAD.
+                    P169_PK_ID: &P170_PK_ID.
+                    P169_ACTIVO_LABEL: &P170_ACTIVO_LABEL.
+                }
+                clearCache: 169
+            }
+        }
+    )
+
+    button volver (
+        buttonName: Volver
+        label: Volver
+        layout {
+            sequence: 30
+            region: @nuevo
+            slot: rightOfInteractiveReportSearchBar
+        }
+        appearance {
+            buttonTemplate: @/text
+            templateOptions: #DEFAULT#
+        }
+        behavior {
+            action: redirectThisApp
+            target: {
+                page: 13
+            }
+        }
+    )
+
+    dynamicAction da-refresh (
+        name: DA_REFRESH
+        execution {
+            sequence: 10
+        }
+        when {
+            event: apexafterclosedialog
+            selectionType: region
+            region: @nuevo
+        }
+
+        action native-refresh (
+            name: Refrescar region tareas
+            action: refresh
+            affectedElements {
+                selectionType: region
+                region: @nuevo
+            }
+            execution {
+                sequence: 10
+                fireOnInit: false
+            }
+        )
+
+    )
+
+)
+

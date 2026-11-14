@@ -1,0 +1,35 @@
+role ADMINISTRATOR (
+    name: Administrator
+    description {
+        description: Role assigned to application administrators.
+    }
+)
+
+role IMPLEMENTADOR (
+    name: Implementador
+    description {
+        description: Rol asignado a los implementadores de sistemas
+    }
+)
+
+role JEFATURA (
+    name: Jefatura
+    description {
+        description: Rol asignado a los Jefes de unidades
+    }
+)
+
+role LECTOR (
+    name: Lector
+    description {
+        description: Role assigned to application readers.
+    }
+)
+
+role TECNICO (
+    name: Tecnico
+    description {
+        description: Perfil para los técnicos de campo
+    }
+)
+

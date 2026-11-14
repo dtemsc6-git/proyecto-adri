@@ -1,0 +1,304 @@
+page 402 (
+    name: Seleccionar los sitios
+    alias: SELECCIONAR-LOS-SITIOS
+    title: Seleccionar los sitios
+    pageGroup: @wzrd-wan
+    appearance {
+        pageTemplate: @/standard
+        templateOptions: #DEFAULT#
+    }
+    navigation {
+        cursorFocus: doNotFocusCursor
+    }
+    javaScript {
+        functionAndGlobalVariableDeclaration:
+            ```javascript-browser
+            function filtrarShuttle() {
+            var filtro = $("#P402_FILTRAR_SITIOS").val();
+                var filtroLower = filtro.toLowerCase();
+                var opciones = document.querySelectorAll("#P402_SITIOS_LEFT option");
+            
+                opciones.forEach(function (opt) {
+                    if (opt.text.toLowerCase().includes(filtroLower)) {
+                        opt.style.display = "";   // mostrar
+                    } else {
+                        opt.style.display = "none"; // ocultar
+                    }
+                });
+            }
+            ```
+    }
+    security {
+        authorizationScheme: @implementador-rights
+        pageAccessProtection: argumentsMustHaveChecksum
+        formAutoComplete: false
+    }
+
+    region buttons (
+        name: Buttons
+        type: staticContent
+        layout {
+            sequence: 10
+            slot: body
+        }
+        appearance {
+            template: @/buttons-container
+            templateOptions: #DEFAULT#
+        }
+        config {
+            buildOption: @commented-out
+        }
+    )
+
+    region seleccionar-los-sitios (
+        name: Seleccionar los sitios
+        type: staticContent
+        layout {
+            sequence: 20
+            parentRegion: @wizard-progress
+            slot: wizardSubRegions
+        }
+        appearance {
+            template: @/blank-with-attributes
+            templateOptions: #DEFAULT#
+        }
+    )
+
+    region wizard-progress (
+        name: Wizard Progress
+        type: list
+        source {
+            list: @wzrd-conexiones-wan
+        }
+        layout {
+            sequence: 10
+            slot: breadcrumbBar
+        }
+        appearance {
+            template: @/wizard-container
+            templateOptions: [
+                #DEFAULT#
+                t-Wizard--hideStepsXSmall
+            ]
+        }
+        componentAppearance {
+            listTemplate: @/wizard-progress
+            templateOptions: [
+                #DEFAULT#
+                t-WizardSteps--displayLabels
+            ]
+        }
+    )
+
+    pageItem P402_FILTRAR_SITIOS (
+        type: textField
+        label {
+            label: Filtrar Sitios
+            alignment: left
+        }
+        layout {
+            sequence: 10
+            region: @seleccionar-los-sitios
+            slot: regionBody
+            alignment: left
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+            width: 30
+        }
+        sessionState {
+            storage: request
+        }
+    )
+
+    pageItem P402_SITIOS (
+        type: shuttle
+        label {
+            label: Sitios
+            alignment: left
+        }
+        lov {
+            type: sharedComponent
+            lov: @sgt-sitios-siglas
+        }
+        multipleValues {
+            separator: ,
+        }
+        layout {
+            sequence: 20
+            region: @seleccionar-los-sitios
+            slot: regionBody
+            alignment: left
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+            height: 5
+        }
+        source {
+            type: sqlQueryMultipleValues
+            sqlQuery:
+                ```sql
+                SELECT SITIO_ID FROM sgt_sitios_enlace_wan wan
+                where wan.enlace_wan_id = :P401_ID
+                
+                order by seq
+                ```
+        }
+        help {
+            inlineHelpText: Arrastre a la derecha los sitios por donde pasa el enlace WAN a crear
+        }
+    )
+
+    button cancel (
+        buttonName: CANCEL
+        label: Cancel
+        layout {
+            sequence: 10
+            region: @wizard-progress
+            slot: close
+        }
+        appearance {
+            buttonTemplate: @/text
+            templateOptions: #DEFAULT#
+        }
+        behavior {
+            action: redirectThisApp
+            target: {
+                page: 34
+                clearCache: 405
+            }
+            warnOnUnsavedChanges: doNotCheck
+        }
+    )
+
+    button next (
+        buttonName: NEXT
+        label: Next
+        layout {
+            sequence: 30
+            region: @wizard-progress
+            slot: next
+        }
+        appearance {
+            buttonTemplate: @/text-with-icon
+            hot: true
+            templateOptions: t-Button--iconRight
+            icon: fa-chevron-right
+        }
+        behavior {
+            warnOnUnsavedChanges: doNotCheck
+        }
+    )
+
+    button previous (
+        buttonName: PREVIOUS
+        label: Previous
+        layout {
+            sequence: 20
+            region: @wizard-progress
+            slot: previous
+        }
+        appearance {
+            buttonTemplate: @/icon
+            templateOptions: #DEFAULT#
+            icon: fa-chevron-left
+        }
+        behavior {
+            executeValidations: false
+            warnOnUnsavedChanges: doNotCheck
+        }
+    )
+
+    dynamicAction filtrar-shuttle (
+        name: FILTRAR_SHUTTLE
+        execution {
+            sequence: 30
+        }
+        when {
+            selectionType: items
+            items: P402_FILTRAR_SITIOS
+        }
+
+        action native-javascript-code (
+            action: executeJsCode
+            settings {
+                jsCode: filtrarShuttle();
+            }
+            execution {
+                sequence: 10
+                fireOnInit: false
+            }
+        )
+
+    )
+
+    dynamicAction no-submit (
+        name: NO_SUBMIT
+        execution {
+            sequence: 20
+        }
+        when {
+            event: keypress
+            selectionType: items
+            items: P402_FILTRAR_SITIOS
+        }
+
+        action stop-submit (
+            name: STOP_SUBMIT
+            action: executeJsCode
+            settings {
+                jsCode:
+                    ```javascript-browser
+                    if (event.key === "Enter") {
+                        filtrarShuttle();    
+                        event.preventDefault();
+                        return false;
+                    }
+                    
+                    ```
+            }
+            execution {
+                sequence: 10
+                fireOnInit: false
+            }
+        )
+
+    )
+
+    branch (
+        execution {
+            sequence: 10
+            point: validating
+        }
+        behavior {
+            target: {
+                page: 401
+            }
+        }
+        serverSideCondition {
+            whenButtonPressed: @previous
+        }
+    )
+
+    branch (
+        name: Go To Page 405
+        execution {
+            sequence: 20
+        }
+        behavior {
+            target: {
+                page: 405
+                items: {
+                    P403_FILTRAR_SITIO: &P402_SITIOS.
+                }
+            }
+        }
+        serverSideCondition {
+            whenButtonPressed: @next
+        }
+    )
+
+)
+

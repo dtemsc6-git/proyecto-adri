@@ -1,0 +1,278 @@
+page 43 (
+    name: Tipo de Wan
+    alias: TIPO-DE-WAN
+    title: Tipo de Wan
+    appearance {
+        pageTemplate: @/standard
+        templateOptions: #DEFAULT#
+    }
+    navigation {
+        cursorFocus: doNotFocusCursor
+    }
+    security {
+        pageAccessProtection: argumentsMustHaveChecksum
+        formAutoComplete: false
+    }
+
+    region tipo-de-wan (
+        name: Tipo de Wan
+        type: interactiveGrid
+        source {
+            location: localDatabase
+            tableName: SGT_TIPO_WAN
+        }
+        layout {
+            sequence: 20
+            slot: body
+        }
+        appearance {
+            template: @/interactive-report
+            templateOptions: [
+                #DEFAULT#
+                t-IRR-region--hideHeader js-addHiddenHeadingRoleDesc
+            ]
+        }
+        edit {
+            enabled: true
+            allowedOperations: [
+                add
+                update
+                delete
+            ]
+        }
+        toolbar {
+            controls: [
+                searchCol
+                searchField
+                actionsMenu
+                resetButton
+                saveButton
+            ]
+        }
+        download {
+            formats: [
+                csv
+                html
+                pdf
+                excel
+            ]
+        }
+        advanced {
+            savedReportMappingIdentifier: 23175240870407513
+        }
+
+        savedReport 231757 (
+            visibility: primary
+            view {
+                default: grid
+            }
+            singleRowView {
+                displayedColumns: true
+            }
+
+            displayColumn (
+                column: @APEX$ROW_ACTION
+                layout {
+                    frozen: true
+                    sequence: 1
+                }
+            )
+
+            displayColumn (
+                column: @ID
+                layout {
+                    sequence: 2
+                }
+            )
+
+            displayColumn (
+                column: @NOMBRE
+                layout {
+                    sequence: 3
+                }
+            )
+
+            displayColumn (
+                column: @CREADO_POR
+                layout {
+                    show: false
+                    sequence: 4
+                }
+            )
+
+            displayColumn (
+                column: @CREADO_EL
+                layout {
+                    show: false
+                    sequence: 5
+                }
+            )
+
+            displayColumn (
+                column: @ACTUALIZADO_POR
+                layout {
+                    show: false
+                    sequence: 6
+                }
+            )
+
+            displayColumn (
+                column: @ACTUALIZADO_EL
+                layout {
+                    sequence: 7
+                }
+            )
+
+        )
+
+        column ACTUALIZADO_EL (
+            type: displayOnly
+            heading {
+                heading: Actualizado El
+            }
+            layout {
+                sequence: 80
+            }
+            source {
+                databaseColumn: ACTUALIZADO_EL
+                dataType: timestamp
+            }
+        )
+
+        column ACTUALIZADO_POR (
+            type: displayOnly
+            heading {
+                heading: Actualizado Por
+            }
+            layout {
+                sequence: 70
+            }
+            source {
+                databaseColumn: ACTUALIZADO_POR
+                dataType: varchar2
+            }
+            columnFilter {
+                performanceImpactingOperators: [
+                    contains
+                    startsWith
+                    caseInsensitive
+                    regexp
+                ]
+            }
+        )
+
+        column APEX$ROW_ACTION (
+            type: actionsMenu
+            layout {
+                sequence: 20
+            }
+        )
+
+        column APEX$ROW_SELECTOR (
+            type: rowSelector
+            layout {
+                sequence: 10
+            }
+        )
+
+        column CREADO_EL (
+            type: displayOnly
+            heading {
+                heading: Creado El
+            }
+            layout {
+                sequence: 60
+            }
+            source {
+                databaseColumn: CREADO_EL
+                dataType: timestamp
+            }
+        )
+
+        column CREADO_POR (
+            type: displayOnly
+            heading {
+                heading: Creado Por
+            }
+            layout {
+                sequence: 50
+            }
+            source {
+                databaseColumn: CREADO_POR
+                dataType: varchar2
+            }
+            columnFilter {
+                performanceImpactingOperators: [
+                    contains
+                    startsWith
+                    caseInsensitive
+                    regexp
+                ]
+            }
+        )
+
+        column ID (
+            type: hidden
+            layout {
+                sequence: 30
+            }
+            source {
+                databaseColumn: ID
+                dataType: number
+                queryOnly: true
+                primaryKey: true
+            }
+            exportPrinting {
+                includeInExportPrint: false
+            }
+        )
+
+        column NOMBRE (
+            type: textField
+            heading {
+                heading: Nombre
+            }
+            layout {
+                sequence: 40
+            }
+            validation {
+                valueRequired: true
+                maxLength: 255
+            }
+            source {
+                databaseColumn: NOMBRE
+                dataType: varchar2
+            }
+            columnFilter {
+                performanceImpactingOperators: [
+                    contains
+                    startsWith
+                    caseInsensitive
+                    regexp
+                ]
+            }
+        )
+
+        page {
+            borderWidth: 0.5
+            borderColor: #666666
+        }
+        pageHeader {
+            pageHeaderText: Tipo de Wan
+        }
+    )
+
+    process tipo-de-wan-save-interactive-grid-data (
+        name: Tipo de Wan - Save Interactive Grid Data
+        type: interactiveGridAutoRowProcessing
+        editableRegion: @tipo-de-wan
+        execution {
+            sequence: 10
+        }
+        advanced {
+            executionMappingIdentifier: 23183511400407524
+        }
+    )
+
+)
+

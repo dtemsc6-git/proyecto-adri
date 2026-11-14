@@ -1,0 +1,352 @@
+page 4 (
+    name: SGT_LST_SALAS
+    alias: SGT-LST-SALAS
+    title: Lista de salas
+    appearance {
+        pageTemplate: @/standard
+        templateOptions: #DEFAULT#
+    }
+    navigation {
+        cursorFocus: doNotFocusCursor
+    }
+    security {
+        pageAccessProtection: argumentsMustHaveChecksum
+        formAutoComplete: false
+    }
+
+    region breadcrumb (
+        name: Breadcrumb
+        type: breadcrumb
+        source {
+            breadcrumb: @breadcrumb
+        }
+        layout {
+            sequence: 10
+            slot: breadcrumbBar
+        }
+        appearance {
+            template: @/title-bar
+            templateOptions: [
+                #DEFAULT#
+                t-BreadcrumbRegion--useBreadcrumbTitle
+            ]
+        }
+        componentAppearance {
+            breadcrumbTemplate: @/breadcrumb
+            templateOptions: #DEFAULT#
+        }
+    )
+
+    region sgt-lst-salas (
+        name: SGT_LST_SALAS
+        type: interactiveReport
+        source {
+            location: localDatabase
+            type: sqlQuery
+            sqlQuery:
+                ```sql
+                select ss.ID,
+                    '<ul>' ||
+                        '<li><a href='||APEX_UTIL.PREPARE_URL('f?p=&APP_ID.:5:&APP_SESSION.::::P5_ID:'|| ss.ID )||'>Editar</a></li>' || 
+                        '<li><a href='||APEX_UTIL.PREPARE_URL('f?p=&APP_ID.:470:&APP_SESSION.::::P470_ENTIDAD,P470_PK_ID:2,' || ss.ID )||'>Imágenes</a></li>' || 
+                        '<li><a href='||APEX_UTIL.PREPARE_URL('f?p=&APP_ID.:33:&APP_SESSION.::::P33_ID:' || ss.ID )||'>Dependencias</a></li>' || 
+                       -- '<li><a href='||APEX_UTIL.PREPARE_URL('f?p=&APP_ID.:465:&APP_SESSION.::::P465_EQUIPO_ID:'||ss.ID )||'>Dependencias</a></li>' || 
+                       -- '<li><a href='||APEX_UTIL.PREPARE_URL('f?p=&APP_ID.:14:&APP_SESSION.::::P14_ID:'|| e.ID )||'>Incidencias</a></li>' || 
+                       -- '<li><a href='||APEX_UTIL.PREPARE_URL('f?p=&APP_ID.:14:&APP_SESSION.::::P14_ID:'|| e.ID )||'>Auditoria</a></li>' || 
+                        
+                        '</ul>'
+                       as ACCIONES, 
+                   
+                       s.id as SITIO_ID,
+                       s.SIGLAS ||' - '|| s.NOMBRE AS SITIO,
+                       ss.SIGLAS AS SIGLAS,
+                       ss.NOMBRE AS NOMBRE,
+                       nvl(C.COMENTARIO,'Ver') as COMENTARIOS
+                  from SGT_SALAS ss
+                  --Agregar comentarios
+                LEFT JOIN (
+                    SELECT PK_ID, 
+                           COMENTARIO, 
+                           ROW_NUMBER() OVER (PARTITION BY PK_ID ORDER BY CREADO_EL DESC) AS rn
+                    FROM SGT_COMENTARIOS
+                    WHERE ENTIDAD = 2
+                ) C ON C.PK_ID = SS.ID AND C.rn = 1
+                --
+                
+                  LEFT join SGT_SITIOS s
+                  ON (s.ID = ss.SITIO_ID)
+                
+                  ORDER BY ss.ID DESC
+                ```
+        }
+        layout {
+            sequence: 10
+            slot: body
+        }
+        appearance {
+            template: @/interactive-report
+            templateOptions: #DEFAULT#
+        }
+        pagination {
+            type: rowRangesXToYOfZ
+            displayPosition: topRight
+        }
+        messages {
+            whenNoDataFound: No data found.
+            whenMoreDataFound: The maximum row count for this report is #MAX_ROW_COUNT# rows.  Please apply a filter to reduce the number of records in your query.
+        }
+        searchBar {
+            searchButtonLabel: Buscar
+        }
+        actionsMenu {
+            controlBreak: false
+            highlight: false
+            compute: false
+            aggregate: false
+            chart: false
+            groupBy: false
+            pivot: false
+            flashback: false
+            saveReport: false
+            reset: false
+            subscription: false
+        }
+        advanced {
+            savedReportMappingIdentifier: 81469246799019636977
+        }
+
+        column ACCIONES (
+            type: richText
+            heading {
+                heading: Acciones
+                alignment: center
+            }
+            layout {
+                sequence: 10
+            }
+            settings {
+                format: html
+            }
+            source {
+                dataType: STRING
+            }
+            advanced {
+                endUserAlias: O
+            }
+            enableUsersTo {
+                hide: false
+                filter: false
+                highlight: false
+            }
+        )
+
+        column COMENTARIOS (
+            type: link
+            heading {
+                heading: Comentarios
+                alignment: center
+            }
+            layout {
+                sequence: 60
+                columnAlignment: center
+            }
+            link {
+                target: {
+                    page: 32
+                    items: {
+                        P32_ENTIDAD: 2
+                        P32_PK_ID: #ID#
+                    }
+                }
+                linkText: #COMENTARIOS#
+            }
+            source {
+                dataType: STRING
+            }
+            advanced {
+                endUserAlias: P
+            }
+        )
+
+        column ID (
+            type: hidden
+            heading {
+                heading: ID
+            }
+            layout {
+                sequence: 0
+            }
+            source {
+                primaryKey: true
+                dataType: NUMBER
+            }
+            advanced {
+                endUserAlias: A
+            }
+        )
+
+        column NOMBRE (
+            type: plainText
+            heading {
+                heading: Nombre Sala
+                alignment: center
+            }
+            layout {
+                sequence: 40
+                columnAlignment: center
+            }
+            source {
+                dataType: STRING
+            }
+            advanced {
+                endUserAlias: J
+            }
+        )
+
+        column SIGLAS (
+            type: plainText
+            heading {
+                heading: Sigla Sala
+                alignment: center
+            }
+            layout {
+                sequence: 30
+                columnAlignment: center
+            }
+            source {
+                dataType: STRING
+            }
+            advanced {
+                endUserAlias: N
+            }
+        )
+
+        column SITIO (
+            type: plainText
+            heading {
+                heading: Sitio
+                alignment: center
+            }
+            layout {
+                sequence: 50
+                columnAlignment: center
+            }
+            source {
+                dataType: STRING
+            }
+            advanced {
+                endUserAlias: G
+            }
+        )
+
+        column SITIO_ID (
+            type: hidden
+            heading {
+                heading: Sitio Id
+            }
+            layout {
+                sequence: 20
+            }
+            source {
+                dataType: NUMBER
+            }
+            advanced {
+                endUserAlias: L
+            }
+        )
+
+        page {
+            size: a4
+            units: millimeters
+            width: 297
+            height: 210
+            borderWidth: 0.5
+            borderColor: #666666
+        }
+
+        savedReport 814742452 (
+            visibility: primaryDefault
+            view {
+                rowsPerPage: 50
+            }
+
+            displayColumn ACCIONES (
+                sequence: 1
+            )
+
+            displayColumn COMENTARIOS (
+                sequence: 5
+            )
+
+            displayColumn NOMBRE (
+                sequence: 3
+            )
+
+            displayColumn SIGLAS (
+                sequence: 4
+            )
+
+            displayColumn SITIO (
+                sequence: 2
+            )
+
+        )
+
+    )
+
+    button create (
+        buttonName: CREATE
+        label: &APP_TEXT$BTN_CREAR!RAW.
+        layout {
+            sequence: 10
+            region: @sgt-lst-salas
+            slot: rightOfInteractiveReportSearchBar
+        }
+        appearance {
+            buttonTemplate: @/text
+            hot: true
+            templateOptions: #DEFAULT#
+        }
+        behavior {
+            action: redirectThisApp
+            target: {
+                page: 5
+                items: {
+                    P5_TITULO: Agregar sala
+                }
+                clearCache: 5
+            }
+            warnOnUnsavedChanges: doNotCheck
+        }
+        security {
+            authorizationScheme: @implementador-rights
+        }
+    )
+
+    dynamicAction edit-report-dialog-closed (
+        name: Edit Report - Dialog Closed
+        execution {
+            sequence: 10
+        }
+        when {
+            event: apexafterclosedialog
+            selectionType: region
+            region: @sgt-lst-salas
+        }
+
+        action native-refresh (
+            action: refresh
+            affectedElements {
+                selectionType: region
+                region: @sgt-lst-salas
+            }
+            execution {
+                sequence: 10
+                fireOnInit: false
+            }
+        )
+
+    )
+
+)
+

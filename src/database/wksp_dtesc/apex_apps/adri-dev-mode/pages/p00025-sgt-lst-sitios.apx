@@ -1,0 +1,602 @@
+page 25 (
+    name: SGT_LST_SITIOS
+    alias: SGT-LST-SITIOS
+    title: Lista de sitios
+    appearance {
+        pageTemplate: @/standard
+        templateOptions: #DEFAULT#
+    }
+    navigation {
+        cursorFocus: doNotFocusCursor
+    }
+    security {
+        pageAccessProtection: argumentsMustHaveChecksum
+        formAutoComplete: false
+    }
+
+    region breadcrumb (
+        name: Breadcrumb
+        type: breadcrumb
+        source {
+            breadcrumb: @breadcrumb
+        }
+        layout {
+            sequence: 10
+            slot: breadcrumbBar
+        }
+        appearance {
+            template: @/title-bar
+            templateOptions: [
+                #DEFAULT#
+                t-BreadcrumbRegion--useBreadcrumbTitle
+            ]
+        }
+        componentAppearance {
+            breadcrumbTemplate: @/breadcrumb
+            templateOptions: #DEFAULT#
+        }
+    )
+
+    region sgt-sitios (
+        name: SGT_SITIOS
+        type: interactiveReport
+        source {
+            location: localDatabase
+            type: sqlQuery
+            sqlQuery:
+                ```sql
+                SELECT S.ID,
+                       '<ul>' ||
+                        
+                        '<li><a href='||APEX_PAGE.GET_URL(p_page => 26, p_items => 'P26_ID', p_values => s.ID )||'>Editar</a></li>' || 
+                        '<li><a href='||APEX_PAGE.GET_URL(p_page => 470, p_items => 'P470_ENTIDAD,P470_PK_ID', p_values=> '1,' || s.ID )||'>Imágenes</a></li>' || 
+                        '<li><a href='||APEX_PAGE.GET_URL(p_page => 9, p_items => 'P9_ID', p_values=>  s.ID )||'>Dependencias</a></li>' || 
+                        --'<li><a href='||APEX_UTIL.PREPARE_URL('f?p=&APP_ID.:470:&APP_SESSION.::::P470_ENTIDAD,P470_PK_ID:1,' || s.ID )||'>Imágenes</a></li>' || 
+                        --'<li><a href='||APEX_UTIL.PREPARE_URL('f?p=&APP_ID.:9:&APP_SESSION.::::P9_ID:' || s.ID )||'>Dependencias</a></li>' || 
+                       -- '<li><a href='||APEX_UTIL.PREPARE_URL('f?p=&APP_ID.:465:&APP_SESSION.::::P465_EQUIPO_ID:'|| e.ID )||'>Dependencias</a></li>' || 
+                       -- '<li><a href='||APEX_UTIL.PREPARE_URL('f?p=&APP_ID.:14:&APP_SESSION.::::P14_ID:'|| e.ID )||'>Incidencias</a></li>' || 
+                       -- '<li><a href='||APEX_UTIL.PREPARE_URL('f?p=&APP_ID.:14:&APP_SESSION.::::P14_ID:'|| e.ID )||'>Auditoria</a></li>' || 
+                        
+                        '</ul>'
+                       as ACCIONES,   
+                       SIGLAS,
+                       S.NOMBRE,
+                       TIPO_DE_SITIO,
+                       PROPIETARIO,
+                       ZONA_ID,
+                       depto.nombre Departamento,
+                       CIUDAD_ID,
+                       LATITUD,
+                       LONGITUD,
+                       "UBICACIÓN",
+                       --OBSERVACION,
+                       CASE 
+                           WHEN LATITUD IS NOT NULL 
+                            AND LONGITUD IS NOT NULL THEN 
+                               'https://www.google.com/maps?q=' ||
+                               TO_CHAR(LATITUD, 'FM9999990D000000', 'NLS_NUMERIC_CHARACTERS=.,') || ',' ||
+                               TO_CHAR(LONGITUD, 'FM9999990D000000', 'NLS_NUMERIC_CHARACTERS=.,')
+                           ELSE 
+                               NULL
+                       END AS GMAPS,
+                       NVL(C.COMENTARIO,'Ver') COMENTARIOS
+                FROM SGT_SITIOS S
+                
+                --Agregar comentarios
+                LEFT JOIN (
+                    SELECT PK_ID, 
+                           COMENTARIO, 
+                           ROW_NUMBER() OVER (PARTITION BY PK_ID ORDER BY CREADO_EL DESC) AS rn
+                    FROM SGT_COMENTARIOS
+                    WHERE ENTIDAD = 1
+                ) C ON C.PK_ID = S.ID AND C.rn = 1
+                --
+                
+                
+                left join sgt_ciudad ciudad on S.ciudad_id = ciudad.id
+                LEFT JOIN SGT_DEPTO depto on ciudad.depto_id = depto.id
+                ORDER BY S.ID DESC
+                
+                ```
+        }
+        layout {
+            sequence: 10
+            slot: body
+        }
+        appearance {
+            template: @/interactive-report
+            templateOptions: #DEFAULT#
+        }
+        pagination {
+            type: rowRangesXToYOfZ
+            displayPosition: topRight
+        }
+        messages {
+            whenNoDataFound: No data found.
+            whenMoreDataFound: The maximum row count for this report is #MAX_ROW_COUNT# rows.  Please apply a filter to reduce the number of records in your query.
+        }
+        searchBar {
+            searchButtonLabel: Buscar
+        }
+        actionsMenu {
+            controlBreak: false
+            compute: false
+            aggregate: false
+            chart: false
+            groupBy: false
+            flashback: false
+            savePublicReport: true
+            help: false
+        }
+        download {
+            authorization: !@reader-rights
+            formats: [
+                csv
+                excel
+            ]
+        }
+        advanced {
+            savedReportMappingIdentifier: 6937190126632263843
+        }
+
+        column ACCIONES (
+            type: richText
+            heading {
+                heading: Acciones
+                alignment: center
+            }
+            layout {
+                sequence: 10
+            }
+            settings {
+                format: html
+            }
+            source {
+                dataType: STRING
+            }
+            advanced {
+                endUserAlias: T
+            }
+            enableUsersTo {
+                hide: false
+                filter: false
+                highlight: false
+            }
+        )
+
+        column CIUDAD_ID (
+            type: plainTextBasedOnLov
+            heading {
+                heading: Ciudad
+                alignment: center
+            }
+            lov {
+                lov: @ciudad-nombre
+            }
+            layout {
+                sequence: 90
+                columnAlignment: center
+            }
+            source {
+                dataType: NUMBER
+            }
+            advanced {
+                endUserAlias: M
+            }
+        )
+
+        column COMENTARIOS (
+            type: link
+            heading {
+                heading: Comentarios
+                alignment: center
+            }
+            layout {
+                sequence: 140
+                columnAlignment: center
+            }
+            link {
+                target: {
+                    page: 32
+                    items: {
+                        P32_ENTIDAD: 1
+                        P32_PK_ID: #ID#
+                    }
+                }
+                linkText: #COMENTARIOS#
+            }
+            source {
+                dataType: STRING
+            }
+            advanced {
+                endUserAlias: U
+            }
+        )
+
+        column DEPARTAMENTO (
+            type: plainText
+            heading {
+                heading: Departamento
+                alignment: center
+            }
+            layout {
+                sequence: 100
+            }
+            source {
+                dataType: STRING
+            }
+            advanced {
+                endUserAlias: P
+            }
+        )
+
+        column GMAPS (
+            type: link
+            heading {
+                heading: Ubicación
+            }
+            layout {
+                sequence: 130
+            }
+            link {
+                target: {
+                    type: url
+                    url: #GMAPS#
+                }
+                linkText: <span class="t-Icon fa fa-map-marker" style="display: block; text-align: center;"></span>
+                linkAttributes: target="_blank"
+            }
+            source {
+                dataType: STRING
+            }
+            advanced {
+                endUserAlias: S
+            }
+            enableUsersTo {
+                sort: false
+                filter: false
+                highlight: false
+                controlBreak: false
+                aggregate: false
+                compute: false
+                chart: false
+                groupBy: false
+                pivot: false
+            }
+        )
+
+        column ID (
+            type: hidden
+            heading {
+                heading: ID
+            }
+            layout {
+                sequence: 0
+            }
+            source {
+                primaryKey: true
+                dataType: NUMBER
+            }
+            advanced {
+                endUserAlias: A
+            }
+        )
+
+        column LATITUD (
+            type: plainText
+            heading {
+                heading: Latitud
+                alignment: center
+            }
+            layout {
+                sequence: 110
+                columnAlignment: end
+            }
+            source {
+                dataType: NUMBER
+            }
+            advanced {
+                endUserAlias: Q
+            }
+        )
+
+        column LONGITUD (
+            type: plainText
+            heading {
+                heading: Longitud
+                alignment: center
+            }
+            layout {
+                sequence: 120
+                columnAlignment: end
+            }
+            source {
+                dataType: NUMBER
+            }
+            advanced {
+                endUserAlias: R
+            }
+        )
+
+        column NOMBRE (
+            type: plainText
+            heading {
+                heading: Nombre
+                alignment: center
+            }
+            layout {
+                sequence: 30
+                columnAlignment: center
+            }
+            source {
+                dataType: STRING
+            }
+            advanced {
+                endUserAlias: C
+            }
+        )
+
+        column PROPIETARIO (
+            type: plainText
+            heading {
+                heading: Propietario
+                alignment: center
+            }
+            layout {
+                sequence: 50
+                columnAlignment: center
+            }
+            source {
+                dataType: STRING
+            }
+            advanced {
+                endUserAlias: E
+            }
+            security {
+                authorizationScheme: @implementador-rights
+            }
+        )
+
+        column SIGLAS (
+            type: plainText
+            heading {
+                heading: Sigla
+                alignment: center
+            }
+            layout {
+                sequence: 20
+                columnAlignment: center
+            }
+            source {
+                dataType: STRING
+            }
+            advanced {
+                endUserAlias: B
+            }
+        )
+
+        column TIPO_DE_SITIO (
+            type: plainText
+            heading {
+                heading: Tipo de Sitio
+                alignment: center
+            }
+            layout {
+                sequence: 40
+                columnAlignment: center
+            }
+            source {
+                dataType: STRING
+            }
+            advanced {
+                endUserAlias: D
+            }
+        )
+
+        column UBICACIÓN (
+            type: hidden
+            heading {
+                heading: Ubicación
+            }
+            layout {
+                sequence: 60
+            }
+            source {
+                dataType: STRING
+            }
+            advanced {
+                endUserAlias: J
+            }
+        )
+
+        column ZONA_ID (
+            type: plainTextBasedOnLov
+            heading {
+                heading: Zona
+                alignment: center
+            }
+            lov {
+                lov: @lov-sgt-zonas
+            }
+            layout {
+                sequence: 80
+                columnAlignment: center
+            }
+            source {
+                dataType: NUMBER
+            }
+            advanced {
+                endUserAlias: L
+            }
+        )
+
+        page {
+            borderWidth: 0.5
+            borderColor: #666666
+        }
+        pageHeader {
+            pageHeaderText: SGT_SITIOS
+        }
+
+        savedReport 69378249 (
+            visibility: primaryDefault
+            view {
+                rowsPerPage: 50
+            }
+
+            displayColumn ACCIONES (
+                sequence: 1
+            )
+
+            displayColumn CIUDAD_ID (
+                sequence: 5
+            )
+
+            displayColumn COMENTARIOS (
+                sequence: 2
+            )
+
+            displayColumn DEPARTAMENTO (
+                sequence: 4
+            )
+
+            displayColumn GMAPS (
+                sequence: 8
+            )
+
+            displayColumn LATITUD (
+                sequence: 6
+            )
+
+            displayColumn LONGITUD (
+                sequence: 7
+            )
+
+            displayColumn NOMBRE (
+                sequence: 11
+            )
+
+            displayColumn PROPIETARIO (
+                sequence: 12
+            )
+
+            displayColumn SIGLAS (
+                sequence: 10
+            )
+
+            displayColumn TIPO_DE_SITIO (
+                sequence: 9
+            )
+
+            displayColumn ZONA_ID (
+                sequence: 3
+            )
+
+        )
+
+    )
+
+    button btn-mapa-sitios (
+        buttonName: BTN_MAPA_SITIOS
+        label: Mapa Sitios
+        layout {
+            sequence: 10
+            region: @sgt-sitios
+            slot: rightOfInteractiveReportSearchBar
+        }
+        appearance {
+            buttonTemplate: @/text-with-icon
+            hot: true
+            templateOptions: [
+                #DEFAULT#
+                t-Button--iconLeft
+            ]
+            icon: fa-map-marker
+        }
+        behavior {
+            action: redirectThisApp
+            target: {
+                page: 47
+            }
+            warnOnUnsavedChanges: doNotCheck
+        }
+    )
+
+    button create (
+        buttonName: CREATE
+        label: &APP_TEXT$BTN_CREAR!RAW.
+        layout {
+            sequence: 20
+            region: @sgt-sitios
+            slot: rightOfInteractiveReportSearchBar
+        }
+        appearance {
+            buttonTemplate: @/text
+            hot: true
+            templateOptions: #DEFAULT#
+        }
+        behavior {
+            action: redirectThisApp
+            target: {
+                page: 26
+                items: {
+                    P26_TITULO: Agregar sitio
+                }
+                clearCache: 26
+            }
+            warnOnUnsavedChanges: doNotCheck
+        }
+        security {
+            authorizationScheme: @implementador-rights
+        }
+    )
+
+    dynamicAction edit-report-dialog-closed (
+        name: Edit Report - Dialog Closed
+        execution {
+            sequence: 10
+        }
+        when {
+            event: apexafterclosedialog
+            selectionType: region
+            region: @sgt-sitios
+        }
+
+        action native-refresh (
+            action: refresh
+            affectedElements {
+                selectionType: region
+                region: @sgt-sitios
+            }
+            execution {
+                sequence: 10
+                fireOnInit: false
+            }
+        )
+
+    )
+
+    process formato-numerico (
+        name: FORMATO_NUMERICO
+        type: executeCode
+        source {
+            plsqlCode:
+                ```plsql
+                EXECUTE IMMEDIATE 
+                   'ALTER SESSION SET NLS_NUMERIC_CHARACTERS = ''.,''';
+                ```
+        }
+        execution {
+            sequence: 10
+            point: beforeHeader
+        }
+        advanced {
+            executionMappingIdentifier: 15999113760665707
+        }
+        config {
+            buildOption: @commented-out
+        }
+    )
+
+)
+

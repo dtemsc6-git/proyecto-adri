@@ -1,0 +1,263 @@
+page 449 (
+    name: Topología WAN
+    alias: TOPOLOGÍA-WAN
+    title: Topología WAN
+    appearance {
+        pageTemplate: @/standard
+        templateOptions: #DEFAULT#
+    }
+    navigation {
+        cursorFocus: doNotFocusCursor
+    }
+    javaScript {
+        fileUrls: [
+            https://unpkg.com/vis-network/standalone/umd/vis-network.min.js
+            #APP_FILES#p400_vista_conexiones#MIN#.js
+        ]
+        functionAndGlobalVariableDeclaration:
+            ```javascript-browser
+            generarGrafo = function () {
+            
+                apex.server.process(
+                    'DATOS_GRAFO', { pageItems: ['P449_WAN'] },
+                    {
+                        success: function (data) {
+                            console.log(data); // Acceder a los datos
+                            
+            
+                            data.nodes.sort((a, b) => a.level - b.level);
+            
+            
+                            if (true) {
+                                console.log("filtrar nodos");
+                                var mapNodos = new Map();
+                                var nodosFiltrados = [];
+                                var level = 0;
+                                var prev_eq = 0;
+                                data.nodes.forEach(nodo => {
+                                    if (!mapNodos.has(nodo.id)) {
+                                        console.log(nodo);
+                                        if (prev_eq !== nodo.eq_id) {
+                                             level++;  
+                                             prev_eq = nodo.eq_id; 
+                                             console.log("subiendo un nivel");
+                                        }
+                                        mapNodos.set(nodo.id, true);
+                                        nodosFiltrados.push({
+                                            id: nodo.id,
+                                            label: nodo.label,
+                                            shape: nodo.shape, // Forma para interfaces
+                                            color: nodo.color,
+                                            level: level
+                                        });
+                                    }
+            
+                                 
+            
+            
+                                });
+                                data.nodes = nodosFiltrados;
+                               
+            
+                            }
+            
+                            var nodes = new vis.DataSet(data.nodes);
+                            var edges = new vis.DataSet(data.edges);
+            
+                            var data = { nodes: nodes, edges: edges };
+            
+                            var container = document.getElementById("network");
+                            var network = new vis.Network(container, data, {
+                                layout: {
+                                    improvedLayout: true,
+                                    hierarchical: {
+                                        enabled: true,
+                                        levelSeparation: 75,
+                                        direction:"UD"
+                                    }
+                                }
+                                ,physics: { enabled: false, solver: "forceAtlas2Based" }
+                            });
+                        }
+            
+            
+                        ,
+                        error: function (pError) {
+                            console.error('Error:', pError);
+                        }
+                    }
+                );
+            }
+            ```
+    }
+    css {
+        inline:
+            ```css
+            #network {
+                width: auto;
+                height: 600px;
+                border: 1px solid lightgray;
+            }
+            ```
+    }
+    security {
+        pageAccessProtection: argumentsMustHaveChecksum
+        formAutoComplete: false
+    }
+
+    region breadcrumb (
+        name: Breadcrumb
+        type: breadcrumb
+        source {
+            breadcrumb: @breadcrumb
+        }
+        layout {
+            sequence: 10
+            slot: breadcrumbBar
+        }
+        appearance {
+            template: @/title-bar
+            templateOptions: [
+                #DEFAULT#
+                t-BreadcrumbRegion--useBreadcrumbTitle
+            ]
+        }
+        componentAppearance {
+            breadcrumbTemplate: @/breadcrumb
+            templateOptions: #DEFAULT#
+        }
+    )
+
+    region controles (
+        name: Controles
+        type: staticContent
+        layout {
+            sequence: 10
+            slot: body
+        }
+        appearance {
+            template: @/standard
+            templateOptions: [
+                #DEFAULT#
+                t-Region--removeHeader js-removeLandmark
+                t-Region--scrollBody
+                margin-bottom-none
+            ]
+        }
+    )
+
+    region network (
+        name: network
+        title: Network
+        type: staticContent
+        layout {
+            sequence: 20
+            slot: body
+        }
+        appearance {
+            template: @/standard
+            templateOptions: [
+                #DEFAULT#
+                t-Region--scrollBody
+            ]
+            cssClasses: network
+        }
+        advanced {
+            htmlDomId: network
+        }
+    )
+
+    pageItem P449_WAN (
+        type: popupLov
+        label {
+            label: Wan
+            alignment: left
+        }
+        lov {
+            type: sqlQuery
+            sqlQuery:
+                ```sql
+                SELECT DISTINCT NOMBRE, W.ID FROM 
+                SGT_ENLACES_WAN W
+                INNER JOIN 
+                SGT_CONEXIONES_ENLACE_WAN CW
+                ON W.ID = CW.ENLACE_WAN_ID
+                ```
+        }
+        layout {
+            sequence: 10
+            region: @controles
+            slot: regionBody
+            alignment: left
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+            width: 30
+        }
+        advanced {
+            warnOnUnsavedChanges: ignore
+        }
+    )
+
+    dynamicAction datos-grafo (
+        name: DATOS_GRAFO
+        execution {
+            sequence: 10
+        }
+        when {
+            selectionType: items
+            items: P449_WAN
+        }
+
+        action native-javascript-code (
+            action: executeJsCode
+            settings {
+                jsCode: generarGrafo();
+            }
+            execution {
+                sequence: 10
+                fireOnInit: false
+            }
+        )
+
+    )
+
+    process datos-grafo (
+        name: DATOS_GRAFO
+        type: executeCode
+        source {
+            plsqlCode:
+                ```plsql
+                DECLARE
+                
+                L_NODES CLOB;
+                L_EDGES CLOB;
+                BEGIN
+                 
+                   L_NODES := GET_WAN_NODOS_IFACE(:P449_WAN);
+                   L_EDGES := GET_WAN_EDGES_IFACE(:P449_WAN);
+                
+                   
+                   htp.p(
+                      JSON_OBJECT(
+                        'nodes' VALUE l_nodes FORMAT JSON,
+                        'edges' VALUE l_edges FORMAT JSON
+                      ) 
+                    );
+                
+                
+                END;
+                ```
+        }
+        execution {
+            sequence: 10
+            point: ajaxCallback
+        }
+        advanced {
+            executionMappingIdentifier: 18951276810977227
+        }
+    )
+
+)
+

@@ -1,0 +1,725 @@
+page 473 (
+    name: Archivos V2
+    alias: ARCHIVOS-V2
+    title: Archivos V2
+    pageGroup: @archivos
+    appearance {
+        pageTemplate: @/left-side-column
+        templateOptions: #DEFAULT#
+    }
+    navigation {
+        cursorFocus: doNotFocusCursor
+        warnOnUnsavedChanges: false
+    }
+    css {
+        inline:
+            ```css
+            .nuevo {
+                border-left: 4px solid #2ecc71;
+            }
+            
+            .obsoleto {
+                border-left: 4px solid #f39c12;
+            }
+            .borrado {
+                border-left: 4px solid red;
+            }
+            ```
+    }
+    security {
+        pageAccessProtection: argumentsMustHaveChecksum
+        formAutoComplete: false
+    }
+
+    region archivos (
+        name: Archivos
+        type: cards
+        source {
+            location: localDatabase
+            type: sqlQuery
+            sqlQuery:
+                ```sql
+                select SGT_ARCHIVOS.ID AS ARCH_ID, sitio.id as sitio_id, sitio.siglas ||'-'||sitio.nombre as sitio_nombre, null as sala_id, null as sala_nombre, 
+                null as rack_id, null as rack_nombre,
+                null as equipo_id, null as equipo_nombre, sitio.siglas ||'.'||sitio.nombre as FULLNAME,
+                'Sitio' as tipo_equipo,
+                
+                       PK_ID,
+                       ESTADO,
+                       FILE_NAME,
+                       FILE_MIMETYPE,
+                       FILE_CHARSET,
+                       FILE_BLOB,
+                       SGT_ARCHIVOS.CREADO_POR,
+                       SGT_ARCHIVOS.CREADO_EL,
+                       OBSERVACIONES,
+                       ROUND(DBMS_LOB.GETLENGTH(FILE_BLOB) / 1024 / 1024, 2) AS mb,
+                       INTERNAL_ATTR
+                
+                
+                
+                
+                from sgt_sitios sitio join sgt_archivos on pk_id = sitio.id
+                where entidad = 1 
+                
+                
+                UNION ALL
+                
+                select SGT_ARCHIVOS.ID AS ARCH_ID, sitio.id as sitio_id, sitio.siglas ||'-'||sitio.nombre as sitio_nombre, 
+                sala.id as sala_id, sala.siglas||'-'||sala.nombre as sala_nombre, null as rack_id, null as rack_nombre,
+                null as equipo_id, null as equipo_nombre,  sitio.siglas ||'.'||sala.siglas as FULLNAME,
+                'Sala' as tipo_equipo,
+                
+                       PK_ID,
+                       ESTADO,
+                       FILE_NAME,
+                       FILE_MIMETYPE,
+                       FILE_CHARSET,
+                       FILE_BLOB,
+                       SGT_ARCHIVOS.CREADO_POR,
+                       SGT_ARCHIVOS.CREADO_EL,
+                       OBSERVACIONES,
+                       ROUND(DBMS_LOB.GETLENGTH(FILE_BLOB) / 1024 / 1024, 2) AS mb,
+                       INTERNAL_ATTR
+                
+                
+                
+                
+                from sgt_sitios sitio 
+                JOIN sgt_salas sala on sitio.id = sala.sitio_id
+                join sgt_archivos on pk_id = sala.id
+                where entidad = 2 
+                
+                UNION ALL
+                
+                select SGT_ARCHIVOS.ID AS ARCH_ID, sitio.id as sitio_id, sitio.siglas ||'-'||sitio.nombre as sitio_nombre, 
+                sala.id as sala_id, sala.siglas||'-'||sala.nombre as sala_nombre, rack.id as rack_id, rack.nombre ||'-'||rack.detalle as rack_nombre,
+                null as equipo_id, null as equipo_nombre, sitio.siglas ||'.'||sala.siglas||'.'||rack.nombre as FULLNAME,
+                'Racks' as tipo_equipo,
+                
+                       PK_ID,
+                       ESTADO,
+                       FILE_NAME,
+                       FILE_MIMETYPE,
+                       FILE_CHARSET,
+                       FILE_BLOB,
+                       SGT_ARCHIVOS.CREADO_POR,
+                       SGT_ARCHIVOS.CREADO_EL,
+                       OBSERVACIONES,
+                       ROUND(DBMS_LOB.GETLENGTH(FILE_BLOB) / 1024 / 1024, 2) AS mb,
+                       INTERNAL_ATTR
+                
+                
+                
+                
+                from sgt_sitios sitio 
+                JOIN sgt_salas sala on sitio.id = sala.sitio_id
+                join sgt_racks rack on sala.id = rack.sala_id
+                join sgt_archivos on pk_id = rack.id
+                where entidad = 3 
+                
+                UNION ALL
+                
+                select SGT_ARCHIVOS.ID AS ARCH_ID, sitio.id as sitio_id, sitio.siglas ||'-'||sitio.nombre as sitio_nombre, 
+                sala.id as sala_id, sala.siglas||'-'||sala.nombre as sala_nombre, rack.id as rack_id, rack.nombre ||'-'||rack.detalle as rack_nombre,
+                equipo.id as equipo_id, equipo.nombre as equipo_nombre, sitio.siglas ||'.'||sala.siglas ||'.'|| rack.nombre ||'.'||equipo.nombre FULLNAME,
+                tipo_equipo.nombre as tipo_equipo,
+                
+                       PK_ID,
+                       sgt_archivos.ESTADO,
+                       FILE_NAME,
+                       FILE_MIMETYPE,
+                       FILE_CHARSET,
+                       sgt_archivos.FILE_BLOB,
+                       SGT_ARCHIVOS.CREADO_POR,
+                       SGT_ARCHIVOS.CREADO_EL,
+                       sgt_archivos.OBSERVACIONES,
+                       ROUND(DBMS_LOB.GETLENGTH(FILE_BLOB) / 1024 / 1024, 2) AS mb,
+                       INTERNAL_ATTR
+                
+                
+                from sgt_sitios sitio 
+                JOIN sgt_salas sala on sitio.id = sala.sitio_id
+                join sgt_racks rack on sala.id = rack.sala_id
+                join sgt_equipos equipo on rack.id = equipo.rack_id
+                join sgt_tipo_equipos tipo_equipo on tipo_equipo.id = equipo.tipo_equipo_id
+                join sgt_archivos on pk_id = equipo.id
+                where entidad = 4 
+                
+                
+                
+                
+                
+                ```
+        }
+        layout {
+            sequence: 20
+            slot: body
+        }
+        appearance {
+            template: @/cards-container
+            templateOptions: [
+                #DEFAULT#
+                t-CardsRegion--hideHeader js-addHiddenHeadingRoleDesc
+            ]
+            cssClasses: btn-acciones
+        }
+        componentAppearance {
+            layout: float
+        }
+        card {
+            cssClasses: &INTERNAL_ATTR.
+            primaryKeyColumn1: ARCH_ID
+        }
+        title {
+            column: FULLNAME
+        }
+        subtitle {
+            advancedFormatting: true
+            htmlExpression:
+                ```html
+                <span class="a-CardView-subTitle">Archivo: &FILE_NAME. size: &MB. MB</span> <br/>
+                <span class="a-CardView-subTitle">Tipo Equipo: &TIPO_EQUIPO. </span><br/>
+                ```
+        }
+        body {
+            column: OBSERVACIONES
+        }
+        secondaryBody {
+            advancedFormatting: true
+            htmlExpression:
+                ```html
+                Creado por: &CREADO_POR. <br/>
+                Creado el: &CREADO_EL.
+                ```
+        }
+        media {
+            source: blobColumn
+            blobColumn: FILE_BLOB
+        }
+        blobAttributes {
+            mimeTypeColumn: FILE_MIMETYPE
+            lastUpdatedColumn: CREADO_EL
+        }
+        performance {
+            lazyLoading: true
+        }
+
+        action action (
+            label: Ver
+            layout {
+                sequence: 40
+            }
+            behavior {
+                type: redirectUrl
+                targetUrl: javascript:void(0);
+                linkAttributes: data-id="&ARCH_ID."
+            }
+        )
+
+        action action-2 (
+            label: Descargar
+            layout {
+                sequence: 10
+            }
+            behavior {
+                type: redirectUrl
+                targetUrl: javascript:void(0);
+                linkAttributes: data-id="&ARCH_ID."
+            }
+            appearance {
+                cssClasses: btn-descargar
+            }
+        )
+
+        action action-3 (
+            label: Obsoleto
+            layout {
+                sequence: 20
+            }
+            behavior {
+                type: redirectUrl
+                targetUrl: javascript:void(0);
+                linkAttributes: data-id="&ARCH_ID."
+            }
+            appearance {
+                cssClasses: btn-obsoleto
+            }
+        )
+
+        action action-4 (
+            label: Eliminar
+            layout {
+                sequence: 30
+            }
+            behavior {
+                type: redirectUrl
+                targetUrl: javascript:void(0);
+                linkAttributes: data-id="&ARCH_ID."
+            }
+            appearance {
+                cssClasses: btn-borrar
+            }
+        )
+
+    )
+
+    region buscador (
+        name: Buscador
+        type: facetedSearch
+        source {
+            filteredRegion: @archivos
+        }
+        layout {
+            sequence: 50
+            slot: leftColumn
+        }
+        appearance {
+            template: @/standard
+            templateOptions: [
+                #DEFAULT#
+                t-Region--scrollBody
+            ]
+        }
+        settings {
+            compactNosThreshold: 10000
+            displayChartForTopNValues: 10
+        }
+
+        facet P473_EQUIPO_NOMBRE (
+            type: checkboxGroup
+            label {
+                label: Equipo
+            }
+            lov {
+                type: distinctValues
+            }
+            layout {
+                sequence: 60
+            }
+            listEntries {
+                maxDisplayedEntries: 7
+            }
+            source {
+                databaseColumn: EQUIPO_NOMBRE
+            }
+        )
+
+        facet P473_RACK_NOMBRE (
+            type: checkboxGroup
+            label {
+                label: Rack
+            }
+            lov {
+                type: distinctValues
+            }
+            layout {
+                sequence: 40
+            }
+            listEntries {
+                maxDisplayedEntries: 7
+            }
+            source {
+                databaseColumn: RACK_NOMBRE
+            }
+        )
+
+        facet P473_SALA_NOMBRE (
+            type: checkboxGroup
+            label {
+                label: Sala
+            }
+            lov {
+                type: distinctValues
+            }
+            layout {
+                sequence: 30
+            }
+            listEntries {
+                maxDisplayedEntries: 7
+            }
+            source {
+                databaseColumn: SALA_NOMBRE
+            }
+        )
+
+        facet P473_SEARCH (
+            type: search
+            label {
+                label: Search
+            }
+            layout {
+                sequence: 10
+            }
+        )
+
+        facet P473_SITIO_NOMBRE (
+            type: checkboxGroup
+            label {
+                label: Sitio
+            }
+            lov {
+                type: distinctValues
+            }
+            layout {
+                sequence: 20
+            }
+            listEntries {
+                maxDisplayedEntries: 7
+            }
+            source {
+                databaseColumn: SITIO_NOMBRE
+            }
+        )
+
+        facet P473_TIPO_EQUIPO (
+            type: checkboxGroup
+            label {
+                label: Tipo Equipo
+            }
+            lov {
+                type: distinctValues
+            }
+            layout {
+                sequence: 50
+            }
+            listEntries {
+                maxDisplayedEntries: 7
+            }
+            source {
+                databaseColumn: TIPO_EQUIPO
+            }
+        )
+
+    )
+
+    pageItem P473_ARCH_ID (
+        type: hidden
+        layout {
+            sequence: 40
+            slot: body
+        }
+    )
+
+    pageItem P473_ENTIDAD (
+        type: hidden
+        layout {
+            sequence: 30
+            slot: body
+        }
+    )
+
+    dynamicAction delete (
+        name: DELETE
+        execution {
+            sequence: 40
+            eventScope: dynamic
+            staticContainer: .btn-acciones
+        }
+        when {
+            event: click
+            selectionType: jQuerySelector
+            jquerySelector: .btn-borrar
+        }
+
+        action native-confirm (
+            action: confirm
+            settings {
+                title: Atención
+                message: Borrar el elemento?
+                style: danger
+            }
+            execution {
+                sequence: 10
+                fireOnInit: false
+            }
+        )
+
+        action native-execute-plsql-code (
+            action: executeServerSideCode
+            settings {
+                plsqlCode:
+                    ```plsql
+                    DELETE FROM SGT_ARCHIVOS
+                    WHERE ID = :p473_ARCH_ID
+                    ```
+                itemsToSubmit: P473_ARCH_ID
+            }
+            execution {
+                sequence: 40
+                fireOnInit: false
+            }
+        )
+
+        action native-refresh (
+            action: refresh
+            affectedElements {
+                selectionType: region
+                region: @archivos
+            }
+            execution {
+                sequence: 50
+                fireOnInit: false
+            }
+        )
+
+        action native-set-value (
+            action: setValue
+            settings {
+                type: jsExpression
+                jsExpression: this.triggeringElement.dataset.id
+            }
+            affectedElements {
+                selectionType: items
+                items: P473_ARCH_ID
+            }
+            execution {
+                sequence: 30
+            }
+        )
+
+    )
+
+    dynamicAction download (
+        name: DOWNLOAD
+        execution {
+            sequence: 30
+            eventScope: dynamic
+            staticContainer: .btn-acciones
+        }
+        when {
+            event: click
+            selectionType: jQuerySelector
+            jquerySelector: .btn-descargar
+        }
+
+        action descargar (
+            name: Descargar
+            action: download
+            source {
+                sqlQuery:
+                    ```sql
+                    select file_blob    AS file_blob, 
+                          file_name,          
+                        file_mimetype from SGT_archivos
+                    where 
+                    id = :P473_ARCH_ID
+                    
+                    ```
+                itemsToSubmit: P473_ARCH_ID
+            }
+            execution {
+                sequence: 30
+                fireOnInit: false
+            }
+        )
+
+        action native-set-value (
+            action: setValue
+            settings {
+                type: jsExpression
+                jsExpression: this.triggeringElement.dataset.id
+            }
+            affectedElements {
+                selectionType: items
+                items: P473_ARCH_ID
+            }
+            execution {
+                sequence: 20
+            }
+        )
+
+    )
+
+    dynamicAction filtrar (
+        name: FILTRAR
+        execution {
+            sequence: 50
+        }
+        when {
+            selectionType: items
+            items: [
+                P473_TIPO_ENTIDAD
+                P473_F_PK_ID
+                P473_SITIO
+                P473_F_NOMBRE
+            ]
+        }
+
+        action native-refresh (
+            action: refresh
+            affectedElements {
+                selectionType: region
+                region: @archivos
+            }
+            execution {
+                sequence: 10
+                fireOnInit: false
+            }
+        )
+
+    )
+
+    dynamicAction obsoleto (
+        name: OBSOLETO
+        execution {
+            sequence: 60
+            eventScope: dynamic
+            staticContainer: .btn-acciones
+        }
+        when {
+            event: click
+            selectionType: jQuerySelector
+            jquerySelector: .btn-obsoleto
+        }
+
+        action native-confirm (
+            action: confirm
+            settings {
+                title: Atención
+                message: Marcar como obsoleto el elemento?
+                style: warning
+            }
+            execution {
+                sequence: 10
+                fireOnInit: false
+            }
+        )
+
+        action native-execute-plsql-code (
+            action: executeServerSideCode
+            settings {
+                plsqlCode:
+                    ```plsql
+                    UPDATE SGT_ARCHIVOS
+                    SET ESTADO = 2
+                    WHERE ID = :P473_ARCH_ID;
+                    ```
+                itemsToSubmit: P473_ARCH_ID
+            }
+            execution {
+                sequence: 30
+                fireOnInit: false
+            }
+        )
+
+        action native-refresh (
+            action: refresh
+            affectedElements {
+                selectionType: region
+                region: @archivos
+            }
+            execution {
+                sequence: 50
+                fireOnInit: false
+            }
+        )
+
+        action native-set-value (
+            action: setValue
+            settings {
+                type: jsExpression
+                jsExpression: this.triggeringElement.dataset.id
+            }
+            affectedElements {
+                selectionType: items
+                items: P473_ARCH_ID
+            }
+            execution {
+                sequence: 20
+            }
+        )
+
+    )
+
+    dynamicAction toggle-entidad (
+        name: TOGGLE_ENTIDAD
+        execution {
+            sequence: 80
+        }
+        when {
+            selectionType: items
+            items: P473_TIPO_ENTIDAD
+        }
+        clientSideCondition {
+            type: itemIsInList
+            item: P473_TIPO_ENTIDAD
+            list: [
+                1
+                2
+                3
+                4
+                5
+            ]
+        }
+
+        action native-hide (
+            action: hide
+            affectedElements {
+                selectionType: items
+                items: P473_F_PK_ID
+            }
+            execution {
+                sequence: 10
+                fireWhenEventResultIs: false
+            }
+        )
+
+        action native-show (
+            action: show
+            affectedElements {
+                selectionType: items
+                items: P473_F_PK_ID
+            }
+            execution {
+                sequence: 10
+            }
+        )
+
+    )
+
+    dynamicAction toggle-sitio (
+        name: TOGGLE_SITIO
+        execution {
+            sequence: 70
+        }
+        when {
+            selectionType: items
+            items: P473_TIPO_ENTIDAD
+        }
+        clientSideCondition {
+            type: itemIsInList
+            item: P473_TIPO_ENTIDAD
+            list: [
+                6
+                7
+            ]
+        }
+
+        action native-hide (
+            action: hide
+            affectedElements {
+                selectionType: items
+                items: P473_SITIO
+            }
+            execution {
+                sequence: 10
+                fireWhenEventResultIs: false
+            }
+        )
+
+        action native-show (
+            action: show
+            affectedElements {
+                selectionType: items
+                items: P473_SITIO
+            }
+            execution {
+                sequence: 10
+            }
+        )
+
+    )
+
+)
+

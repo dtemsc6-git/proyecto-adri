@@ -1,0 +1,110 @@
+page 421 (
+    name: Mapas Servicios
+    alias: MAPAS-SERVICIOS
+    title: Mapas Servicios
+    appearance {
+        pageTemplate: @/left-side-column
+        templateOptions: #DEFAULT#
+    }
+    navigation {
+        cursorFocus: doNotFocusCursor
+    }
+    security {
+        pageAccessProtection: argumentsMustHaveChecksum
+        formAutoComplete: false
+    }
+
+    region button-bar (
+        name: Button Bar
+        type: staticContent
+        source {
+            htmlCode: <div id="active_facets"></div>
+        }
+        layout {
+            sequence: 10
+            slot: body
+        }
+        appearance {
+            template: @/buttons-container
+            templateOptions: [
+                #DEFAULT#
+                t-ButtonRegion--noPadding
+                t-ButtonRegion--noUI
+            ]
+        }
+    )
+
+    region map (
+        name: Map
+        type: map
+        source {
+            location: localDatabase
+            type: sqlQuery
+            sqlQuery: select 0 as lon, 0 as lat from dual
+        }
+        layout {
+            sequence: 20
+            slot: body
+        }
+        appearance {
+            template: @/blank-with-attributes-no-grid
+            templateOptions: #DEFAULT#
+        }
+        controls {
+            options: [
+                scaleBar
+                infiniteMap
+                rectangleZoom
+            ]
+        }
+        attributes {
+            messagesPosition: below
+        }
+
+        layer mapas-servicios (
+            name: Mapas Servicios
+            layout {
+                sequence: 10
+            }
+            source {
+                location: regionSource
+            }
+            columnMapping {
+                geometryColumnDataType: longitudeLatitude
+                longitudeColumn: LON
+                latitudeColumn: LAT
+            }
+        )
+
+    )
+
+    button reset (
+        buttonName: RESET
+        label: Reset
+        layout {
+            sequence: 10
+            region: @button-bar
+            slot: next
+        }
+        appearance {
+            buttonTemplate: @/text-with-icon
+            templateOptions: [
+                #DEFAULT#
+                t-Button--noUI
+                t-Button--iconLeft
+            ]
+            icon: fa-undo
+        }
+        behavior {
+            action: redirectThisApp
+            target: {
+                page: 421
+                clearCache: 421
+                action: resetRegions
+            }
+            warnOnUnsavedChanges: doNotCheck
+        }
+    )
+
+)
+

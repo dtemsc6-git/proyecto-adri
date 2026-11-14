@@ -1,0 +1,508 @@
+page 140 (
+    name: BANDEJA TECNICO
+    alias: BANDEJA-TECNICO
+    title: BANDEJA TECNICO
+    appearance {
+        pageTemplate: @/standard
+        templateOptions: #DEFAULT#
+    }
+    navigation {
+        cursorFocus: doNotFocusCursor
+    }
+    security {
+        pageAccessProtection: argumentsMustHaveChecksum
+        formAutoComplete: false
+    }
+
+    region breadcrumb (
+        name: Breadcrumb
+        type: breadcrumb
+        source {
+            breadcrumb: @breadcrumb
+        }
+        layout {
+            sequence: 10
+            slot: breadcrumbBar
+        }
+        appearance {
+            template: @/title-bar
+            templateOptions: [
+                #DEFAULT#
+                t-BreadcrumbRegion--useBreadcrumbTitle
+            ]
+        }
+        componentAppearance {
+            breadcrumbTemplate: @/breadcrumb
+            templateOptions: #DEFAULT#
+        }
+    )
+
+    region cards (
+        name: Cards
+        type: cards
+        source {
+            location: localDatabase
+            type: sqlQuery
+            sqlQuery:
+                ```sql
+                SELECT N.ID,
+                       N.OT_ID,
+                       O.CODIGO,
+                       O.TITULO,
+                       O.REPORTADO_POR,
+                       N.TIPO,
+                       N.MENSAJE,
+                       N.LEIDA,
+                       CASE WHEN N.LEIDA = 'Y' THEN 'Leída' ELSE 'No leída' END AS ESTADO_LECTURA,
+                       CASE WHEN N.LEIDA = 'N' THEN 'Marcar leída' END AS ACCION,
+                       N.FECHA_CREACION,
+                       N.FECHA_LECTURA,
+                       A.INSTRUCCIONES_JEFATURA AS INSTRUCCION
+                  FROM SGT_OT_NOTIFICACION N
+                  JOIN SGT_OT O ON O.ID = N.OT_ID
+                  JOIN SGT_OT_ASIGNACION A ON O.ID = A.OT_ID
+                 WHERE N.USUARIO_DESTINO = :APP_USER
+                 ORDER BY N.LEIDA, N.FECHA_CREACION DESC
+                ```
+        }
+        layout {
+            sequence: 30
+            slot: body
+        }
+        appearance {
+            template: @/cards-container
+            templateOptions: [
+                #DEFAULT#
+                t-CardsRegion--hideHeader js-addHiddenHeadingRoleDesc
+            ]
+        }
+        title {
+            column: TITULO
+        }
+        subtitle {
+            column: CODIGO
+        }
+        body {
+            column: INSTRUCCION
+        }
+        secondaryBody {
+            column: MENSAJE
+        }
+        iconAndBadge {
+            badgeColumn: TIPO
+            badgeLabel: &TIPO.
+        }
+    )
+
+    region mis-notificaciones (
+        name: Mis Notificaciones
+        type: interactiveReport
+        source {
+            location: localDatabase
+            type: sqlQuery
+            sqlQuery:
+                ```sql
+                SELECT N.ID,
+                       N.OT_ID,
+                       O.CODIGO,
+                       O.TITULO,
+                       O.REPORTADO_POR,
+                       N.TIPO,
+                       N.MENSAJE,
+                       N.LEIDA,
+                       CASE WHEN N.LEIDA = 'Y' THEN 'Leída' ELSE 'No leída' END AS ESTADO_LECTURA,
+                       CASE WHEN N.LEIDA = 'N' THEN 'Marcar leída' END AS ACCION,
+                       N.FECHA_CREACION,
+                       N.FECHA_LECTURA
+                  FROM SGT_OT_NOTIFICACION N
+                  JOIN SGT_OT O ON O.ID = N.OT_ID
+                 WHERE N.USUARIO_DESTINO = :APP_USER
+                 ORDER BY N.LEIDA, N.FECHA_CREACION DESC
+                ```
+        }
+        layout {
+            sequence: 20
+            slot: body
+        }
+        appearance {
+            template: @/interactive-report
+            templateOptions: [
+                #DEFAULT#
+                t-IRR-region--hideHeader js-addHiddenHeadingRoleDesc
+            ]
+        }
+        pagination {
+            type: rowRangesXToY
+        }
+        performance {
+            maxRowsToProcess: 1000000
+        }
+        advanced {
+            savedReportMappingIdentifier: 21926224263711210
+        }
+
+        column ACCION (
+            type: plainText
+            heading {
+                heading: Accion
+            }
+            layout {
+                sequence: 130
+            }
+            columnFormatting {
+                htmlExpression: <a href="javascript:void(0)" class="marcar-leida-btn" data-id="#ID#">#ACCION#</a>
+            }
+            source {
+                dataType: STRING
+            }
+            advanced {
+                endUserAlias: L
+            }
+        )
+
+        column CODIGO (
+            type: link
+            heading {
+                heading: Codigo
+            }
+            layout {
+                sequence: 30
+            }
+            link {
+                target: {
+                    page: 120
+                    items: {
+                        P120_ID: #OT_ID#
+                    }
+                }
+                linkText: #CODIGO#
+            }
+            source {
+                dataType: STRING
+            }
+            advanced {
+                endUserAlias: C
+            }
+        )
+
+        column ESTADO_LECTURA (
+            type: plainText
+            heading {
+                heading: Estado
+            }
+            layout {
+                sequence: 90
+            }
+            source {
+                dataType: STRING
+            }
+            advanced {
+                endUserAlias: K
+            }
+        )
+
+        column FECHA_CREACION (
+            type: plainText
+            heading {
+                heading: Fecha Creacion
+            }
+            layout {
+                sequence: 100
+            }
+            source {
+                dataType: DATE
+            }
+            advanced {
+                endUserAlias: I
+            }
+        )
+
+        column FECHA_LECTURA (
+            type: plainText
+            heading {
+                heading: Fecha Lectura
+            }
+            layout {
+                sequence: 110
+            }
+            source {
+                dataType: DATE
+            }
+            advanced {
+                endUserAlias: J
+            }
+        )
+
+        column ID (
+            type: hidden
+            heading {
+                heading: Id
+            }
+            layout {
+                sequence: 10
+            }
+            source {
+                dataType: NUMBER
+            }
+            advanced {
+                endUserAlias: A
+            }
+        )
+
+        column LEIDA (
+            type: hidden
+            heading {
+                heading: Leida
+            }
+            layout {
+                sequence: 80
+            }
+            source {
+                dataType: STRING
+            }
+            advanced {
+                endUserAlias: H
+            }
+        )
+
+        column MENSAJE (
+            type: plainText
+            heading {
+                heading: Mensaje
+            }
+            layout {
+                sequence: 70
+            }
+            source {
+                dataType: STRING
+            }
+            advanced {
+                endUserAlias: G
+            }
+        )
+
+        column OT_ID (
+            type: hidden
+            heading {
+                heading: Ot Id
+            }
+            layout {
+                sequence: 20
+            }
+            source {
+                dataType: NUMBER
+            }
+            advanced {
+                endUserAlias: B
+            }
+        )
+
+        column REPORTADO_POR (
+            type: plainText
+            heading {
+                heading: Reportado Por
+            }
+            layout {
+                sequence: 50
+            }
+            source {
+                dataType: STRING
+            }
+            advanced {
+                endUserAlias: E
+            }
+        )
+
+        column TIPO (
+            type: plainText
+            heading {
+                heading: Tipo
+            }
+            layout {
+                sequence: 60
+            }
+            source {
+                dataType: STRING
+            }
+            advanced {
+                endUserAlias: F
+            }
+        )
+
+        column TITULO (
+            type: plainText
+            heading {
+                heading: Titulo
+            }
+            layout {
+                sequence: 40
+            }
+            source {
+                dataType: STRING
+            }
+            advanced {
+                endUserAlias: D
+            }
+        )
+
+        page {
+            size: a4
+            units: millimeters
+            width: 297
+            height: 210
+            borderWidth: 0.5
+            borderColor: #666666
+        }
+
+        savedReport 219439 (
+            visibility: primaryDefault
+            view {
+                rowsPerPage: 50
+            }
+
+            displayColumn CODIGO (
+                sequence: 3
+            )
+
+            displayColumn FECHA_CREACION (
+                sequence: 9
+            )
+
+            displayColumn FECHA_LECTURA (
+                sequence: 10
+            )
+
+            displayColumn ID (
+                sequence: 1
+            )
+
+            displayColumn LEIDA (
+                sequence: 8
+            )
+
+            displayColumn MENSAJE (
+                sequence: 7
+            )
+
+            displayColumn OT_ID (
+                sequence: 2
+            )
+
+            displayColumn REPORTADO_POR (
+                sequence: 5
+            )
+
+            displayColumn TIPO (
+                sequence: 6
+            )
+
+            displayColumn TITULO (
+                sequence: 4
+            )
+
+        )
+
+    )
+
+    pageItem P140_NOTI_ID (
+        type: hidden
+        settings {
+            valueProtected: false
+        }
+        layout {
+            sequence: 10
+            region: @mis-notificaciones
+            slot: regionBody
+        }
+    )
+
+    dynamicAction da-marcar-leida (
+        name: DA_MARCAR_LEIDA
+        execution {
+            sequence: 10
+        }
+        when {
+            event: click
+            selectionType: jQuerySelector
+            jquerySelector: .marcar-leida-btn
+        }
+
+        action a (
+            name: A
+            action: show
+            affectedElements {
+                selectionType: javaScriptExpression
+                javaScriptExpression:
+                    ```javascript-browser
+                    apex.items.P140_NOTI_ID.setValue(
+                      this.triggeringElement.getAttribute('data-id')
+                    );
+                    ```
+            }
+            execution {
+                sequence: 10
+            }
+        )
+
+        action b (
+            name: B
+            action: submitPage
+            settings {
+                requestButtonName: MARCAR_LEIDA
+            }
+            execution {
+                sequence: 20
+                fireOnInit: false
+            }
+        )
+
+    )
+
+    process prc-accion-noti (
+        name: PRC_ACCION_NOTI
+        type: executeCode
+        source {
+            plsqlCode:
+                ```plsql
+                UPDATE SGT_OT_NOTIFICACION
+                   SET LEIDA = 'Y',
+                       FECHA_LECTURA = SYSTIMESTAMP
+                 WHERE ID = :P140_NOTI_ID
+                   AND USUARIO_DESTINO = :APP_USER
+                   AND LEIDA = 'N';
+                ```
+        }
+        execution {
+            sequence: 10
+        }
+        error {
+            errorMessage: PRC_ACCION_NOTI FALLA
+        }
+        advanced {
+            executionMappingIdentifier: 21927921077711227
+        }
+        serverSideCondition {
+            type: request=Value
+            value: MARCAR_LEIDA
+        }
+    )
+
+    branch (
+        name: Go To Page 140
+        execution {
+            sequence: 20
+        }
+        behavior {
+            target: {
+                page: 140
+                clearCache: 140
+            }
+        }
+        serverSideCondition {
+            type: request=Value
+            value: MARCAR_LEIDA
+        }
+    )
+
+)
+

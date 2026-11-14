@@ -1,0 +1,424 @@
+page 17 (
+    name: Visor de Servicios
+    alias: VISOR-DE-SERVICIOS
+    title: Visor de Servicios
+    appearance {
+        pageTemplate: @/left-side-column
+        templateOptions: #DEFAULT#
+    }
+    navigation {
+        cursorFocus: doNotFocusCursor
+    }
+    security {
+        pageAccessProtection: argumentsMustHaveChecksum
+        formAutoComplete: false
+    }
+
+    region button-bar (
+        name: Button Bar
+        type: staticContent
+        source {
+            htmlCode: <div id="active_facets"></div>
+        }
+        layout {
+            sequence: 10
+            slot: body
+        }
+        appearance {
+            template: @/buttons-container
+            templateOptions: [
+                #DEFAULT#
+                t-ButtonRegion--noPadding
+                t-ButtonRegion--noUI
+            ]
+        }
+    )
+
+    region search (
+        name: Search
+        type: facetedSearch
+        source {
+            filteredRegion: @search-results
+        }
+        layout {
+            sequence: 10
+            slot: leftColumn
+        }
+        appearance {
+            template: @/standard
+            templateOptions: [
+                #DEFAULT#
+                t-Region--noPadding
+                t-Region--hideHeader js-addHiddenHeadingRoleDesc
+                t-Region--scrollBody
+            ]
+        }
+        accessibility {
+            landmarkLabel: Filters
+        }
+        settings {
+            compactNosThreshold: 10000
+            showCurrentFacets: selector
+            currentFacetsSelector: #active_facets
+            showTotalRowCount: true
+            displayChartForTopNValues: 10
+        }
+
+        facet P17_EQUIPO (
+            type: checkboxGroup
+            label {
+                label: Equipos
+            }
+            lov {
+                type: distinctValues
+            }
+            layout {
+                sequence: 70
+            }
+            listEntries {
+                maxDisplayedEntries: 7
+            }
+            source {
+                databaseColumn: EQUIPO
+            }
+        )
+
+        facet P17_FO (
+            type: checkboxGroup
+            label {
+                label: Fibra óptica
+            }
+            lov {
+                type: distinctValues
+            }
+            layout {
+                sequence: 30
+            }
+            listEntries {
+                maxDisplayedEntries: 7
+            }
+            source {
+                databaseColumn: FO
+            }
+        )
+
+        facet P17_INTERFACE (
+            type: checkboxGroup
+            label {
+                label: Interfaz
+            }
+            lov {
+                type: distinctValues
+            }
+            layout {
+                sequence: 80
+            }
+            listEntries {
+                maxDisplayedEntries: 7
+            }
+            source {
+                databaseColumn: INTERFACE
+            }
+        )
+
+        facet P17_SEARCH (
+            type: search
+            label {
+                label: Search
+            }
+            layout {
+                sequence: 10
+            }
+            source {
+                dbColumns: SERVICIO,SIGLAS,WAN,EQUIPO,INTERFACE
+            }
+        )
+
+        facet P17_SERVICIO (
+            type: checkboxGroup
+            label {
+                label: Servicio
+            }
+            lov {
+                type: distinctValues
+            }
+            layout {
+                sequence: 20
+            }
+            listEntries {
+                maxDisplayedEntries: 7
+            }
+            source {
+                databaseColumn: SERVICIO
+            }
+        )
+
+        facet P17_SITIOS (
+            type: checkboxGroup
+            label {
+                label: Sitios
+            }
+            lov {
+                type: distinctValues
+            }
+            layout {
+                sequence: 50
+            }
+            listEntries {
+                maxDisplayedEntries: 7
+            }
+            source {
+                databaseColumn: SITIOS
+            }
+        )
+
+        facet P17_WAN (
+            type: checkboxGroup
+            label {
+                label: WAN
+            }
+            lov {
+                type: distinctValues
+            }
+            layout {
+                sequence: 40
+            }
+            listEntries {
+                maxDisplayedEntries: 7
+            }
+            source {
+                databaseColumn: WAN
+            }
+        )
+
+    )
+
+    region search-results (
+        name: Search Results
+        type: classicReport
+        source {
+            location: localDatabase
+            tableName: V_SERVICIOS
+        }
+        orderBy {
+            type: staticValue
+            orderByClause: SERVICIO,SEQ, WAN_SEQ
+        }
+        layout {
+            sequence: 20
+            slot: body
+        }
+        appearance {
+            template: @/standard
+            templateOptions: [
+                #DEFAULT#
+                t-Region--noPadding
+                t-Region--hideHeader js-addHiddenHeadingRoleDesc
+                t-Region--scrollBody
+            ]
+        }
+        headerAndFooter {
+            footerText: Datos obtenidos en: #TIMING# seg
+        }
+        reportLayout {
+            numberOfRows: 50
+        }
+        componentAppearance {
+            template: @/standard
+            templateOptions: [
+                #DEFAULT#
+                t-Report--stretch
+                t-Report--staticRowColors
+                t-Report--rowHighlight
+                t-Report--inline
+                t-Report--hideNoPagination
+            ]
+        }
+        pagination {
+            type: nextAndPreviousLinks
+        }
+        performance {
+            maxRowsToProcess: 100000
+        }
+        messages {
+            whenNoDataFound: no data found
+        }
+
+        column EQUIPO (
+            reportColumnQueryId: 5
+            derivedColumn: N
+            heading {
+                heading: Equipo
+                alignment: center
+            }
+            layout {
+                sequence: 32
+            }
+            sorting {
+                sortable: false
+            }
+        )
+
+        column FO (
+            reportColumnQueryId: 7
+            derivedColumn: N
+            heading {
+                heading: FO
+                alignment: center
+            }
+            layout {
+                sequence: 52
+            }
+            sorting {
+                sortable: false
+            }
+        )
+
+        column INTERFACE (
+            reportColumnQueryId: 6
+            derivedColumn: N
+            heading {
+                heading: Interfaz
+                alignment: center
+            }
+            layout {
+                sequence: 42
+            }
+            sorting {
+                sortable: false
+            }
+        )
+
+        column NIVEL_DE_PRIORIDAD (
+            reportColumnQueryId: 2
+            derivedColumn: N
+            type: plainTextBasedOnLov
+            heading {
+                heading: Nivel De Prioridad
+                alignment: end
+            }
+            lov {
+                type: sharedComponent
+                lov: @servicios-nivel-prioridad
+            }
+            layout {
+                sequence: 2
+                columnAlignment: end
+            }
+            sorting {
+                sortable: false
+            }
+            config {
+                buildOption: @commented-out
+            }
+        )
+
+        column SEQ (
+            reportColumnQueryId: 8
+            derivedColumn: N
+            heading {
+                heading: Seq
+                alignment: center
+            }
+            layout {
+                sequence: 62
+                columnAlignment: end
+            }
+            sorting {
+                sortable: false
+            }
+        )
+
+        column SERVICIO (
+            reportColumnQueryId: 1
+            derivedColumn: N
+            heading {
+                heading: Servicio
+                alignment: center
+            }
+            layout {
+                sequence: 1
+            }
+            sorting {
+                sortable: false
+            }
+        )
+
+        column SITIOS (
+            reportColumnQueryId: 3
+            derivedColumn: N
+            heading {
+                heading: Sitio
+                alignment: center
+            }
+            layout {
+                sequence: 12
+            }
+            sorting {
+                sortable: false
+            }
+        )
+
+        column WAN (
+            reportColumnQueryId: 4
+            derivedColumn: N
+            heading {
+                heading: Wan
+                alignment: center
+            }
+            layout {
+                sequence: 22
+            }
+            sorting {
+                sortable: false
+            }
+        )
+
+        column WAN_SEQ (
+            reportColumnQueryId: 9
+            derivedColumn: N
+            heading {
+                heading: WAN Seq
+                alignment: center
+            }
+            layout {
+                sequence: 72
+                columnAlignment: end
+            }
+            sorting {
+                sortable: false
+            }
+        )
+
+    )
+
+    button reset (
+        buttonName: RESET
+        label: Reset
+        layout {
+            sequence: 10
+            region: @button-bar
+            slot: next
+        }
+        appearance {
+            buttonTemplate: @/text-with-icon
+            templateOptions: [
+                #DEFAULT#
+                t-Button--noUI
+                t-Button--iconLeft
+            ]
+            icon: fa-undo
+        }
+        behavior {
+            action: redirectThisApp
+            target: {
+                page: 17
+                clearCache: 17
+                action: resetRegions
+            }
+            warnOnUnsavedChanges: doNotCheck
+        }
+    )
+
+)
+

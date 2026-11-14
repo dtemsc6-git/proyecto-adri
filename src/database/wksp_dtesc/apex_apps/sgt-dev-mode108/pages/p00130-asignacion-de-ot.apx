@@ -1,0 +1,166 @@
+page 130 (
+    name: ASIGNACION DE OT
+    alias: ASIGNACION-DE-OT
+    title: ASIGNACION DE OT
+    appearance {
+        pageTemplate: @/standard
+        templateOptions: #DEFAULT#
+    }
+    navigation {
+        cursorFocus: doNotFocusCursor
+    }
+    security {
+        pageAccessProtection: argumentsMustHaveChecksum
+        formAutoComplete: false
+    }
+
+    region breadcrumb (
+        name: Breadcrumb
+        type: breadcrumb
+        source {
+            breadcrumb: @breadcrumb
+        }
+        layout {
+            sequence: 10
+            slot: breadcrumbBar
+        }
+        appearance {
+            template: @/title-bar
+            templateOptions: [
+                #DEFAULT#
+                t-BreadcrumbRegion--useBreadcrumbTitle
+            ]
+        }
+        componentAppearance {
+            breadcrumbTemplate: @/breadcrumb
+            templateOptions: #DEFAULT#
+        }
+    )
+
+    pageItem P130_INSTRUCCIONES (
+        type: textarea
+        label {
+            label: New
+            alignment: left
+        }
+        layout {
+            sequence: 30
+            slot: body
+            alignment: left
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+            width: 30
+            height: 5
+        }
+    )
+
+    pageItem P130_OT_ID (
+        type: hidden
+        layout {
+            sequence: 10
+            slot: body
+        }
+    )
+
+    pageItem P130_USUARIO_ASIGNADO (
+        type: selectList
+        label {
+            label: Usuario Asignado
+            alignment: left
+        }
+        lov {
+            type: sqlQuery
+            sqlQuery:
+                ```sql
+                SELECT USER_NAME d, USER_NAME r
+                  FROM APEX_WORKSPACE_APEX_USERS
+                 WHERE ACCOUNT_LOCKED = 'No'
+                 ORDER BY USER_NAME
+                ```
+        }
+        layout {
+            sequence: 20
+            slot: body
+            alignment: left
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+            height: 1
+        }
+    )
+
+    button btn-asignar-ot (
+        buttonName: BTN_ASIGNAR_OT
+        label: Asignar OT
+        layout {
+            sequence: 40
+            slot: body
+        }
+        appearance {
+            buttonTemplate: @/text
+            templateOptions: #DEFAULT#
+        }
+        behavior {
+            warnOnUnsavedChanges: doNotCheck
+        }
+    )
+
+    button btn-volver (
+        buttonName: BTN_VOLVER
+        label: Volver
+        layout {
+            sequence: 50
+            slot: body
+            startNewRow: false
+            newColumn: false
+        }
+        appearance {
+            buttonTemplate: @/text
+            templateOptions: #DEFAULT#
+        }
+        behavior {
+            action: redirectThisApp
+            target: {
+                page: 120
+                items: {
+                    P120_ID: &P130_OT_ID.
+                }
+            }
+            warnOnUnsavedChanges: doNotCheck
+        }
+    )
+
+    process prc-asignar-ot (
+        name: PRC_ASIGNAR_OT
+        type: executeCode
+        source {
+            plsqlCode:
+                ```plsql
+                BEGIN
+                    SGT_OT_PKG.ASIGNAR_OT(
+                        P_OT_ID            => :P130_OT_ID,
+                        P_USUARIO_ASIGNADO => :P130_USUARIO_ASIGNADO,
+                        P_INSTRUCCIONES    => :P130_INSTRUCCIONES,
+                        P_ASIGNADO_POR     => :APP_USER
+                    );
+                END;
+                ```
+        }
+        execution {
+            sequence: 10
+        }
+        advanced {
+            executionMappingIdentifier: 21925901365711207
+        }
+        serverSideCondition {
+            whenButtonPressed: @btn-asignar-ot
+            type: itemIsNotNull
+            item: P130_USUARIO_ASIGNADO
+        }
+    )
+
+)
+

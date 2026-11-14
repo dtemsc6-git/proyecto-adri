@@ -1,0 +1,855 @@
+page 30 (
+    name: SGT_FROM_INTERFACES
+    alias: SGT-FROM-INTERFACES
+    title: Agregar / Editar
+    pageGroup: @implementadores
+    appearance {
+        pageMode: modalDialog
+        dialogTemplate: @/drawer
+        templateOptions: [
+            #DEFAULT#
+            js-dialog-class-t-Drawer--pullOutEnd
+        ]
+    }
+    navigation {
+        cursorFocus: doNotFocusCursor
+    }
+    security {
+        authorizationScheme: @implementador-rights
+        pageAccessProtection: argumentsMustHaveChecksum
+        formAutoComplete: false
+    }
+
+    region buttons (
+        name: Buttons
+        type: staticContent
+        layout {
+            sequence: 20
+            slot: dialogFooter
+        }
+        appearance {
+            template: @/buttons-container
+            templateOptions: #DEFAULT#
+        }
+        settings {
+            outputAs: text
+        }
+    )
+
+    region en-uso (
+        name: EN_USO
+        title: Atención
+        type: staticContent
+        source {
+            htmlCode: Esta interfaz esta en uso, modificar los datos podría afectar: Servicios / Enlaces / Otros.-
+        }
+        layout {
+            sequence: 10
+            parentRegion: @sgt-from-interfaces
+            slot: regionBody
+        }
+        appearance {
+            template: @/alert
+            templateOptions: [
+                #DEFAULT#
+                t-Alert--horizontal
+                t-Alert--defaultIcons
+                t-Alert--warning
+            ]
+            cssClasses: warning
+        }
+        serverSideCondition {
+            type: functionBody
+            plsqlFunctionBody:
+                ```plsql
+                DECLARE
+                   v_id_interfaz CONSTANT sgt_interfaces.id%TYPE := :P30_ID;
+                   v_existe NUMBER;
+                BEGIN
+                   -- Consulta combinada
+                   BEGIN
+                      SELECT 1 INTO v_existe
+                      FROM dual
+                      WHERE EXISTS (
+                         SELECT 1 FROM sgt_equipos_wan
+                         WHERE interfaz_a_id = v_id_interfaz OR interfaz_b_id = v_id_interfaz
+                      ) OR EXISTS (
+                         SELECT 1 FROM sgt_equipos_servicio
+                         WHERE interfaz_a_id = v_id_interfaz OR interfaz_b_id = v_id_interfaz
+                      );
+                      
+                      RETURN TRUE; -- Existe en alguna tabla
+                   EXCEPTION
+                      WHEN NO_DATA_FOUND THEN
+                         RETURN FALSE; -- No existe en ninguna tabla
+                   END;
+                END;
+                ```
+        }
+    )
+
+    region sgt-from-interfaces (
+        name: SGT_FROM_INTERFACES
+        type: form
+        source {
+            location: localDatabase
+            tableName: SGT_INTERFACES
+        }
+        layout {
+            sequence: 10
+            slot: contentBody
+        }
+        appearance {
+            template: @/blank-with-attributes
+            templateOptions: #DEFAULT#
+        }
+        edit {
+            enabled: true
+            allowedOperations: [
+                add
+                update
+                delete
+            ]
+        }
+    )
+
+    pageItem P30_ACTUALIZADO_EL (
+        type: hidden
+        layout {
+            sequence: 170
+            region: @sgt-from-interfaces
+            slot: regionBody
+        }
+        source {
+            formRegion: @sgt-from-interfaces
+            column: ACTUALIZADO_EL
+            dataType: timestamp
+        }
+    )
+
+    pageItem P30_ACTUALIZADO_POR (
+        type: hidden
+        layout {
+            sequence: 180
+            region: @sgt-from-interfaces
+            slot: regionBody
+        }
+        source {
+            formRegion: @sgt-from-interfaces
+            column: ACTUALIZADO_POR
+            dataType: varchar2
+        }
+    )
+
+    pageItem P30_CREADO_EL (
+        type: hidden
+        layout {
+            sequence: 160
+            region: @sgt-from-interfaces
+            slot: regionBody
+        }
+        source {
+            formRegion: @sgt-from-interfaces
+            column: CREADO_EL
+            dataType: timestamp
+        }
+    )
+
+    pageItem P30_CREADO_POR (
+        type: hidden
+        layout {
+            sequence: 190
+            region: @sgt-from-interfaces
+            slot: regionBody
+        }
+        source {
+            formRegion: @sgt-from-interfaces
+            column: CREADO_POR
+            dataType: varchar2
+        }
+    )
+
+    pageItem P30_EQUIPO_ID (
+        type: popupLov
+        label {
+            label: Equipo
+            alignment: left
+        }
+        lov {
+            type: sharedComponent
+            lov: @equipos-nombre-compuesto
+        }
+        cascadingLov {
+            parentItems: P30_SITIO
+            itemsToSubmit: P30_SITIO
+        }
+        layout {
+            sequence: 50
+            region: @sgt-from-interfaces
+            slot: regionBody
+            alignment: left
+        }
+        appearance {
+            template: @/required-floating
+            templateOptions: #DEFAULT#
+            width: 30
+        }
+        validation {
+            valueRequired: true
+        }
+        source {
+            formRegion: @sgt-from-interfaces
+            column: EQUIPO_ID
+            dataType: number
+        }
+        help {
+            inlineHelpText: Ingresar el equipo al que pertenece la interfaz
+            helpText: Las opciones desplegadas están en formato Sitio.Sala.Rack.Equipo
+        }
+    )
+
+    pageItem P30_ESTADO (
+        type: selectList
+        label {
+            label: Estado
+            alignment: left
+        }
+        lov {
+            type: sharedComponent
+            lov: @interfaces-estado
+            nullDisplayValue: Seleccione una
+        }
+        layout {
+            sequence: 90
+            region: @sgt-from-interfaces
+            slot: regionBody
+            alignment: left
+        }
+        appearance {
+            template: @/required-floating
+            templateOptions: #DEFAULT#
+            height: 1
+        }
+        validation {
+            valueRequired: true
+        }
+        source {
+            formRegion: @sgt-from-interfaces
+            column: ESTADO
+            dataType: varchar2
+        }
+        help {
+            inlineHelpText: Seleccionar estado de configuración de la interfaz
+        }
+    )
+
+    pageItem P30_ETIQUETA (
+        type: textField
+        label {
+            label: Etiqueta/Descripción
+            alignment: left
+        }
+        layout {
+            sequence: 80
+            region: @sgt-from-interfaces
+            slot: regionBody
+            alignment: left
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+            width: 32
+        }
+        validation {
+            maxLength: 255
+        }
+        source {
+            formRegion: @sgt-from-interfaces
+            column: ETIQUETA
+            dataType: varchar2
+        }
+        help {
+            inlineHelpText: Ingresar etiqueta o descripción de la interfaz
+        }
+    )
+
+    pageItem P30_ID (
+        type: hidden
+        layout {
+            sequence: 30
+            region: @sgt-from-interfaces
+            slot: regionBody
+        }
+        source {
+            formRegion: @sgt-from-interfaces
+            column: ID
+            dataType: number
+            queryOnly: true
+            primaryKey: true
+        }
+        security {
+            sessionStateProtection: checksumRequiredSessionLevel
+        }
+    )
+
+    pageItem P30_MAC_ADDRESS (
+        type: textField
+        label {
+            label: MAC Address
+            alignment: left
+        }
+        layout {
+            sequence: 150
+            region: @sgt-from-interfaces
+            slot: regionBody
+            alignment: left
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+            width: 32
+        }
+        validation {
+            maxLength: 25
+        }
+        source {
+            formRegion: @sgt-from-interfaces
+            column: MAC_ADDRESS
+            dataType: varchar2
+        }
+        help {
+            inlineHelpText: Ingresar MAC-Address de la interfaz
+        }
+    )
+
+    pageItem P30_NOMBRE (
+        type: textField
+        label {
+            label: Nombre/Número de interfaz
+            alignment: left
+        }
+        layout {
+            sequence: 70
+            region: @sgt-from-interfaces
+            slot: regionBody
+            alignment: left
+        }
+        appearance {
+            template: @/required-floating
+            templateOptions: #DEFAULT#
+            width: 32
+        }
+        validation {
+            valueRequired: true
+            maxLength: 100
+        }
+        source {
+            formRegion: @sgt-from-interfaces
+            column: NOMBRE
+            dataType: varchar2
+        }
+        help {
+            inlineHelpText: Ingresar nombre de la interfaz. Se sugiere la nomenclatura Slot_Placa_Puerto.
+            helpText:
+                ```html
+                Puede agregar rangos para crear varias interfaces.
+                Ejemplo: 
+                ge/[0-2]/[0-3]/[0-10].
+                La cantidad maxima de items por creación esta limitada a 100 registros. 
+                ```
+        }
+    )
+
+    pageItem P30_RX_EN_DBM (
+        type: textField
+        label {
+            label: Rx en dBm
+            alignment: left
+        }
+        layout {
+            sequence: 130
+            region: @sgt-from-interfaces
+            slot: regionBody
+            alignment: left
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+            width: 32
+        }
+        validation {
+            maxLength: 10
+        }
+        source {
+            formRegion: @sgt-from-interfaces
+            column: RX_EN_DBM
+            dataType: varchar2
+        }
+        help {
+            inlineHelpText: Ingresar la potencia de recepción en dBm
+        }
+    )
+
+    pageItem P30_SITIO (
+        type: popupLov
+        label {
+            label: Sitio
+            alignment: left
+        }
+        lov {
+            type: sharedComponent
+            lov: @sgt-sitios-siglas
+        }
+        layout {
+            sequence: 40
+            region: @sgt-from-interfaces
+            slot: regionBody
+            alignment: left
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+            width: 30
+        }
+        config {
+            buildOption: @commented-out
+        }
+    )
+
+    pageItem P30_TIPO_INTERFACE_ID (
+        type: popupLov
+        label {
+            label: Tipo de Interfaz
+            alignment: left
+        }
+        lov {
+            type: sharedComponent
+            lov: @tipo-interfaz-nombre
+        }
+        layout {
+            sequence: 100
+            region: @sgt-from-interfaces
+            slot: regionBody
+            alignment: left
+        }
+        appearance {
+            template: @/required-floating
+            templateOptions: #DEFAULT#
+            width: 30
+        }
+        validation {
+            valueRequired: true
+        }
+        source {
+            formRegion: @sgt-from-interfaces
+            column: TIPO_INTERFACE_ID
+            dataType: number
+        }
+        help {
+            inlineHelpText: Seleccionar el tipo de interfaz
+        }
+    )
+
+    pageItem P30_TX_EN_DBM (
+        type: textField
+        label {
+            label: Tx en dBm
+            alignment: left
+        }
+        layout {
+            sequence: 120
+            region: @sgt-from-interfaces
+            slot: regionBody
+            alignment: left
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+            width: 32
+        }
+        validation {
+            maxLength: 10
+        }
+        source {
+            formRegion: @sgt-from-interfaces
+            column: TX_EN_DBM
+            dataType: varchar2
+        }
+        help {
+            inlineHelpText: Ingresar la potencia de transmisión en dBm
+        }
+    )
+
+    pageItem P30_VELOCIDAD_MBPS (
+        type: numberField
+        label {
+            label: Velocidad (Mbps)
+            alignment: left
+        }
+        layout {
+            sequence: 110
+            region: @sgt-from-interfaces
+            slot: regionBody
+            alignment: left
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+            width: 30
+        }
+        source {
+            formRegion: @sgt-from-interfaces
+            column: VELOCIDAD_MBPS
+            dataType: number
+        }
+        help {
+            inlineHelpText: Ingresar la velocidad configurada de la interfaz en Mbps
+        }
+    )
+
+    button cancel (
+        buttonName: CANCEL
+        label: Cancel
+        layout {
+            sequence: 10
+            region: @buttons
+            slot: close
+        }
+        appearance {
+            buttonTemplate: @/text
+            templateOptions: #DEFAULT#
+        }
+        behavior {
+            action: definedByDynamicAction
+        }
+    )
+
+    button create (
+        buttonName: CREATE
+        label: &APP_TEXT$BTN_CREAR!RAW.
+        layout {
+            sequence: 40
+            region: @buttons
+            slot: next
+        }
+        appearance {
+            buttonTemplate: @/text
+            hot: true
+            templateOptions: #DEFAULT#
+        }
+        behavior {
+            warnOnUnsavedChanges: doNotCheck
+            databaseAction: insert
+        }
+        serverSideCondition {
+            type: itemIsNull
+            item: P30_ID
+        }
+    )
+
+    button delete (
+        buttonName: DELETE
+        label: &APP_TEXT$BTN_BORRAR!RAW.
+        layout {
+            sequence: 20
+            region: @buttons
+            slot: delete
+        }
+        appearance {
+            buttonTemplate: @/text
+            templateOptions: #DEFAULT#
+        }
+        behavior {
+            executeValidations: false
+            warnOnUnsavedChanges: doNotCheck
+            databaseAction: delete
+            requiresConfirmation: true
+        }
+        confirmation {
+            message: &APP_TEXT$DELETE_MSG!RAW.
+            style: danger
+        }
+        serverSideCondition {
+            type: itemIsNotNull
+            item: P30_ID
+        }
+    )
+
+    button save (
+        buttonName: SAVE
+        label: &APP_TEXT$BTN_APLICAR_CAMBIOS!RAW.
+        layout {
+            sequence: 30
+            region: @buttons
+            slot: next
+        }
+        appearance {
+            buttonTemplate: @/text
+            hot: true
+            templateOptions: #DEFAULT#
+        }
+        behavior {
+            warnOnUnsavedChanges: doNotCheck
+            databaseAction: update
+        }
+        serverSideCondition {
+            type: itemIsNotNull
+            item: P30_ID
+        }
+    )
+
+    button varios (
+        buttonName: VARIOS
+        label: &APP_TEXT$BTN_CREAR_VARIOS!RAW.
+        layout {
+            sequence: 50
+            region: @buttons
+            slot: next
+        }
+        appearance {
+            buttonTemplate: @/text
+            templateOptions: #DEFAULT#
+        }
+        behavior {
+            warnOnUnsavedChanges: doNotCheck
+        }
+        serverSideCondition {
+            type: itemIsNull
+            item: P30_ID
+        }
+        config {
+            buildOption: @commented-out
+        }
+    )
+
+    dynamicAction cancel-dialog (
+        name: Cancel Dialog
+        execution {
+            sequence: 10
+        }
+        when {
+            event: click
+            selectionType: button
+            button: @cancel
+        }
+
+        action native-dialog-cancel (
+            action: cancelDialog
+            execution {
+                sequence: 10
+                fireOnInit: false
+            }
+        )
+
+    )
+
+    validation p30-actualizado-el-must-be-timestamp (
+        name: P30_ACTUALIZADO_EL must be timestamp
+        execution {
+            sequence: 150
+        }
+        validation {
+            type: itemIsAValidTimestamp
+            item: P30_ACTUALIZADO_EL
+        }
+        error {
+            errorMessage: #LABEL# must be a valid timestamp.
+            associatedItem: @P30_ACTUALIZADO_EL
+        }
+    )
+
+    validation p30-creado-el-must-be-timestamp (
+        name: P30_CREADO_EL must be timestamp
+        execution {
+            sequence: 140
+        }
+        validation {
+            type: itemIsAValidTimestamp
+            item: P30_CREADO_EL
+        }
+        error {
+            errorMessage: #LABEL# must be a valid timestamp.
+            associatedItem: @P30_CREADO_EL
+        }
+    )
+
+    process agregarvarios (
+        name: AgregarVarios
+        type: executeCode
+        source {
+            plsqlCode:
+                ```plsql
+                DECLARE
+                  v_input VARCHAR2(100) := :P30_NOMBRE; 
+                  v_prefix VARCHAR2(10);
+                  v_start_num NUMBER;
+                  v_end_num NUMBER;
+                  v_count NUMBER := 0;
+                  
+                BEGIN
+                  --Desea eliminar el registro?
+                  IF :REQUEST = 'DELETE' THEN
+                    APEX_APPLICATION.G_PRINT_SUCCESS_MESSAGE := 'El usuario presiono DELETE'; 
+                    delete from sgt_interfaces where id = :P30_ID;
+                    return;
+                  else 
+                  --Chequear si quiere actualizar
+                  if :P30_ID is not null then
+                    SELECT COUNT(*) INTO v_count 
+                    FROM sgt_interfaces 
+                    WHERE id = :P30_ID;
+                    
+                    IF v_count = 0 THEN
+                        RAISE_APPLICATION_ERROR(-20001, 'El registro no existe');
+                    END IF;
+                     update sgt_interfaces set 
+                     equipo_id = :P30_EQUIPO_ID,
+                      nombre = :P30_NOMBRE, 
+                      etiqueta = :P30_ETIQUETA,
+                      estado = :P30_ESTADO,
+                      TIPO_INTERFACE_ID = :P30_TIPO_INTERFACE_ID,
+                      TX_EN_DBM = :P30_TX_EN_DBM,
+                      RX_EN_DBM = :P30_RX_EN_DBM,
+                      MAC_ADDRESS =:P30_MAC_ADDRESS,
+                      VELOCIDAD_MBPS =:P30_VELOCIDAD_MBPS
+                
+                      where id = :P30_ID;
+                
+                    
+                    APEX_APPLICATION.G_PRINT_SUCCESS_MESSAGE := 'El usuario esta actualizando datos';
+                   
+                    return;
+                    end if; 
+                  end if;
+                
+                  -- Extraer el prefijo (ge) y los números del rango [0-10]
+                  v_prefix := REGEXP_SUBSTR(v_input, '^([^\[]+)', 1, 1, '', 1);
+                  v_start_num := TO_NUMBER(REGEXP_SUBSTR(v_input, '\[(\d+)-(\d+)\]', 1, 1, '', 1));
+                  v_end_num := TO_NUMBER(REGEXP_SUBSTR(v_input, '\[(\d+)-(\d+)\]', 1, 1, '', 2));
+                
+                  --Chequear un solo registro
+                
+                  IF v_prefix = v_input  THEN
+                
+                    INSERT INTO sgt_interfaces(
+                      equipo_id,
+                      nombre, 
+                      etiqueta,
+                      estado,
+                      TIPO_INTERFACE_ID,
+                      TX_EN_DBM,
+                      RX_EN_DBM,
+                      MAC_ADDRESS,
+                      VELOCIDAD_MBPS
+                      ) VALUES (
+                      
+                      :P30_EQUIPO_ID,
+                      v_prefix,
+                      :P30_etiqueta ,
+                      :P30_estado,
+                      :P30_TIPO_INTERFACE_ID,
+                      :P30_TX_EN_DBM,
+                      :P30_RX_EN_DBM,
+                      :P30_MAC_ADDRESS,
+                      :P30_VELOCIDAD_MBPS
+                    );  
+                  ELSE
+                      IF v_end_num - v_start_num + 1 > 48 THEN
+                        v_end_num := v_start_num + 47;
+                        APEX_APPLICATION.G_PRINT_SUCCESS_MESSAGE := 'Se ha limitado la creación a 48 registros';
+                      END IF;
+                      -- Generar los registros
+                      FOR i IN v_start_num..v_end_num LOOP
+                        INSERT INTO sgt_interfaces(
+                          equipo_id,
+                          nombre, 
+                          etiqueta,
+                          estado,
+                          TIPO_INTERFACE_ID,
+                          TX_EN_DBM,
+                          RX_EN_DBM,
+                          MAC_ADDRESS,
+                          VELOCIDAD_MBPS
+                          ) VALUES (
+                          
+                          :P30_EQUIPO_ID,
+                          v_prefix || i,
+                          :P30_etiqueta ,
+                          :P30_estado,
+                          :P30_TIPO_INTERFACE_ID,
+                          :P30_TX_EN_DBM,
+                          :P30_RX_EN_DBM,
+                          :P30_MAC_ADDRESS,
+                          :P30_VELOCIDAD_MBPS
+                        );
+                        
+                        v_count := v_count + 1;
+                      END LOOP;
+                    END IF;  
+                  
+                  -- Mensaje de éxito
+                  APEX_APPLICATION.G_PRINT_SUCCESS_MESSAGE := 'Se han creado ' || v_count || ' registros correctamente';
+                EXCEPTION
+                  WHEN OTHERS THEN
+                    APEX_APPLICATION.G_PRINT_SUCCESS_MESSAGE:= 'Error: ' || SQLERRM;
+                    RAISE;
+                END;
+                ```
+        }
+        execution {
+            sequence: 30
+        }
+        advanced {
+            executionMappingIdentifier: 42101939500166121407
+        }
+        serverSideCondition {
+            type: requestIsContainedInValue
+            value: SAVE,CREATE,VARIOS
+        }
+        config {
+            buildOption: @commented-out
+        }
+    )
+
+    process close-dialog (
+        name: Close Dialog
+        type: closeDialog
+        execution {
+            sequence: 50
+        }
+        advanced {
+            executionMappingIdentifier: 43191671388602447016
+        }
+        serverSideCondition {
+            type: requestIsContainedInValue
+            value: CREATE,SAVE,DELETE
+        }
+    )
+
+    process initialize-form-sgt-from-interfaces (
+        name: Initialize form SGT_FROM_INTERFACES
+        type: formInitialization
+        formRegion: @sgt-from-interfaces
+        execution {
+            sequence: 10
+            point: beforeHeader
+        }
+        advanced {
+            executionMappingIdentifier: 43191670508660447015
+        }
+    )
+
+    process process-form-sgt-from-interfaces (
+        name: Process form SGT_FROM_INTERFACES
+        type: formAutoRowProcessing
+        formRegion: @sgt-from-interfaces
+        execution {
+            sequence: 40
+        }
+        advanced {
+            executionMappingIdentifier: 43191670908989447016
+        }
+    )
+
+)
+

@@ -1,0 +1,1117 @@
+lov access-roles (
+    name: ACCESS_ROLES
+    source {
+        type: sqlQuery
+        sqlQuery:
+            ```sql
+            select role_name d, role_id r
+            from APEX_APPL_ACL_ROLES where application_id = :APP_ID 
+            order by 1
+            ```
+    }
+    columnMapping {
+        return: R
+        display: D
+    }
+)
+
+lov acciones-equipos (
+    name: ACCIONES EQUIPOS
+    source {
+        location: staticValues
+    }
+
+    entry hola (
+        sequence: 1
+        display: HOLA
+        return: HOLA
+    )
+
+)
+
+lov ciudad-nombre (
+    name: CIUDAD.NOMBRE
+    source {
+        tableName: SGT_CIUDAD
+    }
+    columnMapping {
+        return: ID
+        display: NOMBRE
+        defaultSort: NOMBRE
+    }
+)
+
+lov ciudad-nombre-compuesto (
+    name: CIUDAD.NOMBRE-COMPUESTO
+    source {
+        type: sqlQuery
+        sqlQuery:
+            ```sql
+            select C.ID VALOR, D.NOMBRE||', '||C.NOMBRE  DISPLAY, D.ID DEPTO_ID from SGT_CIUDAD C
+            JOIN SGT_DEPTO D ON C.DEPTO_ID = D.ID
+            ORDER BY DISPLAY
+            ```
+    }
+    columnMapping {
+        return: VALOR
+        display: DISPLAY
+    }
+)
+
+lov conexiones-equipo-a-nombre (
+    name: CONEXIONES.EQUIPO_A.NOMBRE
+    source {
+        type: sqlQuery
+        sqlQuery:
+            ```sql
+            SELECT DISTINCT E.NOMBRE , E.ID FROM 
+            SGT_ENLACES_TRAMOS ET
+            INNER JOIN SGT_EQUIPOS E
+            ON ET.EQUIPO_A_ID = E.ID
+            ORDER BY E.ID
+            ```
+    }
+    columnMapping {
+        return: ID
+        display: NOMBRE
+    }
+)
+
+lov conexiones-equipo-b-nombre (
+    name: CONEXIONES.EQUIPO_B.NOMBRE
+    source {
+        type: sqlQuery
+        sqlQuery:
+            ```sql
+            SELECT DISTINCT E.NOMBRE , E.ID FROM 
+            SGT_ENLACES_TRAMOS ET
+            INNER JOIN SGT_EQUIPOS E
+            ON ET.EQUIPO_B_ID = E.ID
+            ORDER BY E.ID
+            ```
+    }
+    columnMapping {
+        return: ID
+        display: NOMBRE
+    }
+)
+
+lov email-username-format (
+    name: EMAIL_USERNAME_FORMAT
+    source {
+        location: staticValues
+    }
+
+    entry email (
+        sequence: 1
+        display: Email Addresses
+        return: EMAIL
+    )
+
+)
+
+lov enlace-fo-estado (
+    name: ENLACE_FO.ESTADO
+    source {
+        location: staticValues
+    }
+
+    entry activo (
+        sequence: 1
+        display: Activo
+        return: Activo
+    )
+
+    entry cortado (
+        sequence: 2
+        display: Cortado
+        return: Cortado
+    )
+
+    entry desconocido (
+        sequence: 4
+        display: Desconocido
+        return: Desconocido
+    )
+
+    entry planificado (
+        sequence: 5
+        display: Planificado
+        return: Planificado
+    )
+
+    entry suprimido-retirado (
+        sequence: 3
+        display: Suprimido / Retirado
+        return: Suprimido / Retirado
+    )
+
+)
+
+lov enlaces-fo-nombre (
+    name: ENLACES_FO.NOMBRE
+    source {
+        tableName: SGT_ENLACES_FO
+    }
+    columnMapping {
+        return: ID
+        display: NOMBRE
+        defaultSort: NOMBRE
+    }
+)
+
+lov enlaces-wan (
+    name: ENLACES_WAN
+    source {
+        tableName: SGT_ENLACES_WAN
+    }
+    columnMapping {
+        return: ID
+        display: NOMBRE
+        defaultSort: NOMBRE
+    }
+)
+
+lov enlaces-wan-filtrado-en-uso (
+    name: ENLACES_WAN.FILTRADO_EN_USO
+    source {
+        type: sqlQuery
+        sqlQuery:
+            ```sql
+            SELECT DISTINCT WAN.NOMBRE, WAN.ID FROM 
+            SGT_EQUIPOS_WAN EW
+            INNER JOIN SGT_ENLACES_WAN WAN ON
+            EW.WAN_ID = WAN.ID
+            ORDER BY WAN.ID  
+            ```
+    }
+    columnMapping {
+        return: ID
+        display: NOMBRE
+    }
+)
+
+lov enlaces-wan-filtrado-sitios (
+    name: ENLACES_WAN.FILTRADO_SITIOS
+    source {
+        type: functionBody
+        plsqlFunctionBody:
+            ```plsql
+            RETURN 'SELECT distinct w.nombre, W.id
+            FROM sgt_enlaces_wan w
+            JOIN sgt_equipos_wan ew   ON w.id = ew.wan_id
+            JOIN v_sitios_equipos vse ON vse.equipo_id = ew.equipo_a_id
+            WHERE (:SITIO_ID IS NULL OR vse.sitio_id = :SITIO_ID)
+            ORDER BY W.NOMBRE
+            '
+            ```
+    }
+    columnMapping {
+        return: ID
+        display: NOMBRE
+        defaultSort: NOMBRE
+    }
+)
+
+lov enlaces-wan-grupo-red (
+    name: ENLACES_WAN.GRUPO_RED
+    source {
+        type: sqlQuery
+        sqlQuery: SELECT DISTINCT GRUPO_RED DISPLAY, GRUPO_RED VALUE FROM SGT_ENLACES_WAN ORDER BY DISPLAY
+    }
+    columnMapping {
+        return: VALUE
+        display: DISPLAY
+    }
+)
+
+lov enlaces-wan-tipo-enlace (
+    name: ENLACES_WAN.TIPO_ENLACE
+    source {
+        tableName: SGT_TIPO_WAN
+    }
+    columnMapping {
+        return: ID
+        display: NOMBRE
+        defaultSort: NOMBRE
+    }
+)
+
+lov equipo-estado (
+    name: EQUIPO.ESTADO
+    source {
+        location: staticValues
+    }
+
+    entry baja (
+        sequence: 4
+        display: Baja
+        return: Baja
+    )
+
+    entry desconocido (
+        sequence: 3
+        display: Desconocido
+        return: Desconocido
+    )
+
+    entry no-utilizado-apagado (
+        sequence: 2
+        display: No utilizado / Apagado
+        return: No utilizado / Apagado
+    )
+
+    entry planificado (
+        sequence: 5
+        display: Planificado
+        return: Planificado
+    )
+
+    entry utilizado (
+        sequence: 1
+        display: Utilizado
+        return: Utilizado
+    )
+
+)
+
+lov equipos-nombre (
+    name: EQUIPOS.NOMBRE
+    source {
+        tableName: SGT_EQUIPOS
+    }
+    columnMapping {
+        return: ID
+        display: NOMBRE
+        defaultSort: NOMBRE
+    }
+)
+
+lov equipos-nombre-compuesto (
+    name: EQUIPOS.NOMBRE-COMPUESTO
+    source {
+        type: sqlQuery
+        sqlQuery:
+            ```sql
+            select 
+                   SS.SIGLAS ||'.'|| S.SIGLAS ||'.'|| R.NOMBRE || '.'|| E.NOMBRE MOSTRAR,
+                   E.ID VALOR        
+              from SGT_EQUIPOS E
+              LEFT JOIN SGT_RACKS R ON E.RACK_ID = R.ID
+              LEFT JOIN SGT_SALAS S ON R.SALA_ID = S.ID
+              LEFT JOIN SGT_SITIOS SS ON S.SITIO_ID = SS.ID
+            ```
+    }
+    columnMapping {
+        return: VALOR
+        display: MOSTRAR
+        defaultSort: VALOR
+        sortDirection: descNullsLast
+    }
+)
+
+lov equipos-nombre-filtrado (
+    name: EQUIPOS.NOMBRE-FILTRADO
+    source {
+        type: functionBody
+        plsqlFunctionBody:
+            ```plsql
+            
+            RETURN 'select e.nombre, e.id from sgt_equipos e 
+            join sgt_tipo_equipos te on e.tipo_equipo_id = te.id
+            join v_sitios_equipos vse on e.id = vse.equipo_id
+            where vse.sitio_id = :SITIO_ID and lower(e.estado) = ''utilizado'' 
+            and (te.id=11 or lower(te.grupo_equipo) = ''activo'')
+            order by e.nombre';
+            ```
+    }
+    columnMapping {
+        return: ID
+        display: NOMBRE
+        defaultSort: NOMBRE
+    }
+)
+
+lov equipos-posicion (
+    name: EQUIPOS.POSICION
+    source {
+        location: staticValues
+    }
+
+    entry back (
+        sequence: 2
+        display: BACK
+        return: BACK
+    )
+
+    entry front (
+        sequence: 1
+        display: FRONT
+        return: FRONT
+    )
+
+)
+
+lov interfaces-estado (
+    name: INTERFACES.ESTADO
+    source {
+        location: staticValues
+    }
+
+    entry down (
+        sequence: 2
+        display: DOWN
+        return: DOWN
+    )
+
+    entry na (
+        sequence: 3
+        display: NA
+        return: NA
+    )
+
+    entry up (
+        sequence: 1
+        display: UP
+        return: UP
+    )
+
+)
+
+lov interfaces-nombre (
+    name: INTERFACES.NOMBRE
+    source {
+        tableName: SGT_INTERFACES
+    }
+    columnMapping {
+        return: ID
+        display: NOMBRE
+        defaultSort: NOMBRE
+    }
+)
+
+lov interfaces-nombre-compuesto (
+    name: INTERFACES.NOMBRE-COMPUESTO
+    source {
+        type: sqlQuery
+        sqlQuery:
+            ```sql
+            SELECT UPPER(SS.SIGLAS ||'.'|| S.SIGLAS ||'.'|| R.NOMBRE || '.'|| E.NOMBRE ||'.'||I.NOMBRE) NOMBRE, I.ID  VALOR  
+                    
+                    FROM sgt_interfaces I
+                    LEFT JOIN SGT_EQUIPOS E  on i.equipo_id = e.id
+                    LEFT JOIN SGT_RACKS R ON E.RACK_ID = R.ID  
+                    LEFT JOIN SGT_SALAS S ON R.SALA_ID = S.ID  
+                    LEFT JOIN SGT_SITIOS SS ON S.SITIO_ID = SS.ID  
+            ORDER BY NOMBRE
+            ```
+    }
+    columnMapping {
+        return: VALOR
+        display: NOMBRE
+    }
+)
+
+lov interfaces-nombre-equiqueta (
+    name: INTERFACES.NOMBRE:EQUIQUETA
+    source {
+        type: sqlQuery
+        sqlQuery:
+            ```sql
+            SELECT 
+            CASE WHEN ETIQUETA IS NOT NULL THEN NOMBRE ||' : '||ETIQUETA  ELSE NOMBRE END DISPLAY, ID VALUE FROM SGT_INTERFACES
+            ORDER BY ID
+            ```
+    }
+    columnMapping {
+        return: VALUE
+        display: DISPLAY
+    }
+)
+
+lov lov-sgt-dpto (
+    name: LOV_SGT_DPTO
+    source {
+        tableName: SGT_DEPTO
+    }
+    columnMapping {
+        return: ID
+        display: NOMBRE
+        defaultSort: NOMBRE
+    }
+)
+
+lov lov-sgt-racks-filtrado (
+    name: LOV_SGT_RACKS_FILTRADO
+    source {
+        type: sqlQuery
+        sqlQuery:
+            ```sql
+            select 
+                   S.SIGLAS||'.'||R.NOMBRE MOSTRAR,
+                   R.ID VALOR        
+              from SGT_RACKS R
+              LEFT JOIN SGT_SALAS S ON R.SALA_ID = S.ID
+              left join SGT_SITIOS SS ON S.SITIO_ID = SS.ID
+             where
+             SS.ID = :P14_SITIO_ID
+            ```
+    }
+    columnMapping {
+        return: VALOR
+        display: MOSTRAR
+    }
+)
+
+lov lov-sgt-zonas (
+    name: LOV_SGT_ZONAS
+    source {
+        tableName: SGT_ZONAS
+        whereClause: parent_id is not null
+    }
+    columnMapping {
+        return: ID
+        display: NOMBRE
+        defaultSort: NOMBRE
+    }
+)
+
+lov lov-sitios-sf (
+    name: LOV_SITIOS_SF
+    source {
+        tableName: SGT_SITIOS
+    }
+    columnMapping {
+        return: ID
+        display: SIGLAS
+        defaultSort: SIGLAS
+        group: CIUDAD_ID
+    }
+)
+
+lov racks-nombre-compuesto (
+    name: RACKS.NOMBRE-COMPUESTO
+    source {
+        type: sqlQuery
+        sqlQuery:
+            ```sql
+            select 
+                   SS.SIGLAS||'.'||S.SIGLAS||'.'||R.NOMBRE MOSTRAR,
+                   R.ID VALOR        
+              from SGT_RACKS R
+              LEFT JOIN SGT_SALAS S ON R.SALA_ID = S.ID
+              LEFT JOIN SGT_SITIOS SS ON S.SITIO_ID = SS.ID
+            ```
+    }
+    columnMapping {
+        return: VALOR
+        display: MOSTRAR
+        defaultSort: MOSTRAR
+    }
+)
+
+lov racks-nombres (
+    name: RACKS.NOMBRES
+    source {
+        type: sqlQuery
+        sqlQuery:
+            ```sql
+            SELECT SGT_SITIOS.SIGLAS || '.'|| SGT_SALAS.SIGLAS ||'.'||SGT_RACKS.NOMBRE AS MOSTRAR , SGT_RACKS.ID AS CLAVE
+            FROM SGT_RACKS INNER JOIN
+            SGT_SALAS ON SGT_RACKS.SALA_ID = SGT_SALAS.ID
+            INNER JOIN
+            SGT_SITIOS ON SGT_SALAS.SITIO_ID = SGT_SITIOS.ID
+            ```
+    }
+    columnMapping {
+        return: CLAVE
+        display: MOSTRAR
+    }
+)
+
+lov salas-nombre (
+    name: SALAS.NOMBRE
+    source {
+        type: sqlQuery
+        sqlQuery:
+            ```sql
+            SELECT SGT_SITIOS.SIGLAS || '.'|| SGT_SALAS.SIGLAS AS MOSTRAR , SGT_SALAS.ID AS CLAVE
+            FROM SGT_SALAS INNER JOIN
+            SGT_SITIOS ON SGT_SALAS.SITIO_ID = SGT_SITIOS.ID
+            ```
+    }
+    columnMapping {
+        return: CLAVE
+        display: MOSTRAR
+    }
+)
+
+lov servicios-nivel-prioridad (
+    name: SERVICIOS.NIVEL_PRIORIDAD
+    source {
+        location: staticValues
+    }
+
+    entry lov_data (
+        sequence: 1
+        display: "Crítico "
+        return: 10
+    )
+
+    entry lov_data-2 (
+        sequence: 2
+        display: Alta
+        return: 20
+    )
+
+    entry lov_data-3 (
+        sequence: 3
+        display: Media
+        return: 30
+    )
+
+    entry lov_data-4 (
+        sequence: 4
+        display: Baja
+        return: 40
+    )
+
+    entry lov_data-5 (
+        sequence: 5
+        display: Estándar
+        return: 50
+    )
+
+    entry lov_data-6 (
+        sequence: 6
+        display: Experimental
+        return: 60
+    )
+
+    entry lov_data-7 (
+        sequence: 7
+        display: Otros
+        return: 70
+    )
+
+)
+
+lov servicios-nombre (
+    name: SERVICIOS.NOMBRE
+    source {
+        tableName: SGT_SERVICIOS
+    }
+    columnMapping {
+        return: ID
+        display: NOMBRE
+        defaultSort: NOMBRE
+    }
+)
+
+lov sgt-sitios-siglas (
+    name: SGT_SITIOS.SIGLAS
+    source {
+        tableName: SGT_SITIOS
+    }
+    columnMapping {
+        return: ID
+        display: SIGLAS
+        defaultSort: SIGLAS
+    }
+)
+
+lov sgt-tipo-cable-nombre (
+    name: SGT_TIPO_CABLE.NOMBRE
+    source {
+        tableName: SGT_TIPO_CABLE
+    }
+    columnMapping {
+        return: ID
+        display: NOMBRE
+        defaultSort: NOMBRE
+        group: GRUPO_CABLES
+    }
+)
+
+lov sitios-propietarios (
+    name: SITIOS.PROPIETARIOS
+    source {
+        location: staticValues
+    }
+
+    entry ande (
+        sequence: 1
+        display: ANDE
+        return: ANDE
+    )
+
+    entry copaco (
+        sequence: 2
+        display: COPACO
+        return: COPACO
+    )
+
+    entry eby (
+        sequence: 3
+        display: EBY
+        return: EBY
+    )
+
+    entry itaipu (
+        sequence: 4
+        display: ITAIPU
+        return: ITAIPU
+    )
+
+    entry otros (
+        sequence: 5
+        display: OTROS
+        return: OTROS
+    )
+
+)
+
+lov timeframe-4-weeks (
+    name: TIMEFRAME (4 WEEKS)
+    source {
+        type: sqlQuery
+        sqlQuery:
+            ```sql
+            select disp,
+                   val as seconds
+              from table( apex_util.get_timeframe_lov_data )
+             order by insert_order
+            ```
+    }
+    columnMapping {
+        return: SECONDS
+        display: DISP
+    }
+)
+
+lov tipo-cable (
+    name: TIPO_CABLE
+    source {
+        location: staticValues
+    }
+
+    entry adss (
+        sequence: 1
+        display: ADSS
+        return: ADSS
+    )
+
+    entry armored (
+        sequence: 3
+        display: ARMORED
+        return: ARMORED
+    )
+
+    entry drop (
+        sequence: 5
+        display: DROP
+        return: DROP
+    )
+
+    entry opdc (
+        sequence: 4
+        display: OPDC
+        return: OPDC
+    )
+
+    entry opgw (
+        sequence: 2
+        display: OPGW
+        return: OPGW
+    )
+
+    entry patchcord (
+        sequence: 6
+        display: PATCHCORD
+        return: PATCHCORD
+    )
+
+)
+
+lov tipo-conector (
+    name: TIPO_CONECTOR
+    source {
+        location: staticValues
+    }
+
+    entry e (
+        sequence: 5
+        display: E2000
+        return: E2000
+    )
+
+    entry lc-upc (
+        sequence: 4
+        display: LC/UPC
+        return: LC/UPC
+    )
+
+    entry sc-apc (
+        sequence: 2
+        display: SC/APC
+        return: SC/APC
+    )
+
+    entry sc-pc (
+        sequence: 3
+        display: SC/PC
+        return: SC/PC
+    )
+
+    entry sc-upc (
+        sequence: 1
+        display: SC/UPC
+        return: SC/UPC
+    )
+
+    entry st-pc (
+        sequence: 6
+        display: ST/PC
+        return: ST/PC
+    )
+
+)
+
+lov tipo-enlace (
+    name: TIPO_ENLACE
+    source {
+        location: staticValues
+    }
+
+    entry acceso (
+        sequence: 3
+        display: Acceso
+        return: Acceso
+    )
+
+    entry de-terceros (
+        sequence: 4
+        display: De terceros
+        return: De terceros
+    )
+
+    entry interno (
+        sequence: 2
+        display: Interno
+        return: Interno
+    )
+
+    entry troncal (
+        sequence: 1
+        display: Troncal
+        return: Troncal
+    )
+
+)
+
+lov tipo-equipos-nombre (
+    name: TIPO_EQUIPOS.NOMBRE
+    source {
+        type: sqlQuery
+        sqlQuery: "select id, nombre from sgt_tipo_equipos order by nombre "
+    }
+    columnMapping {
+        return: ID
+        display: NOMBRE
+    }
+)
+
+lov tipo-fo (
+    name: TIPO_FO
+    source {
+        location: staticValues
+    }
+
+    entry g (
+        sequence: 1
+        display: G.652
+        return: G.652
+    )
+
+    entry g-2 (
+        sequence: 2
+        display: G.653
+        return: G.653
+    )
+
+    entry g-3 (
+        sequence: 3
+        display: G.654
+        return: G.654
+    )
+
+    entry g-4 (
+        sequence: 4
+        display: G.655
+        return: G.655
+    )
+
+    entry g-5 (
+        sequence: 5
+        display: G.656
+        return: G.656
+    )
+
+    entry g-6 (
+        sequence: 6
+        display: G.657
+        return: G.657
+    )
+
+    entry g-656d (
+        sequence: 7
+        display: G.656D
+        return: G.656D
+    )
+
+)
+
+lov tipo-interfaz-nombre (
+    name: TIPO_INTERFAZ.NOMBRE
+    source {
+        tableName: SGT_TIPO_INTERFAZ
+    }
+    columnMapping {
+        return: ID
+        display: NOMBRE
+        defaultSort: NOMBRE
+    }
+)
+
+lov tipo-lt (
+    name: TIPO_LT
+    source {
+        location: staticValues
+    }
+
+    entry ali-23kv (
+        sequence: 1
+        display: ALI-23KV
+        return: ALI-23KV
+    )
+
+    entry lt-220kv (
+        sequence: 3
+        display: LT-220KV
+        return: LT-220KV
+    )
+
+    entry lt-500kv (
+        sequence: 4
+        display: LT-500KV
+        return: LT-500KV
+    )
+
+    entry lt-66kv (
+        sequence: 2
+        display: LT-66KV
+        return: LT-66KV
+    )
+
+)
+
+lov tipo-red (
+    name: TIPO_RED
+    source {
+        location: staticValues
+    }
+
+    entry desconocido (
+        sequence: 1
+        display: Desconocido
+        return: Desconocido
+    )
+
+    entry externa (
+        sequence: 2
+        display: Externa
+        return: Externa
+    )
+
+    entry misceláneas (
+        sequence: 3
+        display: Misceláneas
+        return: Misceláneas
+    )
+
+    entry red-corporativa (
+        sequence: 4
+        display: Red Corporativa
+        return: Red Corporativa
+    )
+
+    entry red-eccande (
+        sequence: 5
+        display: Red ECCANDE
+        return: Red ECCANDE
+    )
+
+    entry red-radio-dmr (
+        sequence: 6
+        display: Red Radio DMR
+        return: Red Radio DMR
+    )
+
+    entry red-radio-vhf-uhf (
+        sequence: 19
+        display: Red Radio VHF/UHF
+        return: Red Radio VHF/UHF
+    )
+
+    entry red-reconectadores (
+        sequence: 4
+        display: Reconectadores
+        return: Red Reconectadores
+    )
+
+    entry red-scada (
+        sequence: 7
+        display: Red SCADA
+        return: Red SCADA
+    )
+
+    entry red-telefonía (
+        sequence: 8
+        display: Red Telefonía
+        return: Red Telefonía
+    )
+
+    entry red-transporte (
+        sequence: 9
+        display: Red Transporte
+        return: Red Transporte
+    )
+
+)
+
+lov tipo-sitio (
+    name: TIPO_SITIO
+    source {
+        location: staticValues
+    }
+
+    entry agencia-comercial-y-o-de-reclamo (
+        sequence: 3
+        display: Agencia Comercial y/o de Reclamo
+        return: Agencia Comercial y/o de Reclamo
+    )
+
+    entry caseta-repetidora-de-radiocomunicaciones (
+        sequence: 2
+        display: Caseta Repetidora de Radiocomunicaciones
+        return: Caseta Repetidora de Radiocomunicaciones
+    )
+
+    entry central-hidroeléctrica (
+        sequence: 4
+        display: Central Hidroeléctrica
+        return: Central Hidroeléctrica
+    )
+
+    entry centro-de-control (
+        sequence: 5
+        display: Centro de Control
+        return: Centro de Control
+    )
+
+    entry estación-subestación-eléctrica (
+        sequence: 1
+        display: Estación/Subestación Eléctrica
+        return: Estación/Subestación Eléctrica
+    )
+
+    entry otro (
+        sequence: 6
+        display: Otro
+        return: Otro
+    )
+
+)
+
+lov uni-encar (
+    name: UNI_ENCAR
+    source {
+        location: staticValues
+    }
+
+    entry dte-dic (
+        sequence: 1
+        display: DTE/DIC
+        return: DTE/DIC
+    )
+
+    entry dte-isc (
+        sequence: 3
+        display: DTE/ISC
+        return: DTE/ISC
+    )
+
+    entry dte-it (
+        sequence: 5
+        display: DTE/TI
+        return: DTE/IT
+    )
+
+    entry dte-mco (
+        sequence: 4
+        display: DTE/MCO
+        return: DTE/MCO
+    )
+
+    entry dte-msc (
+        sequence: 2
+        display: DTE/MSC
+        return: DTE/MSC
+    )
+
+    entry externo (
+        sequence: 8
+        display: EXTERNO
+        return: EXTERNO
+    )
+
+    entry gt (
+        sequence: 7
+        display: GT
+        return: GT
+    )
+
+    entry ri (
+        sequence: 6
+        display: RI
+        return: RI
+    )
+
+)
+
+lov view-as-report-chart (
+    name: VIEW_AS_REPORT_CHART
+    source {
+        location: staticValues
+    }
+
+    entry chart (
+        sequence: 2
+        display: Add Chart Page
+        return: CHART
+        globalization {
+            template: <span class="fa fa-pie-chart" aria-hidden="true"></span><span class="u-VisuallyHidden">#DISPLAY_VALUE#</span>
+        }
+    )
+
+    entry report (
+        sequence: 1
+        display: Add Report Page
+        return: REPORT
+        globalization {
+            template: <span class="fa fa-table" aria-hidden="true"></span><span class="u-VisuallyHidden">#DISPLAY_VALUE#</span>
+        }
+    )
+
+)
+

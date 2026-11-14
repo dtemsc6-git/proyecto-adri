@@ -1,0 +1,858 @@
+page 471 (
+    name: Archivos
+    alias: ARCHIVOS
+    title: Archivos
+    pageGroup: @archivos
+    appearance {
+        pageTemplate: @/standard
+        templateOptions: #DEFAULT#
+    }
+    navigation {
+        cursorFocus: doNotFocusCursor
+        warnOnUnsavedChanges: false
+    }
+    css {
+        inline:
+            ```css
+            .nuevo {
+                border-left: 4px solid #2ecc71;
+            }
+            
+            .obsoleto {
+                border-left: 4px solid #f39c12;
+            }
+            .borrado {
+                border-left: 4px solid red;
+            }
+            ```
+    }
+    security {
+        pageAccessProtection: argumentsMustHaveChecksum
+        formAutoComplete: false
+    }
+
+    region archivos (
+        name: Archivos
+        type: cards
+        source {
+            location: localDatabase
+            tableName: V_ARCHIVOS_ENTIDADES
+            whereClause:
+                ```sql
+                (:P471_tipo_entidad is null or entidad = :P471_tipo_entidad) 
+                AND 
+                (:P471_F_PK_ID is null  or pk_id = :P471_F_PK_ID)
+                and 
+                (:P471_SITIO is null or ARCH_ID in 
+                    (SELECT ARCHIVO_ID FROM SGT_SITIOS_ARCHIVOS WHERE SITIO_ID IN
+                       ( SELECT column_value FROM apex_string.split_numbers(:P471_SITIO, ':') )
+                    )
+                )
+                AND
+                (:P471_F_NOMBRE IS NULL OR lower(FULLNAME) LIKE lower(:P471_F_NOMBRE))
+                ```
+            pageItemsToSubmit: [
+                P471_TIPO_ENTIDAD
+                P471_F_PK_ID
+                P471_SITIO
+                P471_F_NOMBRE
+            ]
+        }
+        orderBy {
+            type: item
+            item: {
+                itemName: P471_ORDER_BY
+                orderBys: {
+                    FILE_NAME: "FILE_NAME" asc
+                    OBSERVACIONES: "OBSERVACIONES" asc
+                }
+            }
+        }
+        layout {
+            sequence: 10
+            slot: body
+        }
+        appearance {
+            template: @/cards-container
+            templateOptions: [
+                #DEFAULT#
+                t-CardsRegion--hideHeader js-addHiddenHeadingRoleDesc
+            ]
+            cssClasses: btn-acciones
+        }
+        componentAppearance {
+            layout: float
+        }
+        card {
+            cssClasses: &INTERNAL_ATTR.
+            primaryKeyColumn1: ARCH_ID
+        }
+        title {
+            column: FULLNAME
+        }
+        subtitle {
+            column: FILE_NAME
+        }
+        body {
+            column: OBSERVACIONES
+        }
+        secondaryBody {
+            advancedFormatting: true
+            htmlExpression:
+                ```html
+                Creado por: &CREADO_POR. <br/>
+                Creado el: &CREADO_EL.
+                ```
+        }
+        iconAndBadge {
+            badgeColumn: INTERNAL_ATTR
+        }
+        media {
+            source: blobColumn
+            blobColumn: FILE_BLOB
+        }
+        blobAttributes {
+            mimeTypeColumn: FILE_MIMETYPE
+            lastUpdatedColumn: CREADO_EL
+        }
+        performance {
+            lazyLoading: true
+        }
+
+        action action (
+            label: Ver Mapa
+            layout {
+                sequence: 40
+            }
+            behavior {
+                target: {
+                    page: 15
+                    items: {
+                        P15_KMZ: &ARCH_ID.
+                        P15_PK_ID: &PK_ID.
+                    }
+                }
+            }
+            serverSideCondition {
+                type: item=value
+                item: ENTIDAD
+                value: 5
+            }
+        )
+
+        action action-2 (
+            label: Eliminar
+            layout {
+                sequence: 30
+            }
+            behavior {
+                type: redirectUrl
+                targetUrl: javascript:void(0);
+                linkAttributes: data-id="&ARCH_ID."
+            }
+            appearance {
+                cssClasses: btn-borrar
+            }
+        )
+
+        action action-3 (
+            label: Descargar
+            layout {
+                sequence: 10
+            }
+            behavior {
+                type: redirectUrl
+                targetUrl: javascript:void(0);
+                linkAttributes: data-id="&ARCH_ID."
+            }
+            appearance {
+                cssClasses: btn-descargar
+            }
+        )
+
+        action action-4 (
+            label: Obsoleto
+            layout {
+                sequence: 20
+            }
+            behavior {
+                type: redirectUrl
+                targetUrl: javascript:void(0);
+                linkAttributes: data-id="&ARCH_ID."
+            }
+            appearance {
+                cssClasses: btn-obsoleto
+            }
+        )
+
+    )
+
+    pageItem P471_ARCH_ID (
+        type: hidden
+        layout {
+            sequence: 30
+            slot: body
+        }
+    )
+
+    pageItem P471_ENTIDAD (
+        type: hidden
+        layout {
+            sequence: 20
+            slot: body
+        }
+    )
+
+    pageItem P471_ESPACIO_EN_USO (
+        type: percentGraph
+        label {
+            label: Espacio En Uso
+            alignment: left
+        }
+        layout {
+            sequence: 110
+            region: @archivos
+            slot: sortOrder
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+        }
+        source {
+            type: sqlQuerySingleValue
+            sqlQuery: SELECT ROUND(sum(sys.dbms_lob.getlength(FILE_BLOB)) / (2*1024*1024*1024) * 100 , 2)  GB_USED from SGT_archivos
+        }
+        help {
+            inlineHelpText: Muestra el % de uso, con respecto a un espacio de 2GB.
+        }
+    )
+
+    pageItem P471_F_NOMBRE (
+        type: textField
+        label {
+            label: Nombre
+            alignment: left
+        }
+        layout {
+            sequence: 80
+            region: @archivos
+            slot: sortOrder
+            alignment: left
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+            width: 30
+        }
+        help {
+            inlineHelpText: Escribir %palabra% para búsqueda por palabra
+            helpText:
+                ```html
+                <p>
+                Ejemplos:
+                <p>
+                    <ul>
+                	
+                
+                <li> %smi% </li>
+                <li> %smi%sc% </li>
+                <li>%COV%nombre_equipo%</li>
+                
+                	    </ul>
+                </p>
+                ```
+        }
+    )
+
+    pageItem P471_F_PK_ID (
+        type: popupLov
+        label {
+            label: Entidad
+            alignment: left
+        }
+        lov {
+            type: functionBody
+            plsqlFunctionBody:
+                ```plsql
+                DECLARE
+                    v_sql VARCHAR2(4000);
+                BEGIN
+                    -- Validar que se haya seleccionado un tipo
+                    IF :P471_TIPO_ENTIDAD IS NULL THEN
+                        v_sql := 'SELECT NULL as nombre, NULL as id FROM dual WHERE 1=0';
+                    
+                    ELSIF :P471_TIPO_ENTIDAD = 1 THEN
+                        v_sql := 'SELECT nombre, id FROM sgt_sitios where id in (select pk_id from SGT_archivos where entidad = 1) ORDER BY nombre';
+                    
+                    ELSIF :P471_TIPO_ENTIDAD = 2 THEN
+                        v_sql := 'SELECT SGT_SITIOS.SIGLAS ||''.''|| SGT_SALAS.SIGLAS AS MOSTRAR , SGT_SALAS.ID AS CLAVE
+                                  FROM SGT_SALAS INNER JOIN
+                                  SGT_SITIOS ON SGT_SALAS.SITIO_ID = SGT_SITIOS.ID 
+                                  where SGT_SALAS.ID in (select pk_id from SGT_archivos where entidad = 2) ORDER BY MOSTRAR';
+                    
+                    ELSIF :P471_TIPO_ENTIDAD = 3 THEN
+                        v_sql := '
+                        SELECT
+                         SS.SIGLAS||''.''||S.SIGLAS||''.''||R.NOMBRE MOSTRAR,
+                        R.ID VALOR        
+                        FROM SGT_RACKS R
+                        LEFT JOIN SGT_SALAS S ON R.SALA_ID = S.ID
+                        LEFT JOIN SGT_SITIOS SS ON S.SITIO_ID = SS.ID
+                         where R.ID in (select pk_id from SGT_archivos where entidad = 3) ORDER BY MOSTRAR';
+                    
+                    ELSIF :P471_TIPO_ENTIDAD = 4 THEN
+                        v_sql := 'SELECT nombre, id FROM sgt_equipos where id in (select pk_id from SGT_archivos where entidad = 4) ORDER BY nombre';
+                   
+                    ELSIF :P471_TIPO_ENTIDAD = 5 THEN
+                        v_sql := 'SELECT nombre, id FROM sgt_enlaces_fo where id in (select pk_id from SGT_archivos where entidad = 5) ORDER BY nombre';
+                    
+                    ELSIF :P471_TIPO_ENTIDAD = 5 THEN
+                        v_sql := 'SELECT nombre, id FROM sgt_enlaces_fo where id in (select pk_id from SGT_archivos where entidad = 5) ORDER BY nombre';
+                    
+                    ELSE
+                        -- Caso por defecto o error
+                        v_sql := 'SELECT NULL as nombre, NULL as id FROM dual WHERE 1=0';
+                    END IF;
+                    
+                    RETURN v_sql;
+                end;
+                ```
+            nullDisplayValue: Seleccione Una
+        }
+        cascadingLov {
+            parentItems: P471_TIPO_ENTIDAD
+            itemsToSubmit: P471_TIPO_ENTIDAD
+        }
+        layout {
+            sequence: 60
+            region: @archivos
+            slot: sortOrder
+            alignment: left
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+            width: 30
+        }
+    )
+
+    pageItem P471_ORDER_BY (
+        type: selectList
+        label {
+            label: Order By
+            alignment: left
+        }
+        lov {
+            type: staticValues
+            staticValues: STATIC2:File Name;FILE_NAME,Observaciones;OBSERVACIONES
+            displayExtraValues: false
+            displayNullValue: false
+        }
+        layout {
+            sequence: 10
+            region: @archivos
+            slot: sortOrder
+            alignment: left
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+            height: 1
+        }
+        validation {
+            valueRequired: true
+        }
+        advanced {
+            warnOnUnsavedChanges: ignore
+        }
+        default {
+            type: static
+            staticValue: FILE_NAME
+        }
+        config {
+            buildOption: @commented-out
+        }
+    )
+
+    pageItem P471_SALA (
+        type: textField
+        label {
+            label: Sala
+            alignment: left
+        }
+        layout {
+            sequence: 30
+            region: @archivos
+            slot: sortOrder
+            alignment: left
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+            width: 30
+        }
+        config {
+            buildOption: @commented-out
+        }
+    )
+
+    pageItem P471_SITIO (
+        type: popupLov
+        label {
+            label: Sitio
+            alignment: left
+        }
+        lov {
+            type: sqlQuery
+            sqlQuery:
+                ```sql
+                select siglas, id from
+                sgt_sitios
+                where
+                id in (select SITIO_ID from sgt_sitios_archivos)
+                ```
+        }
+        multipleValues {
+            type: delimitedList
+        }
+        layout {
+            sequence: 70
+            region: @archivos
+            slot: sortOrder
+            alignment: left
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+            width: 30
+        }
+    )
+
+    pageItem P471_TIPO_ENTIDAD (
+        type: selectList
+        label {
+            label: Tipo Entidad
+            alignment: left
+        }
+        lov {
+            type: staticValues
+            staticValues: STATIC2:1. Sitios;1,2. Salas;2,3. Racks;3,4. Equipos;4,5. Fibra;5,6. Esquemas;6,7. Informes;7
+            nullDisplayValue: 0. Todas
+        }
+        layout {
+            sequence: 50
+            region: @archivos
+            slot: sortOrder
+            alignment: left
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+            height: 1
+        }
+    )
+
+    button subir-esquemas (
+        buttonName: Subir_Esquemas
+        label: Subir
+        layout {
+            sequence: 90
+            region: @archivos
+            slot: sortOrder
+        }
+        appearance {
+            buttonTemplate: @/text-with-icon
+            hot: true
+            templateOptions: [
+                #DEFAULT#
+                t-Button--iconLeft
+            ]
+            icon: fa-upload
+        }
+        behavior {
+            warnOnUnsavedChanges: doNotCheck
+        }
+    )
+
+    dynamicAction delete (
+        name: DELETE
+        execution {
+            sequence: 40
+            eventScope: dynamic
+            staticContainer: .btn-acciones
+        }
+        when {
+            event: click
+            selectionType: jQuerySelector
+            jquerySelector: .btn-borrar
+        }
+
+        action native-confirm (
+            action: confirm
+            settings {
+                title: Atención
+                message: Borrar el elemento?
+                style: danger
+            }
+            execution {
+                sequence: 10
+                fireOnInit: false
+            }
+        )
+
+        action native-execute-plsql-code (
+            action: executeServerSideCode
+            settings {
+                plsqlCode:
+                    ```plsql
+                    DELETE FROM SGT_ARCHIVOS
+                    WHERE ID = :p471_ARCH_ID
+                    ```
+                itemsToSubmit: P471_ARCH_ID
+            }
+            execution {
+                sequence: 40
+                fireOnInit: false
+            }
+        )
+
+        action native-refresh (
+            action: refresh
+            affectedElements {
+                selectionType: region
+                region: @archivos
+            }
+            execution {
+                sequence: 50
+                fireOnInit: false
+            }
+        )
+
+        action native-set-value (
+            action: setValue
+            settings {
+                type: jsExpression
+                jsExpression: this.triggeringElement.dataset.id
+            }
+            affectedElements {
+                selectionType: items
+                items: P471_ARCH_ID
+            }
+            execution {
+                sequence: 30
+            }
+        )
+
+    )
+
+    dynamicAction download (
+        name: DOWNLOAD
+        execution {
+            sequence: 30
+            eventScope: dynamic
+            staticContainer: .btn-acciones
+        }
+        when {
+            event: click
+            selectionType: jQuerySelector
+            jquerySelector: .btn-descargar
+        }
+
+        action descargar (
+            name: Descargar
+            action: download
+            source {
+                sqlQuery:
+                    ```sql
+                    select file_blob    AS file_blob, 
+                          file_name,          
+                        file_mimetype from SGT_archivos
+                    where 
+                    id = :P471_ARCH_ID
+                    
+                    ```
+                itemsToSubmit: P471_ARCH_ID
+            }
+            execution {
+                sequence: 30
+                fireOnInit: false
+            }
+        )
+
+        action native-set-value (
+            action: setValue
+            settings {
+                type: jsExpression
+                jsExpression: this.triggeringElement.dataset.id
+            }
+            affectedElements {
+                selectionType: items
+                items: P471_ARCH_ID
+            }
+            execution {
+                sequence: 20
+            }
+        )
+
+    )
+
+    dynamicAction filtrar (
+        name: FILTRAR
+        execution {
+            sequence: 50
+        }
+        when {
+            selectionType: items
+            items: [
+                P471_TIPO_ENTIDAD
+                P471_F_PK_ID
+                P471_SITIO
+                P471_F_NOMBRE
+            ]
+        }
+
+        action native-refresh (
+            action: refresh
+            affectedElements {
+                selectionType: region
+                region: @archivos
+            }
+            execution {
+                sequence: 10
+                fireOnInit: false
+            }
+        )
+
+    )
+
+    dynamicAction mostrar-boton-subir (
+        name: MOSTRAR_BOTON_SUBIR
+        execution {
+            sequence: 100
+        }
+        when {
+            selectionType: items
+            items: P471_TIPO_ENTIDAD
+        }
+        clientSideCondition {
+            type: itemIsInList
+            item: P471_TIPO_ENTIDAD
+            list: [
+                6
+                7
+            ]
+        }
+
+        action native-hide (
+            action: hide
+            affectedElements {
+                selectionType: button
+                button: @subir-esquemas
+            }
+            execution {
+                sequence: 10
+                fireWhenEventResultIs: false
+            }
+        )
+
+        action show (
+            name: SHOW
+            action: show
+            affectedElements {
+                selectionType: button
+                button: @subir-esquemas
+            }
+            execution {
+                sequence: 10
+            }
+            clientSideCondition {
+                type: itemIsInList
+                item: P471_TIPO_ENTIDAD
+                list: [
+                    6
+                    7
+                ]
+            }
+        )
+
+    )
+
+    dynamicAction obsoleto (
+        name: OBSOLETO
+        execution {
+            sequence: 60
+            eventScope: dynamic
+            staticContainer: .btn-acciones
+        }
+        when {
+            event: click
+            selectionType: jQuerySelector
+            jquerySelector: .btn-obsoleto
+        }
+
+        action native-confirm (
+            action: confirm
+            settings {
+                title: Atención
+                message: Marcar como obsoleto el elemento?
+                style: warning
+            }
+            execution {
+                sequence: 10
+                fireOnInit: false
+            }
+        )
+
+        action native-execute-plsql-code (
+            action: executeServerSideCode
+            settings {
+                plsqlCode:
+                    ```plsql
+                    UPDATE SGT_ARCHIVOS
+                    SET ESTADO = 2
+                    WHERE ID = :P471_ARCH_ID;
+                    ```
+                itemsToSubmit: P471_ARCH_ID
+            }
+            execution {
+                sequence: 30
+                fireOnInit: false
+            }
+        )
+
+        action native-refresh (
+            action: refresh
+            affectedElements {
+                selectionType: region
+                region: @archivos
+            }
+            execution {
+                sequence: 50
+                fireOnInit: false
+            }
+        )
+
+        action native-set-value (
+            action: setValue
+            settings {
+                type: jsExpression
+                jsExpression: this.triggeringElement.dataset.id
+            }
+            affectedElements {
+                selectionType: items
+                items: P471_ARCH_ID
+            }
+            execution {
+                sequence: 20
+            }
+        )
+
+    )
+
+    dynamicAction toggle-entidad (
+        name: TOGGLE_ENTIDAD
+        execution {
+            sequence: 80
+        }
+        when {
+            selectionType: items
+            items: P471_TIPO_ENTIDAD
+        }
+        clientSideCondition {
+            type: itemIsInList
+            item: P471_TIPO_ENTIDAD
+            list: [
+                1
+                2
+                3
+                4
+                5
+            ]
+        }
+
+        action native-hide (
+            action: hide
+            affectedElements {
+                selectionType: items
+                items: P471_F_PK_ID
+            }
+            execution {
+                sequence: 10
+                fireWhenEventResultIs: false
+            }
+        )
+
+        action native-show (
+            action: show
+            affectedElements {
+                selectionType: items
+                items: P471_F_PK_ID
+            }
+            execution {
+                sequence: 10
+            }
+        )
+
+    )
+
+    dynamicAction toggle-sitio (
+        name: TOGGLE_SITIO
+        execution {
+            sequence: 70
+        }
+        when {
+            selectionType: items
+            items: P471_TIPO_ENTIDAD
+        }
+        clientSideCondition {
+            type: itemIsInList
+            item: P471_TIPO_ENTIDAD
+            list: [
+                6
+                7
+            ]
+        }
+
+        action native-hide (
+            action: hide
+            affectedElements {
+                selectionType: items
+                items: P471_SITIO
+            }
+            execution {
+                sequence: 10
+                fireWhenEventResultIs: false
+            }
+        )
+
+        action native-show (
+            action: show
+            affectedElements {
+                selectionType: items
+                items: P471_SITIO
+            }
+            execution {
+                sequence: 10
+            }
+        )
+
+    )
+
+    branch (
+        name: IR_A_SUBIR
+        execution {
+            sequence: 10
+            point: processing
+        }
+        behavior {
+            target: {
+                page: 472
+                items: {
+                    P472_ENTIDAD: &P471_TIPO_ENTIDAD.
+                }
+            }
+        }
+    )
+
+)
+

@@ -1,0 +1,1086 @@
+page 40 (
+    name: SGT_FORM_ENLACE_TRAMOS_FO
+    alias: SGT-FORM-ENLACE-TRAMOS-FO
+    title: Agregar / Editar
+    pageGroup: @implementadores
+    appearance {
+        pageMode: modalDialog
+        dialogTemplate: @/drawer
+        templateOptions: [
+            #DEFAULT#
+            js-dialog-class-t-Drawer--pullOutEnd
+        ]
+    }
+    dialog {
+        chained: false
+    }
+    navigation {
+        cursorFocus: doNotFocusCursor
+    }
+    security {
+        authorizationScheme: @implementador-rights
+        pageAccessProtection: argumentsMustHaveChecksum
+        formAutoComplete: false
+    }
+
+    region buttons (
+        name: Buttons
+        type: staticContent
+        layout {
+            sequence: 20
+            slot: dialogFooter
+        }
+        appearance {
+            template: @/buttons-container
+            templateOptions: #DEFAULT#
+        }
+        settings {
+            outputAs: text
+        }
+    )
+
+    region enlaces-wan (
+        name: Enlaces Wan
+        title: Enlaces WAN Asociados
+        type: interactiveGrid
+        source {
+            location: localDatabase
+            tableName: SGT_CONEXIONES_ENLACE_WAN
+            whereClause: ENLACE_TRAMO_ID = :P40_ID
+            pageItemsToSubmit: P40_ID
+        }
+        layout {
+            sequence: 30
+            slot: contentBody
+        }
+        appearance {
+            template: @/interactive-report
+            templateOptions: [
+                #DEFAULT#
+                t-IRR-region--hideHeader js-addHiddenHeadingRoleDesc
+            ]
+        }
+        serverSideCondition {
+            type: itemIsNotNull
+            item: P40_ID
+        }
+        edit {
+            enabled: true
+            allowedOperations: [
+                add
+                update
+                delete
+            ]
+        }
+        toolbar {
+            controls: [
+                searchCol
+                searchField
+                actionsMenu
+                resetButton
+                saveButton
+            ]
+        }
+        download {
+            formats: [
+                csv
+                html
+                excel
+                pdf
+            ]
+        }
+        advanced {
+            savedReportMappingIdentifier: 20174482467130107
+        }
+
+        savedReport 201965 (
+            visibility: primary
+            view {
+                default: grid
+            }
+            singleRowView {
+                displayedColumns: true
+            }
+
+            displayColumn (
+                column: @ID
+                layout {
+                    sequence: 1
+                }
+            )
+
+            displayColumn (
+                column: @ENLACE_TRAMO_ID
+                layout {
+                    sequence: 2
+                }
+            )
+
+            displayColumn (
+                column: @ENLACE_WAN_ID
+                layout {
+                    sequence: 3
+                }
+            )
+
+            displayColumn (
+                column: @Orden
+                layout {
+                    sequence: 4
+                }
+            )
+
+            displayColumn (
+                column: @APEX$ROW_ACTION
+                layout {
+                    sequence: 0
+                }
+            )
+
+        )
+
+        column APEX$ROW_ACTION (
+            type: actionsMenu
+            layout {
+                sequence: 20
+            }
+        )
+
+        column APEX$ROW_SELECTOR (
+            type: rowSelector
+            layout {
+                sequence: 10
+            }
+        )
+
+        column ENLACE_TRAMO_ID (
+            type: hidden
+            layout {
+                sequence: 40
+            }
+            source {
+                databaseColumn: ENLACE_TRAMO_ID
+                dataType: number
+            }
+            default {
+                type: item
+                item: P40_ID
+            }
+            exportPrinting {
+                includeInExportPrint: false
+            }
+        )
+
+        column ENLACE_WAN_ID (
+            type: selectList
+            heading {
+                heading: Enlace Wan Id
+            }
+            lov {
+                type: sharedComponent
+                lov: @enlaces-wan
+            }
+            layout {
+                sequence: 50
+            }
+            source {
+                databaseColumn: ENLACE_WAN_ID
+                dataType: number
+            }
+            columnFilter {
+                performanceImpactingOperators: [
+                    contains
+                    startsWith
+                    caseInsensitive
+                    regexp
+                ]
+                lovType: useLov
+            }
+            serverSideCondition {
+                type: itemIsNotNull
+                item: P40_ID
+            }
+        )
+
+        column ID (
+            type: hidden
+            layout {
+                sequence: 30
+            }
+            source {
+                databaseColumn: ID
+                dataType: number
+                queryOnly: true
+                primaryKey: true
+            }
+            exportPrinting {
+                includeInExportPrint: false
+            }
+        )
+
+        column Orden (
+            type: numberField
+            heading {
+                heading: Secuencia
+                alignment: end
+            }
+            layout {
+                sequence: 60
+                columnAlignment: end
+            }
+            source {
+                databaseColumn: SECUENCIA
+                dataType: number
+            }
+            columnFilter {
+                lovType: none
+            }
+        )
+
+        page {
+            size: a4
+            units: millimeters
+            width: 297
+            height: 210
+            borderWidth: 0.5
+            borderColor: #666666
+        }
+        pageHeader {
+            pageHeaderText: Enlaces WAN Asociados
+        }
+    )
+
+    region servicios-asociados (
+        name: Servicios Asociados
+        title: Servicios Asociados
+        type: interactiveGrid
+        source {
+            location: localDatabase
+            tableName: SGT_CONEXIONES_SERVICIO
+            whereClause: ENLACE_TRAMO_ID = :P40_ID
+            pageItemsToSubmit: P40_ID
+        }
+        layout {
+            sequence: 20
+            slot: contentBody
+        }
+        appearance {
+            template: @/interactive-report
+            templateOptions: [
+                #DEFAULT#
+                t-IRR-region--hideHeader js-addHiddenHeadingRoleDesc
+            ]
+        }
+        serverSideCondition {
+            type: itemIsNotNull
+            item: P40_ID
+        }
+        edit {
+            enabled: true
+            allowedOperations: [
+                add
+                update
+                delete
+            ]
+        }
+        toolbar {
+            controls: [
+                searchCol
+                searchField
+                actionsMenu
+                resetButton
+                saveButton
+            ]
+        }
+        download {
+            formats: [
+                csv
+                html
+                excel
+                pdf
+            ]
+        }
+        advanced {
+            savedReportMappingIdentifier: 13115016597268935
+        }
+
+        savedReport 201958 (
+            visibility: primary
+            view {
+                default: grid
+            }
+            singleRowView {
+                displayedColumns: true
+            }
+
+            displayColumn (
+                column: @ID
+                layout {
+                    sequence: 1
+                }
+            )
+
+            displayColumn (
+                column: @SERVICIO_ID
+                layout {
+                    sequence: 2
+                }
+            )
+
+            displayColumn (
+                column: @ENLACE_TRAMO_ID
+                layout {
+                    sequence: 3
+                }
+            )
+
+            displayColumn (
+                column: @Orden
+                layout {
+                    sequence: 4
+                }
+            )
+
+            displayColumn (
+                column: @APEX$ROW_ACTION
+                layout {
+                    sequence: 0
+                }
+            )
+
+        )
+
+        column APEX$ROW_ACTION (
+            type: actionsMenu
+            layout {
+                sequence: 20
+            }
+        )
+
+        column APEX$ROW_SELECTOR (
+            type: rowSelector
+            layout {
+                sequence: 10
+            }
+        )
+
+        column ENLACE_TRAMO_ID (
+            type: hidden
+            layout {
+                sequence: 50
+            }
+            source {
+                databaseColumn: ENLACE_TRAMO_ID
+                dataType: number
+            }
+            default {
+                type: item
+                item: P40_ID
+            }
+            exportPrinting {
+                includeInExportPrint: false
+            }
+        )
+
+        column ID (
+            type: hidden
+            layout {
+                sequence: 30
+            }
+            source {
+                databaseColumn: ID
+                dataType: number
+                queryOnly: true
+                primaryKey: true
+            }
+            exportPrinting {
+                includeInExportPrint: false
+            }
+        )
+
+        column Orden (
+            type: numberField
+            heading {
+                heading: Seq
+                alignment: end
+            }
+            layout {
+                sequence: 60
+                columnAlignment: end
+            }
+            source {
+                databaseColumn: SEQ
+                dataType: number
+            }
+            columnFilter {
+                lovType: none
+            }
+        )
+
+        column SERVICIO_ID (
+            type: selectList
+            heading {
+                heading: Servicio Id
+            }
+            lov {
+                type: sharedComponent
+                lov: @servicios-nombre
+            }
+            layout {
+                sequence: 40
+            }
+            source {
+                databaseColumn: SERVICIO_ID
+                dataType: number
+            }
+            columnFilter {
+                performanceImpactingOperators: [
+                    contains
+                    startsWith
+                    caseInsensitive
+                    regexp
+                ]
+                lovType: useLov
+            }
+        )
+
+        page {
+            size: a4
+            units: millimeters
+            width: 297
+            height: 210
+            borderWidth: 0.5
+            borderColor: #666666
+        }
+        pageHeader {
+            pageHeaderText: Servicios Asociados
+        }
+    )
+
+    region sgt-form-enlace-tramos-fo (
+        name: SGT_FORM_ENLACE_TRAMOS_FO
+        type: form
+        source {
+            location: localDatabase
+            tableName: SGT_ENLACES_TRAMOS
+        }
+        layout {
+            sequence: 10
+            slot: contentBody
+        }
+        appearance {
+            template: @/blank-with-attributes
+            templateOptions: #DEFAULT#
+        }
+        edit {
+            enabled: true
+            allowedOperations: [
+                add
+                update
+                delete
+            ]
+        }
+    )
+
+    pageItem P40_ENLACE_ID (
+        type: textField
+        label {
+            label: Enlace Id
+            alignment: left
+        }
+        layout {
+            sequence: 110
+            region: @sgt-form-enlace-tramos-fo
+            slot: regionBody
+            alignment: left
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+            width: 30
+        }
+        validation {
+            maxLength: 100
+        }
+        source {
+            formRegion: @sgt-form-enlace-tramos-fo
+            column: ENLACE_ID
+            dataType: varchar2
+        }
+        config {
+            buildOption: @commented-out
+        }
+    )
+
+    pageItem P40_EQUIPO_A_ID (
+        type: popupLov
+        label {
+            label: Equipo A
+            alignment: left
+        }
+        lov {
+            type: sqlQuery
+            sqlQuery:
+                ```sql
+                select e.nombre || ' (' || e.id || ')' d,
+                       e.id r
+                from sgt_equipos e
+                join sgt_racks r
+                  on r.id = e.rack_id
+                join sgt_salas sa
+                  on sa.id = r.sala_id
+                where :P40_SITIO_A is not null
+                  and sa.sitio_id = :P40_SITIO_A
+                order by e.nombre
+                ```
+            nullDisplayValue: - Seleccione equipo -
+        }
+        cascadingLov {
+            parentItems: P40_SITIO_A
+            itemsToSubmit: P40_SITIO_A
+        }
+        layout {
+            sequence: 40
+            region: @sgt-form-enlace-tramos-fo
+            slot: regionBody
+            alignment: left
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+            width: 30
+        }
+        validation {
+            valueRequired: true
+        }
+        source {
+            formRegion: @sgt-form-enlace-tramos-fo
+            column: EQUIPO_A_ID
+            dataType: number
+        }
+    )
+
+    pageItem P40_EQUIPO_B_ID (
+        type: popupLov
+        label {
+            label: Equipo B
+            alignment: left
+        }
+        lov {
+            type: sqlQuery
+            sqlQuery:
+                ```sql
+                select e.nombre || ' (' || e.id || ')' d,
+                       e.id r
+                from sgt_equipos e
+                join sgt_racks r
+                  on r.id = e.rack_id
+                join sgt_salas sa
+                  on sa.id = r.sala_id
+                where :P40_SITIO_B is not null
+                  and sa.sitio_id = :P40_SITIO_B
+                order by e.nombre
+                ```
+            nullDisplayValue: - Seleccione equipo -
+        }
+        cascadingLov {
+            parentItems: P40_SITIO_B
+            itemsToSubmit: P40_SITIO_B
+        }
+        layout {
+            sequence: 70
+            region: @sgt-form-enlace-tramos-fo
+            slot: regionBody
+            alignment: left
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+            width: 30
+        }
+        validation {
+            valueRequired: true
+        }
+        source {
+            formRegion: @sgt-form-enlace-tramos-fo
+            column: EQUIPO_B_ID
+            dataType: number
+        }
+    )
+
+    pageItem P40_ID (
+        type: hidden
+        layout {
+            sequence: 10
+            region: @sgt-form-enlace-tramos-fo
+            slot: regionBody
+        }
+        source {
+            formRegion: @sgt-form-enlace-tramos-fo
+            column: ID
+            dataType: number
+            queryOnly: true
+            primaryKey: true
+        }
+        security {
+            sessionStateProtection: checksumRequiredSessionLevel
+        }
+    )
+
+    pageItem P40_INTERFAZ_A_ID (
+        type: popupLov
+        label {
+            label: Interfaz A
+            alignment: left
+        }
+        lov {
+            type: sqlQuery
+            sqlQuery:
+                ```sql
+                select i.nombre || ' - ' || nvl(i.etiqueta, 'Sin etiqueta') d,
+                       i.id r
+                from sgt_interfaces i
+                where :P40_EQUIPO_A_ID is not null
+                  and i.equipo_id = :P40_EQUIPO_A_ID
+                order by i.nombre
+                ```
+            nullDisplayValue: - Seleccione Interfaz -
+        }
+        cascadingLov {
+            parentItems: P40_EQUIPO_A_ID
+            itemsToSubmit: P40_EQUIPO_A_ID
+        }
+        layout {
+            sequence: 50
+            region: @sgt-form-enlace-tramos-fo
+            slot: regionBody
+            alignment: left
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+            width: 30
+        }
+        source {
+            formRegion: @sgt-form-enlace-tramos-fo
+            column: INTERFAZ_A_ID
+            dataType: number
+        }
+    )
+
+    pageItem P40_INTERFAZ_B_ID (
+        type: popupLov
+        label {
+            label: Interfaz B
+            alignment: left
+        }
+        lov {
+            type: sqlQuery
+            sqlQuery:
+                ```sql
+                select i.nombre || ' - ' || nvl(i.etiqueta, 'Sin etiqueta') d,
+                       i.id r
+                from sgt_interfaces i
+                where :P40_EQUIPO_B_ID is not null
+                  and i.equipo_id = :P40_EQUIPO_B_ID
+                order by i.nombre
+                ```
+            nullDisplayValue: - Seleccione interfaz -
+        }
+        cascadingLov {
+            parentItems: P40_EQUIPO_B_ID
+            itemsToSubmit: P40_EQUIPO_B_ID
+        }
+        layout {
+            sequence: 80
+            region: @sgt-form-enlace-tramos-fo
+            slot: regionBody
+            alignment: left
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+            width: 30
+        }
+        source {
+            formRegion: @sgt-form-enlace-tramos-fo
+            column: INTERFAZ_B_ID
+            dataType: number
+        }
+    )
+
+    pageItem P40_LADO_ID (
+        type: numberField
+        label {
+            label: Lado Id
+            alignment: left
+        }
+        layout {
+            sequence: 100
+            region: @sgt-form-enlace-tramos-fo
+            slot: regionBody
+            alignment: left
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+            width: 30
+        }
+        source {
+            formRegion: @sgt-form-enlace-tramos-fo
+            column: LADO_ID
+            dataType: number
+        }
+        config {
+            buildOption: @commented-out
+        }
+    )
+
+    pageItem P40_NOMBRE (
+        type: textField
+        label {
+            label: Nombre
+            alignment: left
+        }
+        layout {
+            sequence: 20
+            region: @sgt-form-enlace-tramos-fo
+            slot: regionBody
+            alignment: left
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+            width: 32
+            valuePlaceholder: "Ingrese un nombre "
+        }
+        validation {
+            maxLength: 50
+        }
+        source {
+            formRegion: @sgt-form-enlace-tramos-fo
+            column: NOMBRE
+            dataType: varchar2
+        }
+        help {
+            inlineHelpText: "Nombre del cable de interconexión, o etiqueta, ej: patchcord 01 "
+            helpText: Puede ser la etiqueta del cable de interconexión (Patchcord)
+        }
+        config {
+            buildOption: @commented-out
+        }
+    )
+
+    pageItem P40_SITIO_A (
+        type: popupLov
+        label {
+            label: Sitio A
+            alignment: left
+        }
+        lov {
+            type: sqlQuery
+            sqlQuery:
+                ```sql
+                select s.siglas || ' - ' || s.nombre d,
+                       s.id r
+                from sgt_sitios s
+                order by s.siglas, s.nombre
+                ```
+            nullDisplayValue: - Seleccione sitio -
+        }
+        layout {
+            sequence: 30
+            region: @sgt-form-enlace-tramos-fo
+            slot: regionBody
+            alignment: left
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+            width: 30
+        }
+    )
+
+    pageItem P40_SITIO_B (
+        type: popupLov
+        label {
+            label: Sitio B
+            alignment: left
+        }
+        lov {
+            type: sqlQuery
+            sqlQuery:
+                ```sql
+                select s.siglas || ' - ' || s.nombre d,
+                       s.id r
+                from sgt_sitios s
+                order by s.siglas, s.nombre
+                ```
+            nullDisplayValue: - Seleccione sitio -
+        }
+        layout {
+            sequence: 60
+            region: @sgt-form-enlace-tramos-fo
+            slot: regionBody
+            alignment: left
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+            width: 30
+        }
+    )
+
+    pageItem P40_TIPO_CONEXION (
+        type: selectList
+        label {
+            label: Tipo Conexion
+            alignment: left
+        }
+        lov {
+            type: staticValues
+            staticValues: STATIC:Física;Física,Lógica;Lógica
+        }
+        layout {
+            sequence: 90
+            region: @sgt-form-enlace-tramos-fo
+            slot: regionBody
+            alignment: left
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+            height: 1
+        }
+        validation {
+            valueRequired: true
+        }
+        source {
+            formRegion: @sgt-form-enlace-tramos-fo
+            column: TIPO_CONEXION
+            dataType: varchar2
+        }
+    )
+
+    button add-more (
+        buttonName: ADD_MORE
+        label: &APP_TEXT$BTN_CREAR_VARIOS!RAW.
+        layout {
+            sequence: 50
+            region: @buttons
+            slot: next
+        }
+        appearance {
+            buttonTemplate: @/text
+            templateOptions: #DEFAULT#
+        }
+        behavior {
+            warnOnUnsavedChanges: doNotCheck
+        }
+    )
+
+    button cancel (
+        buttonName: CANCEL
+        label: Cancel
+        layout {
+            sequence: 10
+            region: @buttons
+            slot: close
+        }
+        appearance {
+            buttonTemplate: @/text
+            templateOptions: #DEFAULT#
+        }
+        behavior {
+            action: definedByDynamicAction
+        }
+    )
+
+    button create (
+        buttonName: CREATE
+        label: &APP_TEXT$BTN_CREAR!RAW.
+        layout {
+            sequence: 40
+            region: @buttons
+            slot: next
+        }
+        appearance {
+            buttonTemplate: @/text
+            hot: true
+            templateOptions: #DEFAULT#
+        }
+        behavior {
+            warnOnUnsavedChanges: doNotCheck
+            databaseAction: insert
+        }
+        serverSideCondition {
+            type: itemIsNull
+            item: P40_ID
+        }
+    )
+
+    button delete (
+        buttonName: DELETE
+        label: Delete
+        layout {
+            sequence: 20
+            region: @buttons
+            slot: delete
+        }
+        appearance {
+            buttonTemplate: @/text
+            templateOptions: #DEFAULT#
+        }
+        behavior {
+            executeValidations: false
+            warnOnUnsavedChanges: doNotCheck
+            databaseAction: delete
+            requiresConfirmation: true
+        }
+        confirmation {
+            message: &APP_TEXT$DELETE_MSG!RAW.
+            style: danger
+        }
+        serverSideCondition {
+            type: itemIsNotNull
+            item: P40_ID
+        }
+    )
+
+    button save (
+        buttonName: SAVE
+        label: &APP_TEXT$BTN_APLICAR_CAMBIOS!RAW.
+        layout {
+            sequence: 30
+            region: @buttons
+            slot: next
+        }
+        appearance {
+            buttonTemplate: @/text
+            hot: true
+            templateOptions: #DEFAULT#
+        }
+        behavior {
+            warnOnUnsavedChanges: doNotCheck
+            databaseAction: update
+        }
+        serverSideCondition {
+            type: itemIsNotNull
+            item: P40_ID
+        }
+    )
+
+    process close-dialog (
+        name: Close Dialog
+        type: closeDialog
+        execution {
+            sequence: 50
+        }
+        advanced {
+            executionMappingIdentifier: 44132895177657381952
+        }
+        serverSideCondition {
+            type: requestIsContainedInValue
+            value: CREATE,SAVE,DELETE
+        }
+    )
+
+    process enlaces-wan-save-interactive-grid-data (
+        name: Enlaces Wan - Save Interactive Grid Data
+        type: interactiveGridAutoRowProcessing
+        editableRegion: @enlaces-wan
+        execution {
+            sequence: 70
+        }
+        advanced {
+            executionMappingIdentifier: 20408275218160907
+        }
+    )
+
+    process initialize-form-sgt-form-enlace-tramos-fo (
+        name: Initialize form SGT_FORM_ENLACE_TRAMOS_FO
+        type: formInitialization
+        formRegion: @sgt-form-enlace-tramos-fo
+        execution {
+            sequence: 20
+            point: beforeHeader
+        }
+        advanced {
+            executionMappingIdentifier: 44132894381459381951
+        }
+    )
+
+    process obtener-sitios (
+        name: obtener_sitios
+        type: executeCode
+        source {
+            plsqlCode:
+                ```plsql
+                begin
+                    if :P40_EQUIPO_A_ID is not null then
+                        select sa.sitio_id
+                          into :P40_SITIO_A
+                          from sgt_equipos e
+                          join sgt_racks r
+                            on r.id = e.rack_id
+                          join sgt_salas sa
+                            on sa.id = r.sala_id
+                         where e.id = :P40_EQUIPO_A_ID;
+                    end if;
+                
+                    if :P40_EQUIPO_B_ID is not null then
+                        select sa.sitio_id
+                          into :P40_SITIO_B
+                          from sgt_equipos e
+                          join sgt_racks r
+                            on r.id = e.rack_id
+                          join sgt_salas sa
+                            on sa.id = r.sala_id
+                         where e.id = :P40_EQUIPO_B_ID;
+                    end if;
+                exception
+                    when no_data_found then
+                        :P40_SITIO_A := null;
+                        :P40_SITIO_B := null;
+                end;
+                ```
+        }
+        execution {
+            sequence: 30
+            point: beforeHeader
+        }
+        advanced {
+            executionMappingIdentifier: 20177821211130141
+        }
+        serverSideCondition {
+            type: itemIsNotNull
+            item: P40_ID
+        }
+    )
+
+    process process-form-sgt-form-enlace-tramos-fo (
+        name: Process form SGT_FORM_ENLACE_TRAMOS_FO
+        type: formAutoRowProcessing
+        formRegion: @sgt-form-enlace-tramos-fo
+        execution {
+            sequence: 10
+        }
+        advanced {
+            executionMappingIdentifier: 44132894680571381951
+        }
+    )
+
+    process servicios-asociados-save-interactive-grid-data (
+        name: Servicios Asociados - Save Interactive Grid Data
+        type: interactiveGridAutoRowProcessing
+        editableRegion: @servicios-asociados
+        execution {
+            sequence: 60
+        }
+        advanced {
+            executionMappingIdentifier: 20174166190130104
+        }
+    )
+
+)
+

@@ -1,0 +1,2322 @@
+list access-control (
+    name: Access Control
+    config {
+        buildOption: @feature-access-control
+    }
+
+    entry access-control (
+        label: Access Control
+        icon {
+            imageIconCssClasses: fa-key
+        }
+        layout {
+            sequence: 20
+        }
+        link {
+            target: {
+                page: 10010
+            }
+        }
+        userDefinedAttributes {
+            1: Change access control settings and disable access control
+        }
+    )
+
+    entry users (
+        label: Users
+        icon {
+            imageIconCssClasses: fa-users
+        }
+        layout {
+            sequence: 10
+        }
+        link {
+            target: {
+                page: 10011
+                action: resetPagination
+            }
+        }
+        userDefinedAttributes {
+            1: Set level of access for authenticated users of this application
+        }
+    )
+
+)
+
+list acciones-equipos (
+    name: ACCIONES EQUIPOS
+
+    entry comentarios (
+        label: Comentarios
+        icon {
+            imageIconCssClasses: fa-clipboard-edit
+        }
+        layout {
+            sequence: 20
+        }
+        link {
+            target: {
+                page: 32
+                items: {
+                    P32_PK_ID: &P66_ID.
+                    P32_ENTIDAD: 4
+                }
+            }
+        }
+    )
+
+    entry editar (
+        label: Editar
+        icon {
+            imageIconCssClasses: fa-edit
+        }
+        layout {
+            sequence: 10
+        }
+        link {
+            target: {
+                page: 14
+                items: {
+                    P14_ID: &P66_ID.
+                }
+            }
+        }
+    )
+
+    entry imágenes (
+        label: Imágenes
+        icon {
+            imageIconCssClasses: fa-file-image-o
+        }
+        layout {
+            sequence: 30
+        }
+        link {
+            target: {
+                page: 470
+                items: {
+                    P470_PK_ID: &P66_ID.
+                    P470_ENTIDAD: 4
+                }
+            }
+        }
+    )
+
+)
+
+list activity-reports (
+    name: Activity Reports
+    config {
+        buildOption: @feature-activity-reporting
+    }
+
+    entry application-error-log (
+        label: Application Error Log
+        icon {
+            imageIconCssClasses: fa-exclamation
+        }
+        layout {
+            sequence: 30
+        }
+        link {
+            target: {
+                page: 10032
+                clearCache: 10032
+            }
+        }
+        userDefinedAttributes {
+            1: Report of errors logged by this application
+        }
+    )
+
+    entry automations-log (
+        label: Automations Log
+        icon {
+            imageIconCssClasses: fa-gears
+        }
+        layout {
+            sequence: 60
+        }
+        link {
+            target: {
+                page: 10035
+                clearCache: 10035
+                action: resetRegions
+            }
+        }
+        userDefinedAttributes {
+            1: Report of automation executions and messages logged by this application
+        }
+        serverSideCondition {
+            type: rowsReturned
+            sqlQuery:
+                ```sql
+                select 1
+                from apex_appl_automations a, apex_automation_log l
+                where a.automation_id = l.automation_id
+                and l.application_id = :APP_ID
+                ```
+        }
+    )
+
+    entry dashboard (
+        label: Dashboard
+        icon {
+            imageIconCssClasses: fa-area-chart
+        }
+        layout {
+            sequence: 10
+        }
+        link {
+            target: {
+                page: 10030
+                clearCache: 10030
+            }
+        }
+        userDefinedAttributes {
+            1: View application activity metrics
+        }
+    )
+
+    entry page-performance (
+        label: Page Performance
+        icon {
+            imageIconCssClasses: fa-file-chart
+        }
+        layout {
+            sequence: 40
+        }
+        link {
+            target: {
+                page: 10033
+                clearCache: 10033
+            }
+        }
+        userDefinedAttributes {
+            1: Report of activity and performance by application page
+        }
+    )
+
+    entry page-views (
+        label: Page Views
+        icon {
+            imageIconCssClasses: fa-file-search
+        }
+        layout {
+            sequence: 50
+        }
+        link {
+            target: {
+                page: 10034
+                clearCache: 10034
+                action: resetRegions
+            }
+        }
+        userDefinedAttributes {
+            1: Report of each page view by user including date of access and elapsed time
+        }
+    )
+
+    entry top-users (
+        label: Top Users
+        icon {
+            imageIconCssClasses: fa-user-chart
+        }
+        layout {
+            sequence: 20
+        }
+        link {
+            target: {
+                page: 10031
+                clearCache: 10031
+            }
+        }
+        userDefinedAttributes {
+            1: Report of page views aggregated by user
+        }
+    )
+
+)
+
+list asistente-servicios (
+    name: Asistente Servicios
+
+    entry paso (
+        label: Paso 1
+        layout {
+            sequence: 10
+        }
+        link {
+            target: {
+                page: 50
+            }
+        }
+    )
+
+    entry paso-2 (
+        label: Paso 2
+        layout {
+            sequence: 20
+        }
+        link {
+            target: {
+                page: 51
+            }
+        }
+    )
+
+    entry paso-3 (
+        label: Paso 3
+        layout {
+            sequence: 30
+        }
+        link {
+            target: {
+                page: 53
+            }
+        }
+    )
+
+    entry paso-4 (
+        label: Paso 5
+        layout {
+            sequence: 60
+        }
+        link {
+            target: {
+                page: 54
+            }
+        }
+    )
+
+    entry paso-5 (
+        label: Paso 4
+        layout {
+            sequence: 50
+        }
+        link {
+            target: {
+                page: 52
+            }
+        }
+    )
+
+)
+
+list menu (
+    name: Menu 2.0
+
+    entry admin-ip-s (
+        label: Admin IP's
+        icon {
+            imageIconCssClasses: fa-table-pointer
+        }
+        layout {
+            sequence: 760
+            parentEntry: @experimental
+        }
+        isCurrent {
+            type: pages
+            pages: 59
+        }
+        link {
+            target: {
+                page: 59
+            }
+        }
+        security {
+            authorizationScheme: @implementador-rights
+        }
+    )
+
+    entry administración (
+        label: Administración
+        icon {
+            imageIconCssClasses: fa-key
+        }
+        layout {
+            sequence: 900
+        }
+        security {
+            authorizationScheme: @administration-rights
+        }
+    )
+
+    entry archivos (
+        label: Archivos
+        icon {
+            imageIconCssClasses: fa-address-book
+        }
+        layout {
+            sequence: 850
+        }
+        link {
+            target: {
+                page: 471
+            }
+        }
+    )
+
+    entry auditoría-general (
+        label: Auditoría General
+        icon {
+            imageIconCssClasses: fa-table
+        }
+        layout {
+            sequence: 620
+            parentEntry: @administración
+        }
+        isCurrent {
+            type: pages
+            pages: 46
+        }
+        link {
+            target: {
+                page: 46
+            }
+        }
+    )
+
+    entry ciudades (
+        label: Ciudades
+        icon {
+            imageIconCssClasses: fa-table
+        }
+        layout {
+            sequence: 27
+            parentEntry: @administración
+        }
+        isCurrent {
+            type: pages
+            pages: [
+                23
+                24
+            ]
+        }
+        link {
+            target: {
+                page: 23
+            }
+        }
+    )
+
+    entry conexiones-de-enlaces-wan (
+        label: Conexiones de Enlaces WAN
+        icon {
+            imageIconCssClasses: fa-table-pointer
+        }
+        layout {
+            sequence: 160
+        }
+        isCurrent {
+            type: pages
+            pages: 407
+        }
+        link {
+            target: {
+                page: 407
+            }
+        }
+    )
+
+    entry conexiones-de-servicios (
+        label: Conexiones de Servicios
+        icon {
+            imageIconCssClasses: fa-table-pointer
+        }
+        layout {
+            sequence: 170
+        }
+        isCurrent {
+            type: pages
+            pages: 18
+        }
+        link {
+            target: {
+                page: 18
+            }
+        }
+    )
+
+    entry control-de-accesos (
+        label: Control de Accesos
+        icon {
+            imageIconCssClasses: fa-user-secret
+        }
+        layout {
+            sequence: 610
+            parentEntry: @administración
+        }
+        link {
+            target: {
+                page: 10000
+            }
+        }
+        security {
+            authorizationScheme: @administration-rights
+        }
+    )
+
+    entry dashboard-de-cumplimiento (
+        label: Dashboard de Cumplimiento
+        icon {
+            imageIconCssClasses: fa-dashboard
+        }
+        layout {
+            sequence: 640
+            parentEntry: @administración
+        }
+        isCurrent {
+            type: pages
+            pages: 200
+        }
+        link {
+            target: {
+                page: 200
+            }
+        }
+    )
+
+    entry dashboard-de-gestión-de-auditoría (
+        label: Dashboard de Gestión de Auditoría
+        icon {
+            imageIconCssClasses: fa-file-o
+        }
+        layout {
+            sequence: 630
+            parentEntry: @administración
+        }
+        isCurrent {
+            type: pages
+            pages: 100
+        }
+        link {
+            target: {
+                page: 100
+            }
+        }
+    )
+
+    entry departamentos (
+        label: Departamentos
+        icon {
+            imageIconCssClasses: fa-table
+        }
+        layout {
+            sequence: 25
+            parentEntry: @administración
+        }
+        isCurrent {
+            type: pages
+            pages: [
+                21
+                22
+            ]
+        }
+        link {
+            target: {
+                page: 21
+            }
+        }
+    )
+
+    entry enlaces-fo (
+        label: Enlaces FO
+        icon {
+            imageIconCssClasses: fa-accessor-one
+        }
+        layout {
+            sequence: 150
+        }
+        isCurrent {
+            type: pages
+            pages: 36
+        }
+        link {
+            target: {
+                page: 36
+            }
+        }
+    )
+
+    entry enlaces-wan (
+        label: Enlaces WAN
+        icon {
+            imageIconCssClasses: fa-table-edit
+        }
+        layout {
+            sequence: 155
+            parentEntry: @implementadores
+        }
+        isCurrent {
+            type: pages
+            pages: 10
+        }
+        link {
+            target: {
+                page: 10
+            }
+        }
+    )
+
+    entry equipos (
+        label: Equipos
+        icon {
+            imageIconCssClasses: fa-table
+        }
+        layout {
+            sequence: 70
+        }
+        isCurrent {
+            type: pages
+            pages: [
+                13
+                14
+            ]
+        }
+        link {
+            target: {
+                page: 13
+            }
+        }
+    )
+
+    entry esquemas-informes (
+        label: Esquemas / Informes
+        icon {
+            imageIconCssClasses: fa-file-pdf-o
+        }
+        layout {
+            sequence: 960
+            parentEntry: @archivos
+        }
+        link {
+            target: {
+                page: 471
+                items: {
+                    P471_TIPO_ENTIDAD: 6
+                }
+                clearCache: 471
+            }
+        }
+    )
+
+    entry experimental (
+        label: Experimental
+        icon {
+            imageIconCssClasses: fa-vial
+        }
+        layout {
+            sequence: 910
+        }
+    )
+
+    entry grilla-enlaces-fo (
+        label: Grilla Enlaces FO
+        icon {
+            imageIconCssClasses: fa-cards
+        }
+        layout {
+            sequence: 73
+            parentEntry: @implementadores
+        }
+        isCurrent {
+            type: pages
+            pages: 45
+        }
+        link {
+            target: {
+                page: 45
+            }
+        }
+    )
+
+    entry grilla-equipos (
+        label: Grilla Equipos
+        icon {
+            imageIconCssClasses: fa-accordion
+        }
+        layout {
+            sequence: 71
+            parentEntry: @implementadores
+        }
+        link {
+            target: {
+                page: 44
+            }
+        }
+    )
+
+    entry grilla-interfaces (
+        label: Grilla Interfaces
+        icon {
+            imageIconCssClasses: fa-list-ul
+        }
+        layout {
+            sequence: 72
+            parentEntry: @implementadores
+        }
+        link {
+            target: {
+                page: 49
+            }
+        }
+        security {
+            authorizationScheme: @implementador-rights
+        }
+    )
+
+    entry implementadores (
+        label: Implementadores
+        icon {
+            imageIconCssClasses: fa-plus-square
+        }
+        layout {
+            sequence: 860
+        }
+        security {
+            authorizationScheme: @implementador-rights
+        }
+    )
+
+    entry informes-globales (
+        label: Informes Globales
+        icon {
+            imageIconCssClasses: fa-ai-sparkle-generate-document
+        }
+        layout {
+            sequence: 10
+        }
+        link {
+            target: {
+                page: 1
+            }
+        }
+    )
+
+    entry interfaces (
+        label: Interfaces
+        icon {
+            imageIconCssClasses: fa-table
+        }
+        layout {
+            sequence: 130
+        }
+        isCurrent {
+            type: pages
+            pages: 8
+        }
+        link {
+            target: {
+                page: 8
+            }
+        }
+    )
+
+    entry interfaces-l (
+        label: Interfaces L2
+        icon {
+            imageIconCssClasses: fa-table-pointer
+        }
+        layout {
+            sequence: 740
+            parentEntry: @experimental
+        }
+        isCurrent {
+            type: pages
+            pages: 48
+        }
+        link {
+            target: {
+                page: 48
+            }
+        }
+        security {
+            authorizationScheme: @implementador-rights
+        }
+    )
+
+    entry interfaces-l-2 (
+        label: Interfaces L3
+        icon {
+            imageIconCssClasses: fa-table-pointer
+        }
+        layout {
+            sequence: 750
+            parentEntry: @experimental
+        }
+        isCurrent {
+            type: pages
+            pages: 57
+        }
+        link {
+            target: {
+                page: 57
+            }
+        }
+        security {
+            authorizationScheme: @implementador-rights
+        }
+    )
+
+    entry kmz (
+        label: KMZ
+        icon {
+            imageIconCssClasses: fa-map-marker-check
+        }
+        layout {
+            sequence: 920
+            parentEntry: @archivos
+        }
+        link {
+            target: {
+                page: 471
+                items: {
+                    P471_TIPO_ENTIDAD: 5
+                }
+                clearCache: 471
+            }
+        }
+    )
+
+    entry mapa-enlace-wan (
+        label: Mapa Enlace Wan
+        icon {
+            imageIconCssClasses: fa-map-marker
+        }
+        layout {
+            sequence: 850
+            parentEntry: @mapa-sitios
+        }
+        isCurrent {
+            type: pages
+            pages: 420
+        }
+        link {
+            target: {
+                page: 420
+            }
+        }
+    )
+
+    entry mapa-enlaces-fo (
+        label: Mapa enlaces FO
+        icon {
+            imageIconCssClasses: fa-map-marker
+        }
+        layout {
+            sequence: 845
+            parentEntry: @mapa-sitios
+        }
+        isCurrent {
+            type: pages
+            pages: 65
+        }
+        link {
+            target: {
+                page: 65
+            }
+        }
+    )
+
+    entry mapa-sitios (
+        label: Mapa Sitios
+        icon {
+            imageIconCssClasses: fa-map-marker
+        }
+        layout {
+            sequence: 855
+        }
+        isCurrent {
+            type: pages
+            pages: 47
+        }
+        link {
+            target: {
+                page: 47
+            }
+        }
+    )
+
+    entry racks (
+        label: Racks
+        icon {
+            imageIconCssClasses: fa-table
+        }
+        layout {
+            sequence: 60
+            parentEntry: @implementadores
+        }
+        isCurrent {
+            type: pages
+            pages: [
+                11
+                12
+            ]
+        }
+        link {
+            target: {
+                page: 11
+            }
+        }
+    )
+
+    entry salas (
+        label: Salas
+        icon {
+            imageIconCssClasses: fa-table
+        }
+        layout {
+            sequence: 40
+            parentEntry: @implementadores
+        }
+        isCurrent {
+            type: pages
+            pages: [
+                4
+                5
+            ]
+        }
+        link {
+            target: {
+                page: 4
+            }
+        }
+    )
+
+    entry servicios (
+        label: Servicios
+        icon {
+            imageIconCssClasses: fa-table-edit
+        }
+        layout {
+            sequence: 165
+            parentEntry: @implementadores
+        }
+        isCurrent {
+            type: pages
+            pages: 16
+        }
+        link {
+            target: {
+                page: 16
+            }
+        }
+    )
+
+    entry sitios (
+        label: Sitios
+        icon {
+            imageIconCssClasses: fa-table
+        }
+        layout {
+            sequence: 30
+            parentEntry: @implementadores
+        }
+        isCurrent {
+            type: pages
+            pages: [
+                25
+                26
+            ]
+        }
+        link {
+            target: {
+                page: 25
+            }
+        }
+    )
+
+    entry subir-esquemas-informes (
+        label: Subir Esquemas / Informes
+        icon {
+            imageIconCssClasses: fa-arrow-circle-up
+        }
+        layout {
+            sequence: 970
+            parentEntry: @archivos
+        }
+        link {
+            target: {
+                page: 472
+            }
+        }
+    )
+
+    entry tipo-de-interfaz (
+        label: Tipo de Interfaz
+        icon {
+            imageIconCssClasses: fa-table-pointer
+        }
+        layout {
+            sequence: 770
+            parentEntry: @implementadores
+        }
+        isCurrent {
+            type: pages
+            pages: 58
+        }
+        link {
+            target: {
+                page: 58
+            }
+        }
+    )
+
+    entry tipo-de-wan (
+        label: Tipo de Wan
+        icon {
+            imageIconCssClasses: fa-table-pointer
+        }
+        layout {
+            sequence: 940
+            parentEntry: @implementadores
+        }
+        isCurrent {
+            type: pages
+            pages: 43
+        }
+        link {
+            target: {
+                page: 43
+            }
+        }
+    )
+
+    entry tipo-equipo (
+        label: Tipo Equipo
+        icon {
+            imageIconCssClasses: fa-table-pointer
+        }
+        layout {
+            sequence: 950
+            parentEntry: @implementadores
+        }
+        isCurrent {
+            type: pages
+            pages: 68
+        }
+        link {
+            target: {
+                page: 68
+            }
+        }
+    )
+
+    entry ver-imágenes (
+        label: "Ver imágenes "
+        icon {
+            imageIconCssClasses: fa-file-image-o
+        }
+        layout {
+            sequence: 910
+            parentEntry: @archivos
+        }
+        link {
+            target: {
+                page: 473
+            }
+        }
+        clickCounting {
+            countClicks: true
+            category: imágenes
+        }
+    )
+
+    entry visor-de-wan-y-servicios (
+        label: Visor de WAN y Servicios
+        icon {
+            imageIconCssClasses: fa-table-search
+        }
+        layout {
+            sequence: 30
+        }
+        isCurrent {
+            type: pages
+            pages: 17
+        }
+        link {
+            target: {
+                page: 17
+            }
+        }
+    )
+
+    entry vista-global-comentarios (
+        label: Vista Global Comentarios
+        icon {
+            imageIconCssClasses: fa-table-search
+        }
+        layout {
+            sequence: 35
+        }
+        isCurrent {
+            type: pages
+            pages: 67
+        }
+        link {
+            target: {
+                page: 67
+            }
+        }
+    )
+
+    entry vista-árbol (
+        label: Vista Árbol
+        icon {
+            imageIconCssClasses: fa-tree-org
+        }
+        layout {
+            sequence: 29
+        }
+        isCurrent {
+            type: pages
+            pages: 20
+        }
+        link {
+            target: {
+                page: 20
+            }
+        }
+    )
+
+    entry zonas (
+        label: Zonas
+        icon {
+            imageIconCssClasses: fa-table
+        }
+        layout {
+            sequence: 20
+            parentEntry: @administración
+        }
+        isCurrent {
+            type: pages
+            pages: [
+                2
+                3
+            ]
+        }
+        link {
+            target: {
+                page: 2
+            }
+        }
+    )
+
+)
+
+list navigation-bar (
+    name: Navigation Bar
+
+    entry acerca-de-esta-app (
+        label: Acerca de esta App
+        icon {
+            imageIconCssClasses: fa-info-circle-o
+        }
+        layout {
+            sequence: 1009
+        }
+        link {
+            target: {
+                page: 10020
+                clearCache: 10020
+            }
+        }
+        userDefinedAttributes {
+            2: icon-only
+        }
+        config {
+            buildOption: @feature-about-page
+        }
+    )
+
+    entry app-user (
+        label: &APP_USER.
+        icon {
+            imageIconCssClasses: fa-user
+        }
+        layout {
+            sequence: 999
+        }
+        link {
+            target: {
+                type: url
+                url: #
+            }
+        }
+        userDefinedAttributes {
+            2: has-username
+        }
+    )
+
+    entry archivos (
+        label: Archivos
+        icon {
+            imageIconCssClasses: fa-folder
+        }
+        layout {
+            sequence: 150
+            parentEntry: @app-user
+        }
+        link {
+            target: {
+                page: 471
+            }
+        }
+        serverSideCondition {
+            type: currentPage!=page
+            page: 471
+        }
+    )
+
+    entry enlaces-fo (
+        label: Enlaces FO
+        icon {
+            imageIconCssClasses: fa-accessor-one
+        }
+        layout {
+            sequence: 120
+            parentEntry: @app-user
+        }
+        link {
+            target: {
+                page: 36
+            }
+        }
+    )
+
+    entry equipos (
+        label: Equipos
+        icon {
+            imageIconCssClasses: fa-hardware
+        }
+        layout {
+            sequence: 110
+        }
+        link {
+            target: {
+                page: 13
+            }
+        }
+    )
+
+    entry interfaces (
+        label: Interfaces
+        icon {
+            imageIconCssClasses: fa-plug
+        }
+        layout {
+            sequence: 110
+        }
+        link {
+            target: {
+                page: 8
+            }
+        }
+        serverSideCondition {
+            type: expression
+            plsqlExpression: null
+        }
+    )
+
+    entry list_item (
+        label: ---
+        layout {
+            sequence: 20
+            parentEntry: @app-user
+        }
+        link {
+            target: {
+                type: url
+                url: separator
+            }
+        }
+        serverSideCondition {
+            type: userIsAuthenticated
+        }
+    )
+
+    entry mapas (
+        label: Mapas
+        icon {
+            imageIconCssClasses: fa-map-marker
+        }
+        layout {
+            sequence: 130
+            parentEntry: @app-user
+        }
+        link {
+            target: {
+                page: 47
+            }
+        }
+    )
+
+    entry racks (
+        label: Racks
+        icon {
+            imageIconCssClasses: fa-badge-list
+        }
+        layout {
+            sequence: 50
+        }
+        link {
+            target: {
+                page: 11
+            }
+        }
+    )
+
+    entry salas (
+        label: Salas
+        icon {
+            imageIconCssClasses: fa-city
+        }
+        layout {
+            sequence: 45
+        }
+        link {
+            target: {
+                page: 4
+            }
+        }
+    )
+
+    entry sign-out (
+        label: Sign Out
+        icon {
+            imageIconCssClasses: fa-sign-out
+        }
+        layout {
+            sequence: 300
+            parentEntry: @app-user
+        }
+        link {
+            target: {
+                type: url
+                url: &LOGOUT_URL.
+            }
+        }
+        serverSideCondition {
+            type: userIsAuthenticated
+        }
+    )
+
+    entry sitios (
+        label: Sitios
+        icon {
+            imageIconCssClasses: fa-map-marker
+        }
+        layout {
+            sequence: 40
+        }
+        link {
+            target: {
+                page: 25
+            }
+        }
+    )
+
+    entry ver-imágenes (
+        label: Ver Imágenes
+        icon {
+            imageIconCssClasses: fa-file-image-o
+        }
+        layout {
+            sequence: 150
+            parentEntry: @app-user
+        }
+        link {
+            target: {
+                page: 473
+            }
+        }
+        serverSideCondition {
+            type: currentPage=page
+            page: 471
+        }
+    )
+
+)
+
+list navigation-menu (
+    name: Navigation Menu
+
+    entry admin-ip-s (
+        label: Admin IP's
+        icon {
+            imageIconCssClasses: fa-table-pointer
+        }
+        layout {
+            sequence: 760
+            parentEntry: @interfaces
+        }
+        isCurrent {
+            type: pages
+            pages: 59
+        }
+        link {
+            target: {
+                page: 59
+            }
+        }
+        security {
+            authorizationScheme: @implementador-rights
+        }
+    )
+
+    entry administración (
+        label: Administración
+        icon {
+            imageIconCssClasses: fa-key
+        }
+        layout {
+            sequence: 500
+        }
+        security {
+            authorizationScheme: @administration-rights
+        }
+    )
+
+    entry archivos (
+        label: Archivos
+        icon {
+            imageIconCssClasses: fa-apex
+        }
+        layout {
+            sequence: 880
+            parentEntry: @administración
+        }
+        link {
+            target: {
+                page: 471
+            }
+        }
+    )
+
+    entry auditoría-general (
+        label: Auditoría General
+        icon {
+            imageIconCssClasses: fa-table
+        }
+        layout {
+            sequence: 620
+            parentEntry: @administración
+        }
+        isCurrent {
+            type: pages
+            pages: 46
+        }
+        link {
+            target: {
+                page: 46
+            }
+        }
+    )
+
+    entry ciudades (
+        label: Ciudades
+        icon {
+            imageIconCssClasses: fa-table
+        }
+        layout {
+            sequence: 27
+            parentEntry: @administración
+        }
+        isCurrent {
+            type: pages
+            pages: [
+                23
+                24
+            ]
+        }
+        link {
+            target: {
+                page: 23
+            }
+        }
+    )
+
+    entry conexiones (
+        label: Conexiones
+        icon {
+            imageIconCssClasses: fa-wizard
+        }
+        layout {
+            sequence: 160
+            parentEntry: @administración
+        }
+        isCurrent {
+            type: pages
+            pages: [
+                39
+                40
+            ]
+        }
+        link {
+            target: {
+                page: 39
+            }
+        }
+    )
+
+    entry conexiones-de-enlaces-wan (
+        label: Conexiones de Enlaces WAN
+        icon {
+            imageIconCssClasses: fa-table-pointer
+        }
+        layout {
+            sequence: 830
+            parentEntry: @enlaces-wan
+        }
+        isCurrent {
+            type: pages
+            pages: 407
+        }
+        link {
+            target: {
+                page: 407
+            }
+        }
+    )
+
+    entry conexiones-de-servicios (
+        label: Conexiones de Servicios
+        icon {
+            imageIconCssClasses: fa-table-pointer
+        }
+        layout {
+            sequence: 850
+            parentEntry: @servicios
+        }
+        isCurrent {
+            type: pages
+            pages: 18
+        }
+        link {
+            target: {
+                page: 18
+            }
+        }
+    )
+
+    entry conexiones-v (
+        label: Conexiones V2
+        icon {
+            imageIconCssClasses: fa-cards
+        }
+        layout {
+            sequence: 161
+            parentEntry: @administración
+        }
+        isCurrent {
+            type: pages
+            pages: 55
+        }
+        link {
+            target: {
+                page: 55
+            }
+        }
+    )
+
+    entry control-de-accesos (
+        label: Control de Accesos
+        icon {
+            imageIconCssClasses: fa-user-secret
+        }
+        layout {
+            sequence: 610
+            parentEntry: @administración
+        }
+        link {
+            target: {
+                page: 10000
+            }
+        }
+        security {
+            authorizationScheme: @administration-rights
+        }
+    )
+
+    entry dashboard-de-cumplimiento (
+        label: Dashboard de Cumplimiento
+        icon {
+            imageIconCssClasses: fa-dashboard
+        }
+        layout {
+            sequence: 640
+            parentEntry: @administración
+        }
+        isCurrent {
+            type: pages
+            pages: 200
+        }
+        link {
+            target: {
+                page: 200
+            }
+        }
+    )
+
+    entry dashboard-de-gestión-de-auditoría (
+        label: Dashboard de Gestión de Auditoría
+        icon {
+            imageIconCssClasses: fa-file-o
+        }
+        layout {
+            sequence: 630
+            parentEntry: @administración
+        }
+        isCurrent {
+            type: pages
+            pages: 100
+        }
+        link {
+            target: {
+                page: 100
+            }
+        }
+    )
+
+    entry departamentos (
+        label: Departamentos
+        icon {
+            imageIconCssClasses: fa-table
+        }
+        layout {
+            sequence: 25
+            parentEntry: @administración
+        }
+        isCurrent {
+            type: pages
+            pages: [
+                21
+                22
+            ]
+        }
+        link {
+            target: {
+                page: 21
+            }
+        }
+    )
+
+    entry dependencias-salas (
+        label: Dependencias Salas
+        icon {
+            imageIconCssClasses: fa-file-o
+        }
+        layout {
+            sequence: 900
+        }
+        isCurrent {
+            type: pages
+            pages: 33
+        }
+        link {
+            target: {
+                page: 33
+            }
+        }
+    )
+
+    entry enlaces-fo (
+        label: Enlaces FO
+        icon {
+            imageIconCssClasses: fa-accessor-one
+        }
+        layout {
+            sequence: 150
+        }
+        isCurrent {
+            type: pages
+            pages: 36
+        }
+        link {
+            target: {
+                page: 36
+            }
+        }
+    )
+
+    entry enlaces-wan (
+        label: Enlaces Wan
+        icon {
+            imageIconCssClasses: fa-accessor-more
+        }
+        layout {
+            sequence: 180
+        }
+        isCurrent {
+            type: pages
+            pages: [
+                34
+                35
+            ]
+        }
+        link {
+            target: {
+                page: 34
+            }
+        }
+    )
+
+    entry equipos (
+        label: Equipos
+        icon {
+            imageIconCssClasses: fa-table
+        }
+        layout {
+            sequence: 70
+        }
+        isCurrent {
+            type: pages
+            pages: [
+                13
+                14
+            ]
+        }
+        link {
+            target: {
+                page: 13
+            }
+        }
+    )
+
+    entry estructura-app (
+        label: Estructura App
+        icon {
+            imageIconCssClasses: fa-tree-org
+        }
+        layout {
+            sequence: 80
+            parentEntry: @experimental
+        }
+        isCurrent {
+            type: pages
+            pages: 20
+        }
+        link {
+            target: {
+                page: 20
+            }
+        }
+    )
+
+    entry experimental (
+        label: Experimental
+        icon {
+            imageIconCssClasses: fa-vial
+        }
+        layout {
+            sequence: 600
+        }
+    )
+
+    entry grilla-enlaces-fo (
+        label: Grilla Enlaces FO
+        icon {
+            imageIconCssClasses: fa-cards
+        }
+        layout {
+            sequence: 73
+            parentEntry: @administración
+        }
+        isCurrent {
+            type: pages
+            pages: 45
+        }
+        link {
+            target: {
+                page: 45
+            }
+        }
+    )
+
+    entry grilla-enlaces-wan (
+        label: Grilla enlaces WAN
+        icon {
+            imageIconCssClasses: fa-table-edit
+        }
+        layout {
+            sequence: 820
+            parentEntry: @enlaces-wan
+        }
+        isCurrent {
+            type: pages
+            pages: 10
+        }
+        link {
+            target: {
+                page: 10
+            }
+        }
+    )
+
+    entry grilla-equipos (
+        label: Grilla Equipos
+        icon {
+            imageIconCssClasses: fa-accordion
+        }
+        layout {
+            sequence: 71
+            parentEntry: @administración
+        }
+        link {
+            target: {
+                page: 44
+            }
+        }
+    )
+
+    entry grilla-interfaces (
+        label: Grilla Interfaces
+        icon {
+            imageIconCssClasses: fa-list-ul
+        }
+        layout {
+            sequence: 72
+            parentEntry: @administración
+        }
+        link {
+            target: {
+                page: 49
+            }
+        }
+        security {
+            authorizationScheme: @implementador-rights
+        }
+    )
+
+    entry grilla-servicios (
+        label: Grilla Servicios
+        icon {
+            imageIconCssClasses: fa-table-edit
+        }
+        layout {
+            sequence: 840
+            parentEntry: @servicios
+        }
+        isCurrent {
+            type: pages
+            pages: 16
+        }
+        link {
+            target: {
+                page: 16
+            }
+        }
+    )
+
+    entry home (
+        label: Home
+        icon {
+            imageIconCssClasses: fa-home
+        }
+        layout {
+            sequence: 10
+        }
+        link {
+            target: {
+                page: 1
+            }
+        }
+    )
+
+    entry interfaces (
+        label: Interfaces
+        icon {
+            imageIconCssClasses: fa-table
+        }
+        layout {
+            sequence: 130
+        }
+        isCurrent {
+            type: pages
+            pages: 8
+        }
+        link {
+            target: {
+                page: 8
+            }
+        }
+    )
+
+    entry interfaces-l (
+        label: Interfaces L2
+        icon {
+            imageIconCssClasses: fa-table-pointer
+        }
+        layout {
+            sequence: 740
+            parentEntry: @interfaces
+        }
+        isCurrent {
+            type: pages
+            pages: 48
+        }
+        link {
+            target: {
+                page: 48
+            }
+        }
+        security {
+            authorizationScheme: @implementador-rights
+        }
+    )
+
+    entry interfaces-l-2 (
+        label: Interfaces L3
+        icon {
+            imageIconCssClasses: fa-table-pointer
+        }
+        layout {
+            sequence: 750
+            parentEntry: @interfaces
+        }
+        isCurrent {
+            type: pages
+            pages: 57
+        }
+        link {
+            target: {
+                page: 57
+            }
+        }
+        security {
+            authorizationScheme: @implementador-rights
+        }
+    )
+
+    entry mapa-enlace-wan (
+        label: Mapa Enlace Wan
+        icon {
+            imageIconCssClasses: fa-map-marker
+        }
+        layout {
+            sequence: 845
+            parentEntry: @enlaces-wan
+        }
+        isCurrent {
+            type: pages
+            pages: 420
+        }
+        link {
+            target: {
+                page: 420
+            }
+        }
+    )
+
+    entry mapa-enlaces-fo (
+        label: Mapa enlaces FO
+        icon {
+            imageIconCssClasses: fa-map-marker
+        }
+        layout {
+            sequence: 845
+            parentEntry: @enlaces-fo
+        }
+        isCurrent {
+            type: pages
+            pages: 65
+        }
+        link {
+            target: {
+                page: 65
+            }
+        }
+    )
+
+    entry mapa-kmz (
+        label: Mapa KMZ
+        icon {
+            imageIconCssClasses: fa-file-o
+        }
+        layout {
+            sequence: 870
+            parentEntry: @experimental
+        }
+        isCurrent {
+            type: pages
+            pages: 460
+        }
+        link {
+            target: {
+                page: 460
+            }
+        }
+    )
+
+    entry mapa-sitios (
+        label: Mapa Sitios
+        icon {
+            imageIconCssClasses: fa-map-marker
+        }
+        layout {
+            sequence: 720
+            parentEntry: @sitios
+        }
+        isCurrent {
+            type: pages
+            pages: 47
+        }
+        link {
+            target: {
+                page: 47
+            }
+        }
+    )
+
+    entry mapas-servicios (
+        label: Mapas Servicios
+        icon {
+            imageIconCssClasses: fa-map-marker
+        }
+        layout {
+            sequence: 860
+            parentEntry: @servicios
+        }
+        isCurrent {
+            type: pages
+            pages: 421
+        }
+        link {
+            target: {
+                page: 421
+            }
+        }
+    )
+
+    entry racks (
+        label: Racks
+        icon {
+            imageIconCssClasses: fa-table
+        }
+        layout {
+            sequence: 60
+        }
+        isCurrent {
+            type: pages
+            pages: [
+                11
+                12
+            ]
+        }
+        link {
+            target: {
+                page: 11
+            }
+        }
+    )
+
+    entry salas (
+        label: Salas
+        icon {
+            imageIconCssClasses: fa-table
+        }
+        layout {
+            sequence: 40
+        }
+        isCurrent {
+            type: pages
+            pages: [
+                4
+                5
+            ]
+        }
+        link {
+            target: {
+                page: 4
+            }
+        }
+    )
+
+    entry servicios (
+        label: Servicios
+        icon {
+            imageIconCssClasses: fa-sitemap-horizontal
+        }
+        layout {
+            sequence: 190
+        }
+        isCurrent {
+            type: pages
+            pages: [
+                19
+                38
+            ]
+        }
+        link {
+            target: {
+                page: 19
+            }
+        }
+    )
+
+    entry sitios (
+        label: Sitios
+        icon {
+            imageIconCssClasses: fa-table
+        }
+        layout {
+            sequence: 30
+        }
+        isCurrent {
+            type: pages
+            pages: [
+                25
+                26
+            ]
+        }
+        link {
+            target: {
+                page: 25
+            }
+        }
+    )
+
+    entry subir-esquemas (
+        label: Subir Esquemas
+        icon {
+            imageIconCssClasses: fa-arrow-circle-up
+        }
+        layout {
+            sequence: 890
+            parentEntry: @administración
+        }
+        link {
+            target: {
+                page: 472
+            }
+        }
+    )
+
+    entry tipo-de-interfaz (
+        label: Tipo de Interfaz
+        icon {
+            imageIconCssClasses: fa-table-pointer
+        }
+        layout {
+            sequence: 770
+            parentEntry: @administración
+        }
+        isCurrent {
+            type: pages
+            pages: 58
+        }
+        link {
+            target: {
+                page: 58
+            }
+        }
+    )
+
+    entry topología-wan (
+        label: Topología WAN
+        icon {
+            imageIconCssClasses: fa-file-o
+        }
+        layout {
+            sequence: 845
+            parentEntry: @enlaces-wan
+        }
+        isCurrent {
+            type: pages
+            pages: 449
+        }
+        link {
+            target: {
+                page: 449
+            }
+        }
+    )
+
+    entry unir-enlace-wan (
+        label: Unir Enlace Wan
+        icon {
+            imageIconCssClasses: fa-file-o
+        }
+        layout {
+            sequence: 800
+        }
+        isCurrent {
+            type: pages
+            pages: 450
+        }
+        link {
+            target: {
+                page: 450
+            }
+        }
+    )
+
+    entry visor-de-servicios (
+        label: Visor de Servicios 2
+        icon {
+            imageIconCssClasses: fa-table-search
+        }
+        layout {
+            sequence: 850
+            parentEntry: @servicios
+        }
+        isCurrent {
+            type: pages
+            pages: 17
+        }
+        link {
+            target: {
+                page: 17
+            }
+        }
+    )
+
+    entry visor-de-servicios-2 (
+        label: Visor de servicios
+        icon {
+            imageIconCssClasses: fa-address-book
+        }
+        layout {
+            sequence: 199
+        }
+        isCurrent {
+            type: pages
+            pages: 410
+        }
+        link {
+            target: {
+                page: 410
+            }
+        }
+    )
+
+    entry vista-zona-global (
+        label: VISTA_ZONA_GLOBAL
+        icon {
+            imageIconCssClasses: fa-table-search
+        }
+        layout {
+            sequence: 780
+        }
+        isCurrent {
+            type: pages
+            pages: 63
+        }
+        link {
+            target: {
+                page: 63
+            }
+        }
+    )
+
+    entry visualizar-topología (
+        label: Visualizar Topología
+        icon {
+            imageIconCssClasses: fa-file-o
+        }
+        layout {
+            sequence: 660
+            parentEntry: @experimental
+        }
+        isCurrent {
+            type: pages
+            pages: 400
+        }
+        link {
+            target: {
+                page: 400
+            }
+        }
+    )
+
+    entry zonas (
+        label: Zonas
+        icon {
+            imageIconCssClasses: fa-table
+        }
+        layout {
+            sequence: 20
+            parentEntry: @administración
+        }
+        isCurrent {
+            type: pages
+            pages: [
+                2
+                3
+            ]
+        }
+        link {
+            target: {
+                page: 2
+            }
+        }
+    )
+
+)
+
+list wzrd-conexiones-wan (
+    name: WZRD_CONEXIONES_WAN
+
+    entry crear-el-enlace-wan (
+        label: Crear el enlace WAN
+        layout {
+            sequence: 10
+        }
+        link {
+            target: {
+                page: 401
+            }
+        }
+    )
+
+    entry seleccionar-equipos (
+        label: Seleccionar Equipos
+        layout {
+            sequence: 25
+        }
+        link {
+            target: {
+                page: 405
+            }
+        }
+    )
+
+    entry seleccionar-las-conexiones (
+        label: Seleccionar las conexiones
+        layout {
+            sequence: 30
+        }
+        link {
+            target: {
+                page: 403
+            }
+        }
+    )
+
+    entry seleccionar-los-sitios (
+        label: Seleccionar los sitios
+        layout {
+            sequence: 20
+        }
+        link {
+            target: {
+                page: 402
+            }
+        }
+    )
+
+    entry verificar-las-instrucciones (
+        label: Verificar las instrucciones
+        layout {
+            sequence: 40
+        }
+        link {
+            target: {
+                page: 404
+            }
+        }
+    )
+
+)
+

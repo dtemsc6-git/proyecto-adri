@@ -1,0 +1,227 @@
+page 101 (
+    name: Detalle de Transacción
+    alias: DETALLE-DE-TRANSACCIÓN1
+    title: Detalle de Auditoría
+    appearance {
+        pageMode: modalDialog
+        dialogTemplate: @/modal-dialog
+        templateOptions: #DEFAULT#
+    }
+    dialog {
+        width: 600
+        height: 600
+    }
+    navigation {
+        cursorFocus: doNotFocusCursor
+    }
+    security {
+        pageAccessProtection: argumentsMustHaveChecksum
+        formAutoComplete: false
+    }
+
+    region detalle (
+        name: Detalle
+        title: Detalle de Campos Modificados
+        type: classicReport
+        source {
+            location: localDatabase
+            type: sqlQuery
+            sqlQuery:
+                ```sql
+                SELECT 
+                    ad.COLUMN_NAME as "Campo",
+                    ad.OLD_VALUE as "Valor Anterior", 
+                    ad.NEW_VALUE as "Valor Nuevo"
+                FROM AUDIT_DETAIL ad
+                WHERE ad.AUDIT_ID = :P101_AUDIT_ID
+                ORDER BY ad.COLUMN_NAME
+                ```
+            pageItemsToSubmit: P101_AUDIT_ID
+        }
+        layout {
+            sequence: 90
+            slot: contentBody
+        }
+        appearance {
+            template: @/standard
+            templateOptions: [
+                #DEFAULT#
+                t-Region--scrollBody
+            ]
+        }
+        componentAppearance {
+            template: @/standard
+            templateOptions: [
+                #DEFAULT#
+                t-Report--altRowsDefault
+                t-Report--rowHighlight
+            ]
+        }
+        pagination {
+            type: nextAndPreviousLinks
+        }
+
+        column Campo (
+            reportColumnQueryId: 1
+            derivedColumn: N
+            heading {
+                heading: Campo
+            }
+            layout {
+                sequence: 10
+            }
+            sorting {
+                sortable: false
+            }
+        )
+
+        column "Valor Anterior" (
+            reportColumnQueryId: 2
+            derivedColumn: N
+            heading {
+                heading: Valor Anterior
+            }
+            layout {
+                sequence: 20
+            }
+            sorting {
+                sortable: false
+            }
+        )
+
+        column "Valor Nuevo" (
+            reportColumnQueryId: 3
+            derivedColumn: N
+            heading {
+                heading: Valor Nuevo
+            }
+            layout {
+                sequence: 30
+            }
+            sorting {
+                sortable: false
+            }
+        )
+
+    )
+
+    region new-info (
+        name: New_info
+        title: Información de la Transacción
+        type: staticContent
+        source {
+            htmlCode:
+                ```html
+                <div class="audit-context-info">
+                    <div class="t-Alert t-Alert--horizontal t-Alert--defaultIcons t-Alert--info">
+                        <div class="t-Alert-wrap">
+                            <div class="t-Alert-icon">
+                                <span class="t-Icon fa fa-info-circle"></span>
+                            </div>
+                            <div class="t-Alert-content">
+                                <div class="t-Alert-body">
+                                    <p><strong>ID Transacción:</strong> &P101_AUDIT_ID.</p>
+                                    <p><strong>Usuario:</strong> &P101_USUARIO.</p>
+                                    <p><strong>Operación:</strong> &P101_OPERACION.</p>
+                                    <p><strong>Fecha/Hora:</strong> &P101_FECHA_HORA.</p>
+                                    <p><strong>Tabla:</strong> &P101_TABLA.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                ```
+        }
+        layout {
+            sequence: 10
+            slot: contentBody
+        }
+        appearance {
+            template: @/standard
+            templateOptions: [
+                #DEFAULT#
+                t-Region--scrollBody
+            ]
+        }
+    )
+
+    pageItem P101_AUDIT_ID (
+        type: hidden
+        layout {
+            sequence: 20
+            slot: contentBody
+        }
+    )
+
+    pageItem P101_FECHA_HORA (
+        type: hidden
+        layout {
+            sequence: 60
+            slot: contentBody
+        }
+    )
+
+    pageItem P101_OPERACION (
+        type: hidden
+        layout {
+            sequence: 50
+            slot: contentBody
+        }
+    )
+
+    pageItem P101_TABLA (
+        type: hidden
+        layout {
+            sequence: 70
+            slot: contentBody
+        }
+    )
+
+    pageItem P101_USUARIO (
+        type: hidden
+        layout {
+            sequence: 40
+            slot: contentBody
+        }
+    )
+
+    button close (
+        buttonName: CLOSE
+        label: Cerrar
+        layout {
+            sequence: 80
+            slot: contentBody
+        }
+        appearance {
+            buttonTemplate: @/text
+            templateOptions: #DEFAULT#
+        }
+        behavior {
+            action: definedByDynamicAction
+        }
+    )
+
+    dynamicAction close (
+        name: Close
+        execution {
+            sequence: 10
+        }
+        when {
+            event: click
+            selectionType: button
+            button: @close
+        }
+
+        action cerrar (
+            name: Cerrar
+            action: closeDialog
+            execution {
+                sequence: 10
+                fireOnInit: false
+            }
+        )
+
+    )
+
+)
+

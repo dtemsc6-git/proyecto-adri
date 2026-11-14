@@ -1,0 +1,692 @@
+page 37 (
+    name: SGT_UBICAR_EQUIPO_RACK
+    alias: UBICAR-EQUIPO-RACK
+    title: Vista del Rack
+    appearance {
+        pageMode: modalDialog
+        dialogTemplate: @/modal-dialog
+        templateOptions: #DEFAULT#
+    }
+    dialog {
+        chained: false
+    }
+    navigation {
+        cursorFocus: doNotFocusCursor
+    }
+    css {
+        fileUrls: #APP_FILES#racks#MIN#.css
+        inline:
+            ```css
+            
+            
+            
+            
+            ```
+    }
+    security {
+        pageAccessProtection: argumentsMustHaveChecksum
+        formAutoComplete: false
+    }
+
+    region aviso-de-no-asignacion (
+        name: Aviso de no asignacion
+        title: Equipos ubicados en el rack sin información de ubicación:
+        type: staticContent
+        source {
+            htmlCode: &P37_SIN_ASIGNAR.
+        }
+        layout {
+            sequence: 20
+            parentRegion: @new
+            slot: subRegions
+        }
+        appearance {
+            template: @/alert
+            templateOptions: [
+                #DEFAULT#
+                t-Alert--horizontal
+                t-Alert--defaultIcons
+                t-Alert--warning
+            ]
+        }
+        serverSideCondition {
+            type: itemIsNotNull
+            item: P37_SIN_ASIGNAR
+        }
+    )
+
+    region contenido (
+        name: Contenido
+        type: staticContent
+        layout {
+            sequence: 10
+            slot: contentBody
+        }
+        appearance {
+            template: @/standard
+            templateOptions: [
+                #DEFAULT#
+                t-Region--removeHeader js-removeLandmark
+                t-Region--scrollBody
+            ]
+        }
+    )
+
+    region controles (
+        name: Controles
+        type: staticContent
+        layout {
+            sequence: 50
+            parentRegion: @contenido
+            slot: subRegions
+        }
+        appearance {
+            template: @/standard
+            templateOptions: [
+                #DEFAULT#
+                t-Region--removeHeader js-removeLandmark
+                t-Region--scrollBody
+            ]
+        }
+    )
+
+    region new (
+        name: New
+        type: staticContent
+        layout {
+            sequence: 10
+            parentRegion: @contenido
+            slot: subRegions
+            columnCssClasses: racks
+        }
+        appearance {
+            template: @/standard
+            templateOptions: [
+                #DEFAULT#
+                t-Region--noPadding
+                t-Region--removeHeader js-removeLandmark
+                t-Region--noBorder
+                t-Region--scrollBody
+            ]
+        }
+    )
+
+    region nombrerack (
+        name: NombreRack
+        type: staticContent
+        source {
+            htmlCode: Rack: &P37_RACK_NOMBRE.
+        }
+        layout {
+            sequence: 10
+            parentRegion: @new
+            slot: subRegions
+        }
+        appearance {
+            template: @/standard
+            templateOptions: [
+                #DEFAULT#
+                t-Region--removeHeader js-removeLandmark
+                t-Region--scrollBody
+            ]
+            cssClasses: u-libre
+        }
+    )
+
+    region vista-back (
+        name: VISTA_BACK
+        title: Vista Posterior Rack
+        type: classicReport
+        source {
+            location: localDatabase
+            type: sqlQuery
+            sqlQuery:
+                ```sql
+                WITH Pisos(posicion_u) AS (
+                  SELECT 1 FROM dual
+                  UNION ALL
+                  SELECT posicion_u + 1 FROM Pisos
+                  WHERE posicion_u + 1 <= (
+                    SELECT altura_u FROM sgt_Racks WHERE id=:P37_RACK_ID
+                  )
+                )
+                
+                SELECT 
+                  'U'||p.posicion_u as "U", 
+                  CASE 
+                    WHEN EXISTS (
+                      SELECT 1 FROM sgt_Equipos e
+                      WHERE e.rack_id = :P37_RACK_ID
+                        AND p.posicion_u BETWEEN e.u AND (e.u + e.altura_u - 1)
+                        AND e.posicion = 'BACK'
+                    ) THEN 
+                      '<span class="u-ocupada u-clickable">'|| 
+                      (SELECT e.nombre FROM sgt_Equipos e
+                       WHERE e.rack_id = :P37_RACK_ID
+                         AND p.posicion_u BETWEEN e.u AND (e.u + e.altura_u - 1)
+                         AND e.posicion = 'BACK'
+                       AND ROWNUM = 1) ||'</span>'
+                    ELSE
+                      '<span class="u-libre u-clickable" data-pos="'|| p.posicion_u ||'">Seleccionar Aqui</span>'
+                  END AS Equipo
+                FROM Pisos p
+                ORDER BY p.posicion_u DESC;
+                ```
+        }
+        layout {
+            sequence: 50
+            parentRegion: @new
+            slot: subRegions
+            startNewRow: false
+            columnCssClasses: back
+        }
+        appearance {
+            template: @/standard
+            templateOptions: [
+                #DEFAULT#
+                t-Region--scrollBody
+            ]
+        }
+        reportLayout {
+            numberOfRows: 60
+        }
+        componentAppearance {
+            template: @/standard
+            templateOptions: [
+                #DEFAULT#
+                t-Report--altRowsDefault
+                t-Report--rowHighlight
+            ]
+        }
+        pagination {
+            type: nextAndPreviousLinks
+        }
+
+        column EQUIPO (
+            reportColumnQueryId: 2
+            derivedColumn: N
+            type: richText
+            heading {
+                heading: Equipo
+            }
+            layout {
+                sequence: 20
+            }
+            settings {
+                format: html
+            }
+            sorting {
+                sortable: false
+            }
+        )
+
+        column U (
+            reportColumnQueryId: 1
+            derivedColumn: N
+            heading {
+                heading: U
+            }
+            layout {
+                sequence: 10
+            }
+            sorting {
+                sortable: false
+            }
+        )
+
+    )
+
+    region vista-front (
+        name: VISTA_FRONT
+        title: Vista Frontal Rack
+        type: classicReport
+        source {
+            location: localDatabase
+            type: sqlQuery
+            sqlQuery:
+                ```sql
+                WITH Pisos(posicion_u) AS (
+                  SELECT 1 FROM dual
+                  UNION ALL
+                  SELECT posicion_u + 1 FROM Pisos
+                  WHERE posicion_u + 1 <= (
+                    SELECT altura_u FROM sgt_Racks WHERE id=:P37_RACK_ID
+                  )
+                )
+                
+                SELECT 
+                  'U'||p.posicion_u as "U", 
+                  CASE 
+                    WHEN EXISTS (
+                      SELECT 1 FROM sgt_Equipos e
+                      WHERE e.rack_id = :P37_RACK_ID
+                        AND p.posicion_u BETWEEN e.u AND (e.u + e.altura_u - 1)
+                        AND e.posicion = 'FRONT'
+                    ) THEN 
+                      '<span class="u-ocupada u-clickable">'|| 
+                      (SELECT e.nombre FROM sgt_Equipos e
+                       WHERE e.rack_id = :P37_RACK_ID
+                         AND p.posicion_u BETWEEN e.u AND (e.u + e.altura_u - 1)
+                         AND e.posicion = 'FRONT'
+                       AND ROWNUM = 1) ||'</span>'
+                    ELSE
+                      '<span class="u-libre u-clickable" data-ua="'|| p.posicion_u ||'">Seleccionar Aqui</span>'
+                  END AS Equipo
+                FROM Pisos p
+                ORDER BY p.posicion_u DESC;
+                ```
+        }
+        layout {
+            sequence: 40
+            parentRegion: @new
+            slot: subRegions
+        }
+        appearance {
+            template: @/standard
+            templateOptions: [
+                #DEFAULT#
+                t-Region--scrollBody
+            ]
+            cssClasses: table-front
+        }
+        reportLayout {
+            numberOfRows: 60
+        }
+        componentAppearance {
+            template: @/standard
+            templateOptions: [
+                #DEFAULT#
+                t-Report--altRowsDefault
+                t-Report--rowHighlight
+            ]
+            cssClasses: tabla-front
+        }
+        pagination {
+            type: nextAndPreviousLinks
+        }
+
+        column EQUIPO (
+            reportColumnQueryId: 2
+            derivedColumn: N
+            type: richText
+            heading {
+                heading: Equipo
+            }
+            layout {
+                sequence: 20
+            }
+            settings {
+                format: html
+            }
+            sorting {
+                sortable: false
+            }
+        )
+
+        column U (
+            reportColumnQueryId: 1
+            derivedColumn: N
+            heading {
+                heading: U
+            }
+            layout {
+                sequence: 10
+            }
+            sorting {
+                sortable: false
+            }
+        )
+
+    )
+
+    pageItem P37_ALTURA_U (
+        type: hidden
+        layout {
+            sequence: 30
+            region: @contenido
+            slot: regionBody
+        }
+    )
+
+    pageItem P37_NOMBRE (
+        type: hidden
+        layout {
+            sequence: 60
+            region: @contenido
+            slot: regionBody
+        }
+    )
+
+    pageItem P37_POSICION (
+        type: hidden
+        layout {
+            sequence: 40
+            region: @contenido
+            slot: regionBody
+        }
+    )
+
+    pageItem P37_RACK_ID (
+        type: hidden
+        layout {
+            sequence: 10
+            region: @contenido
+            slot: regionBody
+        }
+    )
+
+    pageItem P37_RACK_NOMBRE (
+        type: textField
+        label {
+            label: New
+            alignment: left
+        }
+        layout {
+            sequence: 20
+            region: @contenido
+            slot: regionBody
+            alignment: left
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+            width: 30
+        }
+        config {
+            buildOption: @commented-out
+        }
+    )
+
+    pageItem P37_SIN_ASIGNAR (
+        type: textarea
+        label {
+            label: Equipos con asignación pendiente en el rack:
+            alignment: left
+        }
+        layout {
+            sequence: 20
+            region: @new
+            slot: regionBody
+            alignment: left
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+            width: 30
+            height: 5
+            valuePlaceholder: Ingrese datos
+        }
+        serverSideCondition {
+            type: itemIsNotNull
+            item: P37_SIN_ASIGNAR
+        }
+        config {
+            buildOption: @commented-out
+        }
+    )
+
+    pageItem P37_U (
+        type: hidden
+        layout {
+            sequence: 50
+            region: @contenido
+            slot: regionBody
+        }
+    )
+
+    button asignar (
+        buttonName: Asignar
+        label: Asignar
+        layout {
+            sequence: 20
+            region: @controles
+            slot: regionBody
+            startNewRow: false
+        }
+        appearance {
+            buttonTemplate: @/text
+            templateOptions: #DEFAULT#
+        }
+        behavior {
+            action: definedByDynamicAction
+        }
+    )
+
+    button clear (
+        buttonName: Clear
+        label: Limpiar Selección
+        layout {
+            sequence: 10
+            region: @controles
+            slot: regionBody
+        }
+        appearance {
+            buttonTemplate: @/text
+            templateOptions: #DEFAULT#
+        }
+        behavior {
+            action: definedByDynamicAction
+        }
+    )
+
+    dynamicAction aceptardatos (
+        name: AceptarDatos
+        execution {
+            sequence: 30
+        }
+        when {
+            event: click
+            selectionType: button
+            button: @asignar
+        }
+
+        action native-dialog-close (
+            action: closeDialog
+            settings {
+                itemsToReturn: [
+                    P37_POSICION
+                    P37_U
+                ]
+            }
+            execution {
+                sequence: 10
+                fireOnInit: false
+            }
+            comments {
+                comments: Al presionar cierra el dialogo y devuelve la u y posicion como valores de salida
+            }
+        )
+
+    )
+
+    dynamicAction asignaru (
+        name: AsignarU
+        execution {
+            sequence: 10
+        }
+        when {
+            event: click
+            selectionType: jQuerySelector
+            jquerySelector: .u-clickable
+        }
+
+        action native-javascript-code (
+            action: executeJsCode
+            settings {
+                jsCode:
+                    ```javascript-browser
+                    /*
+                    DMF: Chequear la altura en U de equipo a ubicar, verificar
+                    que la u esta disponible y que la altura no coliciona con otras U Ocupadas.
+                    
+                    Obtener el punto donde se hizo click y preguntar el estado de los 
+                    que estan abajo de ese punto 
+                    
+                    Determinar si esta en la vista frontal o back
+                    
+                    Proceso: 
+                    Obtener el elemento donde se hace click.
+                    Preguntar si las ubicaciones estan libres
+                    iterar la tabla y chequear que todas las u necesarias estan disponibles
+                    Si no se puede asignar alguna de las U notificar al usuario y normalizar la vista
+                    Si pasa las validaciones asignar al equipo.
+                    
+                    Validación:
+                    Si ya se tiene una selección no se puede volver a seleccionar, se debe limpiar 
+                    Examinar opciones para las ediciones:
+                       Al presionar Limpiar debe limpiar las U donde coinciden los nombres de los equipos o las 
+                       U que digan asignado.
+                    
+                    2 la u seleccionada + la altura del equipo no puede superar la altura del rack
+                    2 Si alguna de las U estan en uso en el intervalo u seleccionada alturaU cancelar y notificar
+                    3 Si pasa las validaciones asignar
+                    
+                    */
+                    
+                    
+                    let elementosModificados = [];
+                    
+                    console.log((this));
+                    console.log(this.triggeringElement.getAttribute('data-ua'));
+                    
+                    if (apex.item("P37_POSICION").getValue().length > 0 ){
+                        alert("Presione el boton limpiar para realizar una nueva seleción")
+                        return false;
+                    }
+                    
+                    
+                    var alturaEquipo = Number(apex.item("P37_ALTURA_U").getValue());
+                    
+                    
+                    // Preguntar si el elemento tiene la propiedad data-pos si tiene estamos en la vista posterior
+                    var posicion = this.triggeringElement.hasAttribute('data-pos') ? "BACK" : "FRONT";
+                    
+                    
+                    // elemento que disparó el evento
+                    var $elem = $(this.triggeringElement);  
+                    var uSeleccionada = $elem.closest('tr').index();
+                    // Obtener la tabla más cercana a ese elemento
+                    var $tabla = $elem.closest('table');
+                    //
+                    var alturaRack = $tabla.find('tbody tr').length;
+                    // Iterar sobre las filas del tbody
+                    console.log('Altura rack: '+alturaRack);
+                    //var validacion = uSeleccionada + alturaEquipo-1
+                    //console.log('Validacion 1: '+ (validacion));
+                    /*if (alturaRack < validacion) {
+                        alert("Val1 No se puede seleccionar esa U");
+                        return false;
+                    }
+                    
+                    var index = alturaRack - uSeleccionada - alturaEquipo + 1;
+                    */
+                    //validar si la uSeleccionada - la alturaEquipo es menor a cero
+                    if (uSeleccionada + 1 - alturaEquipo < 0) {
+                        alert("Val 1: No se puede seleccionar la U, no hay espacio")
+                        return false;
+                    }
+                    for (i=uSeleccionada; i>uSeleccionada-alturaEquipo; i-- ) {
+                        var $span = $tabla.find('tbody tr').eq(i).find('td').eq(1).find('span');
+                        var textoCol = $tabla.find('tbody tr').eq(i).find('td').eq(1).text().trim().toLowerCase();
+                        console.log('Bucle for: '+i+',text: '+textoCol);
+                        if (textoCol !== "seleccionar aqui") {
+                            alert("Val2 No se puede seleccionar esa U");
+                            elementosModificados.forEach((i) => {
+                                i.removeClass('u-ocupada').addClass('u-libre');
+                                i.text("Seleccionar Aqui");
+                            });
+                            return false;
+                        }
+                        else {
+                            $span.removeClass('u-libre').addClass('u-ocupada');
+                            $span.text("Asignado");
+                            //Guardar las U asignadas en caso de necesitar revertir
+                            elementosModificados.push ($span);
+                    
+                        }
+                    
+                    } 
+                    
+                    //Asignar los datos
+                    apex.item("P37_POSICION").setValue(posicion);
+                    apex.item("P37_U").setValue(alturaRack - uSeleccionada);
+                    ```
+            }
+            execution {
+                sequence: 10
+                fireOnInit: false
+            }
+        )
+
+    )
+
+    dynamicAction limpiarseleccion (
+        name: LimpiarSeleccion
+        execution {
+            sequence: 20
+        }
+        when {
+            event: click
+            selectionType: button
+            button: @clear
+        }
+
+        action native-javascript-code (
+            action: executeJsCode
+            settings {
+                jsCode:
+                    ```javascript-browser
+                    /*
+                    DMF: Obtener las tablas de la vista, iterar sobre ellas, limpiar los campos que tengan el texto
+                    Asignado o que el nombre del equipo en minusculas coincidan.
+                    */
+                    var equipo = apex.item('P37_NOMBRE').getValue().trim().toLowerCase();
+                    var $spanOcupado = $('.u-ocupada');
+                    
+                    $spanOcupado.each(function (index) { 
+                           
+                            var $span = $(this);
+                            var textoCol = $span.text().trim().toLowerCase();
+                             console.log("LimpiarSelección: "+index+ ":"+equipo+":"+textoCol);  
+                            if (textoCol === "asignado" || textoCol === equipo) {
+                                
+                                $span.removeClass('u-ocupada').addClass('u-libre');
+                                $span.text("Seleccionar Aqui");
+                            }
+                            
+                        
+                    });
+                    
+                    apex.item("P37_POSICION").setValue("");
+                    apex.item("P37_U").setValue("");
+                    ```
+            }
+            execution {
+                sequence: 10
+                fireOnInit: false
+            }
+        )
+
+    )
+
+    computation p37-sin-asignar (
+        itemName: P37_SIN_ASIGNAR
+        execution {
+            sequence: 10
+        }
+        computation {
+            sqlQuery:
+                ```sql
+                    SELECT LISTAGG(NOMBRE, ', ') AS mostrar
+                FROM SGT_EQUIPOS
+                WHERE RACK_ID = :P37_RACK_ID
+                  AND U IS NULL;
+                ```
+        }
+        error {
+            errorMessage: sE PRODUJO UN ERROR
+        }
+    )
+
+)
+

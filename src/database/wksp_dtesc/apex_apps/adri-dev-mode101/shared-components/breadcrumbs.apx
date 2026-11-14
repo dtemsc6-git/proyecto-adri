@@ -1,0 +1,431 @@
+breadcrumb breadcrumb (
+    name: Breadcrumb
+
+    entry admin-ip-x27-s (
+        name: Admin IP&#x27;s
+        pageNumber: 59
+        execution {
+            sequence: 10
+        }
+        appearance {
+            parentEntry: @interfaces
+        }
+        link {
+            target: {
+                page: 59
+            }
+        }
+    )
+
+    entry auditoría-general (
+        name: Auditoría General
+        pageNumber: 46
+        execution {
+            sequence: 10
+        }
+        link {
+            target: {
+                page: 46
+            }
+        }
+    )
+
+    entry ciudades (
+        name: Ciudades
+        pageNumber: 23
+        execution {
+            sequence: 10
+        }
+        appearance {
+            parentEntry: @departamentos
+        }
+        link {
+            target: {
+                page: 23
+            }
+        }
+    )
+
+    entry conexiones (
+        name: Conexiones
+        pageNumber: 39
+        execution {
+            sequence: 10
+        }
+        link {
+            target: {
+                page: 39
+            }
+        }
+    )
+
+    entry control-de-accesos (
+        name: Control de Accesos
+        pageNumber: 10000
+        execution {
+            sequence: 10
+        }
+        link {
+            target: {
+                page: 10000
+            }
+        }
+    )
+
+    entry dashboard-de-cumplimiento-de-políticas-y-patrones-de-riesgo-últimos-90-días (
+        name: Dashboard de Cumplimiento de políticas y patrones de riesgo - Últimos 90 días
+        pageNumber: 200
+        execution {
+            sequence: 10
+        }
+        link {
+            target: {
+                page: 200
+            }
+        }
+    )
+
+    entry dashboard-de-gestión-de-auditoría-últimos-30-días (
+        name: Dashboard de Gestión de Auditoría - Últimos 30 días
+        pageNumber: 100
+        execution {
+            sequence: 10
+        }
+        link {
+            target: {
+                page: 100
+            }
+        }
+    )
+
+    entry departamentos (
+        name: Departamentos
+        pageNumber: 21
+        execution {
+            sequence: 10
+        }
+        appearance {
+            parentEntry: @zonas
+        }
+        link {
+            target: {
+                page: 21
+            }
+        }
+    )
+
+    entry dependencias-salas (
+        name: Dependencias Salas
+        pageNumber: 33
+        execution {
+            sequence: 10
+        }
+        link {
+            target: {
+                page: 33
+            }
+        }
+    )
+
+    entry detalles-equipos (
+        name: Detalles Equipos
+        pageNumber: 66
+        execution {
+            sequence: 10
+        }
+        appearance {
+            parentEntry: @equipos
+        }
+        link {
+            target: {
+                page: 66
+            }
+        }
+    )
+
+    entry enlaces-fo (
+        name: Enlaces FO
+        pageNumber: 36
+        execution {
+            sequence: 10
+        }
+        link {
+            target: {
+                page: 36
+            }
+        }
+    )
+
+    entry enlaces-wan (
+        name: Enlaces Wan
+        pageNumber: 34
+        execution {
+            sequence: 10
+        }
+        link {
+            target: {
+                page: 34
+            }
+        }
+    )
+
+    entry equipos (
+        name: Equipos
+        pageNumber: 13
+        execution {
+            sequence: 10
+        }
+        appearance {
+            parentEntry: @racks
+        }
+        link {
+            target: {
+                page: 13
+            }
+        }
+    )
+
+    entry home (
+        name: Home
+        pageNumber: 1
+        execution {
+            sequence: 10
+        }
+        link {
+            target: {
+                page: 1
+            }
+        }
+    )
+
+    entry interfaces (
+        name: Interfaces
+        pageNumber: 8
+        execution {
+            sequence: 10
+        }
+        appearance {
+            parentEntry: @equipos
+        }
+        link {
+            target: {
+                page: 8
+            }
+        }
+    )
+
+    entry interfaces-l (
+        name: Interfaces L2
+        pageNumber: 48
+        execution {
+            sequence: 10
+        }
+        appearance {
+            parentEntry: @interfaces
+        }
+        link {
+            target: {
+                page: 48
+            }
+        }
+    )
+
+    entry interfaces-l-2 (
+        name: Interfaces L3
+        pageNumber: 57
+        execution {
+            sequence: 10
+        }
+        appearance {
+            parentEntry: @interfaces
+        }
+        link {
+            target: {
+                page: 57
+            }
+        }
+    )
+
+    entry mapa-sitios (
+        name: Mapa Sitios
+        pageNumber: 47
+        execution {
+            sequence: 10
+        }
+        link {
+            target: {
+                page: 47
+            }
+        }
+    )
+
+    entry racks (
+        name: Racks
+        pageNumber: 11
+        execution {
+            sequence: 10
+        }
+        appearance {
+            parentEntry: @salas
+        }
+        link {
+            target: {
+                page: 11
+            }
+        }
+    )
+
+    entry salas (
+        name: Salas
+        pageNumber: 4
+        execution {
+            sequence: 10
+        }
+        appearance {
+            parentEntry: @sitios
+        }
+        link {
+            target: {
+                page: 4
+            }
+        }
+    )
+
+    entry servicios (
+        name: Servicios
+        pageNumber: 19
+        execution {
+            sequence: 10
+        }
+        link {
+            target: {
+                page: 19
+            }
+        }
+    )
+
+    entry sgt-cables (
+        name: SGT_CABLES
+        pageNumber: 32
+        execution {
+            sequence: 10
+        }
+        link {
+            target: {
+                page: 32
+            }
+        }
+    )
+
+    entry sitios (
+        name: Sitios
+        pageNumber: 25
+        execution {
+            sequence: 10
+        }
+        appearance {
+            parentEntry: @ciudades
+        }
+        link {
+            target: {
+                page: 25
+            }
+        }
+    )
+
+    entry topología-wan (
+        name: Topología WAN
+        pageNumber: 449
+        execution {
+            sequence: 10
+        }
+        link {
+            target: {
+                page: 449
+            }
+        }
+    )
+
+    entry unir-enlace-wan (
+        name: Unir Enlace Wan
+        pageNumber: 450
+        execution {
+            sequence: 10
+        }
+        link {
+            target: {
+                page: 450
+            }
+        }
+    )
+
+    entry vista-global (
+        name: Vista Global
+        pageNumber: 63
+        execution {
+            sequence: 10
+        }
+        link {
+            target: {
+                page: 63
+            }
+        }
+    )
+
+    entry vista-global-comentarios (
+        name: Vista Global Comentarios
+        pageNumber: 67
+        execution {
+            sequence: 10
+        }
+        link {
+            target: {
+                page: 67
+            }
+        }
+    )
+
+    entry vista-servicios (
+        name: Vista Servicios
+        pageNumber: 410
+        execution {
+            sequence: 10
+        }
+        appearance {
+            longName: Vista General de los servicios
+        }
+        link {
+            target: {
+                page: 410
+            }
+        }
+    )
+
+    entry visualizar-topología (
+        name: Visualizar Topología
+        pageNumber: 400
+        execution {
+            sequence: 10
+        }
+        link {
+            target: {
+                page: 400
+            }
+        }
+    )
+
+    entry zonas (
+        name: Zonas
+        pageNumber: 2
+        execution {
+            sequence: 10
+        }
+        link {
+            target: {
+                page: 2
+            }
+        }
+    )
+
+)
+

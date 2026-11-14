@@ -1,0 +1,52 @@
+textMessage BTN_APLICAR_CAMBIOS (
+    message {
+        text: Aplicar Cambios
+        language: es-py
+    }
+)
+
+textMessage BTN_BORRAR (
+    message {
+        text: Borrar
+        language: es-py
+    }
+)
+
+textMessage BTN_CREAR (
+    message {
+        text: Crear
+        language: es-py
+    }
+)
+
+textMessage BTN_CREAR_VARIOS (
+    message {
+        text: Crear Varios
+        language: es-py
+    }
+)
+
+textMessage BTN_GRILLA_EDITABLE (
+    message {
+        text: Grilla Editable
+        language: es-py
+    }
+    comments {
+        comments: Para los botones que llevan a la grilla Editable
+    }
+)
+
+textMessage BTN_IMPORTAR_XLS (
+    message {
+        text: Importar XLS
+        language: es-py
+    }
+)
+
+textMessage DELETE_MSG (
+    message {
+        text: ¿Estás seguro de que deseas eliminar?
+        language: es-py
+    }
+)
+

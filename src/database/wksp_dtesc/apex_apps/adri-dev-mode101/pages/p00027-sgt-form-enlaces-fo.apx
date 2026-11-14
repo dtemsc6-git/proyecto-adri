@@ -1,0 +1,1164 @@
+page 27 (
+    name: SGT_FORM_ENLACES_FO
+    alias: SGT-FORM-ENLACES-FO
+    title: Agregar / Editar
+    pageGroup: @implementadores
+    appearance {
+        pageMode: modalDialog
+        dialogTemplate: @/drawer
+        templateOptions: [
+            #DEFAULT#
+            js-dialog-class-t-Drawer--pullOutEnd
+        ]
+    }
+    dialog {
+        chained: false
+    }
+    navigation {
+        cursorFocus: doNotFocusCursor
+    }
+    security {
+        authorizationScheme: @implementador-rights
+        pageAccessProtection: argumentsMustHaveChecksum
+        formAutoComplete: false
+    }
+
+    region buttons (
+        name: Buttons
+        type: staticContent
+        layout {
+            sequence: 20
+            slot: dialogFooter
+        }
+        appearance {
+            template: @/buttons-container
+            templateOptions: #DEFAULT#
+        }
+        settings {
+            outputAs: text
+        }
+    )
+
+    region datos-cable (
+        name: DATOS_CABLE
+        title: Datos Adicionales
+        type: staticContent
+        layout {
+            sequence: 20
+            parentRegion: @detalles-form
+            slot: subRegions
+        }
+        appearance {
+            template: @/standard
+            templateOptions: [
+                #DEFAULT#
+                t-Region--noPadding
+                t-Region--hideHeader js-addHiddenHeadingRoleDesc
+                t-Region--noBorder
+                t-Region--scrollBody
+            ]
+        }
+        advanced {
+            regionDisplaySelector: true
+        }
+    )
+
+    region datos-enlaces (
+        name: DATOS_ENLACES
+        title: Datos Principales
+        type: staticContent
+        layout {
+            sequence: 10
+            parentRegion: @detalles-form
+            slot: subRegions
+        }
+        appearance {
+            template: @/standard
+            templateOptions: [
+                #DEFAULT#
+                t-Region--noPadding
+                t-Region--hideHeader js-addHiddenHeadingRoleDesc
+                t-Region--noBorder
+                t-Region--scrollBody
+            ]
+        }
+        advanced {
+            regionDisplaySelector: true
+        }
+    )
+
+    region datos-log (
+        name: DATOS_LOG
+        type: staticContent
+        source {
+            htmlCode:
+                ```html
+                Creado por &P27_CREADO_POR. el &P27_CREADO_EL.. 
+                Actualizado por &P27_ACTUALIZADO_POR. el &P27_ACTUALIZADO_EL. 
+                ```
+        }
+        layout {
+            sequence: 270
+            parentRegion: @sgt-form-enlaces-fo
+            slot: regionBody
+        }
+        appearance {
+            template: @/standard
+            templateOptions: [
+                #DEFAULT#
+                t-Region--removeHeader js-removeLandmark
+                t-Region--scrollBody
+            ]
+        }
+        serverSideCondition {
+            type: itemIsNotNull
+            item: P27_ID
+        }
+    )
+
+    region detalles-form (
+        name: DETALLES_FORM
+        title: Detalles
+        type: regionDisplaySelector
+        layout {
+            sequence: 250
+            parentRegion: @sgt-form-enlaces-fo
+            slot: regionBody
+        }
+        appearance {
+            template: @/standard
+            templateOptions: [
+                #DEFAULT#
+                t-Region--noPadding
+                t-Region--removeHeader js-removeLandmark
+                t-Region--noBorder
+                t-Region--scrollBody
+            ]
+        }
+        settings {
+            includeShowAll: false
+        }
+    )
+
+    region sgt-form-enlaces-fo (
+        name: SGT_FORM_ENLACES_FO
+        title: Agregar  / Editar Enlace FO
+        type: form
+        source {
+            location: localDatabase
+            tableName: SGT_ENLACES_FO
+        }
+        layout {
+            sequence: 10
+            slot: contentBody
+        }
+        appearance {
+            template: @/blank-with-attributes
+            templateOptions: #DEFAULT#
+        }
+        edit {
+            enabled: true
+            allowedOperations: [
+                add
+                update
+                delete
+            ]
+        }
+    )
+
+    pageItem P27_ABS_LONGITUD (
+        type: numberField
+        label {
+            label: Abs Longitud
+            alignment: left
+        }
+        layout {
+            sequence: 60
+            region: @datos-cable
+            slot: regionBody
+            alignment: left
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+            width: 32
+        }
+        validation {
+            maxLength: 255
+        }
+        source {
+            formRegion: @sgt-form-enlaces-fo
+            column: ABS_LONGITUD
+            dataType: number
+        }
+        config {
+            buildOption: @commented-out
+        }
+    )
+
+    pageItem P27_ACTUALIZADO_EL (
+        type: hidden
+        layout {
+            sequence: 240
+            region: @sgt-form-enlaces-fo
+            slot: regionBody
+        }
+        source {
+            formRegion: @sgt-form-enlaces-fo
+            column: ACTUALIZADO_EL
+            dataType: timestamp
+        }
+    )
+
+    pageItem P27_ACTUALIZADO_POR (
+        type: hidden
+        layout {
+            sequence: 230
+            region: @sgt-form-enlaces-fo
+            slot: regionBody
+        }
+        source {
+            formRegion: @sgt-form-enlaces-fo
+            column: ACTUALIZADO_POR
+            dataType: varchar2
+        }
+    )
+
+    pageItem P27_CANTIDAD_DE_PELOS (
+        type: numberField
+        label {
+            label: Cantidad de Pelos
+            alignment: left
+        }
+        settings {
+            minValue: 0
+            maxValue: 144
+            virtualKeyboard: numeric
+        }
+        layout {
+            sequence: 130
+            region: @datos-enlaces
+            slot: regionBody
+            alignment: left
+            startNewRow: false
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+            width: 32
+        }
+        validation {
+            maxLength: 255
+        }
+        source {
+            formRegion: @sgt-form-enlaces-fo
+            column: CANTIDAD_DE_PELOS
+            dataType: number
+        }
+        help {
+            inlineHelpText: Indicar la cantidad de pelos utilizada para el enlace
+        }
+    )
+
+    pageItem P27_CERTIFICACIÓN (
+        type: numberField
+        label {
+            label: Certificación (Km.)
+            alignment: left
+        }
+        layout {
+            sequence: 120
+            region: @datos-enlaces
+            slot: regionBody
+            alignment: left
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+            width: 32
+        }
+        validation {
+            maxLength: 255
+        }
+        source {
+            formRegion: @sgt-form-enlaces-fo
+            column: CERTIFICACIÓN
+            dataType: number
+        }
+        help {
+            inlineHelpText: Indicar la longitud de la fibra óptica en kilómetros según medición de OTDR
+        }
+    )
+
+    pageItem P27_COMENTARIOS (
+        type: markdownEditor
+        label {
+            label: Observaciones
+            alignment: left
+        }
+        layout {
+            sequence: 160
+            region: @datos-enlaces
+            slot: regionBody
+            alignment: left
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+        }
+        source {
+            formRegion: @sgt-form-enlaces-fo
+            column: COMENTARIOS
+            dataType: varchar2
+        }
+        help {
+            inlineHelpText: Insertar observaciones o comentarios si los hubiere
+        }
+        config {
+            buildOption: @commented-out
+        }
+    )
+
+    pageItem P27_CONECTOR (
+        type: selectList
+        label {
+            label: Conector
+            alignment: left
+        }
+        lov {
+            type: sharedComponent
+            lov: @tipo-conector
+        }
+        layout {
+            sequence: 70
+            region: @datos-cable
+            slot: regionBody
+            alignment: left
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+            height: 1
+        }
+        source {
+            formRegion: @sgt-form-enlaces-fo
+            column: CONECTOR
+            dataType: varchar2
+        }
+        help {
+            inlineHelpText: Seleccionar el tipo de conector de los DIOs extremos
+        }
+    )
+
+    pageItem P27_CREADO_EL (
+        type: hidden
+        layout {
+            sequence: 220
+            region: @sgt-form-enlaces-fo
+            slot: regionBody
+        }
+        source {
+            formRegion: @sgt-form-enlaces-fo
+            column: CREADO_EL
+            dataType: timestamp
+        }
+    )
+
+    pageItem P27_CREADO_POR (
+        type: hidden
+        layout {
+            sequence: 210
+            region: @sgt-form-enlaces-fo
+            slot: regionBody
+        }
+        source {
+            formRegion: @sgt-form-enlaces-fo
+            column: CREADO_POR
+            dataType: varchar2
+        }
+    )
+
+    pageItem P27_EQUIPO_ID_A (
+        type: popupLov
+        label {
+            label: Equipo Lado A
+            alignment: left
+        }
+        settings {
+            fetchOnSearch: true
+        }
+        lov {
+            type: sqlQuery
+            sqlQuery:
+                ```sql
+                select e.nombre Mostrar, e.id Valor from SGT_EQUIPOS e
+                left join sgt_racks r on e.rack_id = r.id
+                left join sgt_salas s on r.sala_id = s.id
+                left join sgt_sitios ss on s.sitio_id = ss.id
+                where ss.id = :P27_SITIO_ID_A AND e.tipo_equipo_id = 11
+                ```
+            displayExtraValues: false
+            nullDisplayValue: Valor no asignado
+        }
+        cascadingLov {
+            parentItems: P27_SITIO_ID_A
+            itemsToSubmit: P27_SITIO_ID_A
+        }
+        layout {
+            sequence: 40
+            region: @datos-enlaces
+            slot: regionBody
+            alignment: left
+            startNewRow: false
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+            width: 32
+        }
+        validation {
+            maxLength: 255
+        }
+        source {
+            formRegion: @sgt-form-enlaces-fo
+            column: EQUIPO_ID_A
+            dataType: number
+        }
+        help {
+            inlineHelpText: Seleccionar el DIO de inicio del enlace
+        }
+    )
+
+    pageItem P27_EQUIPO_ID_B (
+        type: popupLov
+        label {
+            label: Equipo Lado B
+            alignment: left
+        }
+        settings {
+            fetchOnSearch: true
+        }
+        lov {
+            type: sqlQuery
+            sqlQuery:
+                ```sql
+                select  e.nombre Mostrar, e.id Valor from SGT_EQUIPOS e
+                left join sgt_racks r on e.rack_id = r.id
+                left join sgt_salas s on r.sala_id = s.id
+                left join sgt_sitios ss on s.sitio_id = ss.id
+                where ss.id = :P27_SITIO_ID_B AND e.tipo_equipo_id = 11
+                ```
+            nullDisplayValue: Valor no asignado
+        }
+        cascadingLov {
+            parentItems: P27_SITIO_ID_B
+            itemsToSubmit: P27_EQUIPO_ID_B
+        }
+        layout {
+            sequence: 60
+            region: @datos-enlaces
+            slot: regionBody
+            alignment: left
+            startNewRow: false
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+            width: 32
+        }
+        validation {
+            maxLength: 255
+        }
+        source {
+            formRegion: @sgt-form-enlaces-fo
+            column: EQUIPO_ID_B
+            dataType: number
+        }
+        help {
+            inlineHelpText: Seleccionar el DIO de fin del enlace
+        }
+    )
+
+    pageItem P27_ESTADO (
+        type: selectList
+        label {
+            label: Estado
+            alignment: left
+        }
+        lov {
+            type: sharedComponent
+            lov: @enlace-fo-estado
+        }
+        layout {
+            sequence: 80
+            region: @datos-enlaces
+            slot: regionBody
+            alignment: left
+        }
+        appearance {
+            template: @/required-floating
+            templateOptions: #DEFAULT#
+            height: 1
+        }
+        validation {
+            valueRequired: true
+        }
+        source {
+            formRegion: @sgt-form-enlaces-fo
+            column: ESTADO
+            dataType: varchar2
+        }
+        help {
+            inlineHelpText: Seleccionar el estado del enlace
+        }
+    )
+
+    pageItem P27_FECHA_IMPLEMENTACIÓN (
+        type: datePicker
+        label {
+            label: Fecha Implementación
+            alignment: left
+        }
+        layout {
+            sequence: 100
+            region: @datos-cable
+            slot: regionBody
+            alignment: left
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+            width: 32
+        }
+        validation {
+            maxLength: 255
+        }
+        source {
+            formRegion: @sgt-form-enlaces-fo
+            column: FECHA_IMPLEMENTACIÓN
+            dataType: timestamp
+        }
+        help {
+            inlineHelpText: Indicar la fecha en la que se implementó el enlace
+        }
+    )
+
+    pageItem P27_ID (
+        type: hidden
+        layout {
+            sequence: 10
+            region: @sgt-form-enlaces-fo
+            slot: regionBody
+        }
+        source {
+            formRegion: @sgt-form-enlaces-fo
+            column: ID
+            dataType: number
+            queryOnly: true
+            primaryKey: true
+        }
+        security {
+            sessionStateProtection: checksumRequiredSessionLevel
+        }
+    )
+
+    pageItem P27_LT (
+        type: selectList
+        label {
+            label: LT
+            alignment: left
+        }
+        lov {
+            type: sharedComponent
+            lov: @tipo-lt
+        }
+        layout {
+            sequence: 100
+            region: @datos-enlaces
+            slot: regionBody
+            alignment: left
+            startNewRow: false
+        }
+        appearance {
+            template: @/required-floating
+            templateOptions: #DEFAULT#
+            height: 1
+        }
+        validation {
+            valueRequired: true
+        }
+        source {
+            formRegion: @sgt-form-enlaces-fo
+            column: LT
+            dataType: varchar2
+        }
+        help {
+            inlineHelpText: Seleccionar tipo de tendido eléctrico utilizado por el enlace
+        }
+    )
+
+    pageItem P27_NOMBRE (
+        type: textField
+        label {
+            label: Nombre
+            alignment: left
+        }
+        layout {
+            sequence: 20
+            region: @datos-enlaces
+            slot: regionBody
+            alignment: left
+        }
+        appearance {
+            template: @/required-floating
+            templateOptions: #DEFAULT#
+            width: 32
+        }
+        validation {
+            valueRequired: true
+            maxLength: 255
+        }
+        source {
+            formRegion: @sgt-form-enlaces-fo
+            column: NOMBRE
+            dataType: varchar2
+        }
+        help {
+            inlineHelpText: Asignar un nombre al enlace. El nombre debe ser único y se recomienda el formato SitioA_SitioB_TipoCable_NroEnlace.
+        }
+    )
+
+    pageItem P27_PROYECTO_DE_IMPLEMENTACIÓN (
+        type: textField
+        label {
+            label: Proyecto de Implementación
+            alignment: left
+        }
+        layout {
+            sequence: 90
+            region: @datos-cable
+            slot: regionBody
+            alignment: left
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+            width: 32
+        }
+        validation {
+            maxLength: 255
+        }
+        source {
+            formRegion: @sgt-form-enlaces-fo
+            column: PROYECTO_DE_IMPLEMENTACIÓN
+            dataType: varchar2
+        }
+        help {
+            inlineHelpText: Indicar el proyecto por medio del cual se implementó el enlace
+        }
+    )
+
+    pageItem P27_SITIO_ID_A (
+        type: popupLov
+        label {
+            label: Sitio Lado A
+            alignment: left
+        }
+        settings {
+            fetchOnSearch: true
+        }
+        lov {
+            type: sharedComponent
+            lov: @lov-sitios-sf
+        }
+        layout {
+            sequence: 40
+            region: @datos-enlaces
+            slot: regionBody
+            alignment: left
+            columnSpan: 4
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+            width: 32
+        }
+        validation {
+            maxLength: 255
+        }
+        source {
+            formRegion: @sgt-form-enlaces-fo
+            column: SITIO_ID_A
+            dataType: number
+        }
+        help {
+            inlineHelpText: Seleccionar el sitio donde inicia el enlace
+        }
+    )
+
+    pageItem P27_SITIO_ID_B (
+        type: popupLov
+        label {
+            label: Sitio Lado B
+            alignment: left
+        }
+        settings {
+            fetchOnSearch: true
+        }
+        lov {
+            type: sharedComponent
+            lov: @lov-sitios-sf
+        }
+        layout {
+            sequence: 60
+            region: @datos-enlaces
+            slot: regionBody
+            alignment: left
+            columnSpan: 4
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+            width: 32
+        }
+        validation {
+            maxLength: 255
+        }
+        source {
+            formRegion: @sgt-form-enlaces-fo
+            column: SITIO_ID_B
+            dataType: number
+        }
+        help {
+            inlineHelpText: Seleccionar el sitio donde finaliza el enlace
+        }
+    )
+
+    pageItem P27_TIPO (
+        type: selectList
+        label {
+            label: Tipo de enlace
+            alignment: left
+        }
+        lov {
+            type: sharedComponent
+            lov: @tipo-enlace
+        }
+        layout {
+            sequence: 90
+            region: @datos-enlaces
+            slot: regionBody
+            alignment: left
+        }
+        appearance {
+            template: @/required-floating
+            templateOptions: #DEFAULT#
+            height: 1
+        }
+        validation {
+            valueRequired: true
+        }
+        source {
+            formRegion: @sgt-form-enlaces-fo
+            column: TIPO
+            dataType: varchar2
+        }
+        help {
+            inlineHelpText: Seleccionar el tipo de enlace
+            helpText:
+                ```html
+                <p>
+                Opciones:
+                <p>
+                    <ul>
+                	
+                <li>Troncal: Unión de sitios diferentes.</li>
+                <li>Interno: Cableado interno dentro de un sitio dado.</li>
+                <li>Acceso: Conexiones a gabinetes de poste, reconectadores o cualquier otro equipo externo ubicado fuera de un sitio.</li>
+                <li>De Terceros: El enlace no pertenece a ANDE.</li>
+                
+                	    </ul>
+                </p>
+                
+                ```
+        }
+    )
+
+    pageItem P27_TIPO_CABLE (
+        type: selectMany
+        label {
+            label: Tipo de cable
+            alignment: left
+        }
+        settings {
+            infiniteScroll: false
+        }
+        lov {
+            type: sharedComponent
+            lov: @tipo-cable
+        }
+        layout {
+            sequence: 140
+            region: @datos-enlaces
+            slot: regionBody
+            alignment: left
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+            width: 30
+        }
+        source {
+            formRegion: @sgt-form-enlaces-fo
+            column: TIPO_CABLE
+            dataType: varchar2
+        }
+        help {
+            inlineHelpText: Seleccionar el tipo o los tipos de cable de fibra óptica que utiliza el enlace (Puede seleccionar más de uno)
+        }
+    )
+
+    pageItem P27_TIPO_DE_FO (
+        type: selectList
+        label {
+            label: Tipo de fibra
+            alignment: left
+        }
+        lov {
+            type: sharedComponent
+            lov: @tipo-fo
+        }
+        layout {
+            sequence: 40
+            region: @datos-cable
+            slot: regionBody
+            alignment: left
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+            height: 1
+        }
+        source {
+            formRegion: @sgt-form-enlaces-fo
+            column: TIPO_DE_FO
+            dataType: varchar2
+        }
+        help {
+            inlineHelpText: Seleccionar el tipo de cable de fibra óptica
+        }
+    )
+
+    pageItem P27_TIPO_TENDIDO (
+        type: selectList
+        label {
+            label: Tipo de tendido
+            alignment: left
+        }
+        lov {
+            type: staticValues
+            staticValues: STATIC2:Aéreo;Aéreo,Subterráneo;Subterráneo,Mix;Mix,NA;NA
+        }
+        layout {
+            sequence: 150
+            region: @datos-enlaces
+            slot: regionBody
+            alignment: left
+            startNewRow: false
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+            height: 1
+        }
+        source {
+            formRegion: @sgt-form-enlaces-fo
+            column: TIPO_TENDIDO
+            dataType: varchar2
+        }
+        help {
+            inlineHelpText: Seleccionar el tipo de tendido de fibra óptica
+            helpText:
+                ```html
+                <p>
+                Aclaración:
+                <p>
+                    <ul>
+                <li>Mix: Se refiere a mezcla de tipos de tendido (aéreo y subterráneo)</li>
+                	    </ul>
+                </p>
+                
+                ```
+        }
+    )
+
+    pageItem P27_UNIDAD_ENCARGADA_ACTUAL (
+        type: selectMany
+        label {
+            label: Unidad Encargada
+            alignment: left
+        }
+        settings {
+            infiniteScroll: false
+        }
+        lov {
+            type: sharedComponent
+            lov: @uni-encar
+        }
+        layout {
+            sequence: 80
+            region: @datos-cable
+            slot: regionBody
+            alignment: left
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+            width: 32
+        }
+        validation {
+            maxLength: 255
+        }
+        source {
+            formRegion: @sgt-form-enlaces-fo
+            column: UNIDAD_ENCARGADA_ACTUAL
+            dataType: varchar2
+        }
+        help {
+            inlineHelpText: Seleccionar unidad administrativa actual del enlace
+        }
+    )
+
+    pageItem P27_UNIDAD_MEDIDA (
+        type: selectList
+        label {
+            label: Unidad de medida
+            alignment: left
+        }
+        lov {
+            type: staticValues
+            staticValues: STATIC2:km;km,m;m,cm;cm
+        }
+        layout {
+            sequence: 50
+            region: @datos-cable
+            slot: regionBody
+            alignment: left
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+            height: 1
+        }
+        source {
+            formRegion: @sgt-form-enlaces-fo
+            column: UNIDAD_MEDIDA
+            dataType: varchar2
+        }
+        help {
+            inlineHelpText: Seleccionar la unidad de medida de la certificación
+        }
+        config {
+            buildOption: @commented-out
+        }
+    )
+
+    button cancel (
+        buttonName: CANCEL
+        label: Cancel
+        layout {
+            sequence: 10
+            region: @buttons
+            slot: close
+        }
+        appearance {
+            buttonTemplate: @/text
+            templateOptions: #DEFAULT#
+        }
+        behavior {
+            action: definedByDynamicAction
+        }
+    )
+
+    button create (
+        buttonName: CREATE
+        label: &APP_TEXT$BTN_CREAR!RAW.
+        layout {
+            sequence: 40
+            region: @buttons
+            slot: next
+        }
+        appearance {
+            buttonTemplate: @/text
+            hot: true
+            templateOptions: #DEFAULT#
+        }
+        behavior {
+            warnOnUnsavedChanges: doNotCheck
+            databaseAction: insert
+        }
+        serverSideCondition {
+            type: itemIsNull
+            item: P27_ID
+        }
+    )
+
+    button delete (
+        buttonName: DELETE
+        label: Delete
+        layout {
+            sequence: 20
+            region: @buttons
+            slot: delete
+        }
+        appearance {
+            buttonTemplate: @/text
+            templateOptions: #DEFAULT#
+        }
+        behavior {
+            executeValidations: false
+            warnOnUnsavedChanges: doNotCheck
+            databaseAction: delete
+            requiresConfirmation: true
+        }
+        confirmation {
+            message: &APP_TEXT$DELETE_MSG!RAW.
+            style: danger
+        }
+        serverSideCondition {
+            type: itemIsNotNull
+            item: P27_ID
+        }
+    )
+
+    button save (
+        buttonName: SAVE
+        label: &APP_TEXT$BTN_APLICAR_CAMBIOS!RAW.
+        layout {
+            sequence: 30
+            region: @buttons
+            slot: next
+        }
+        appearance {
+            buttonTemplate: @/text
+            hot: true
+            templateOptions: #DEFAULT#
+        }
+        behavior {
+            warnOnUnsavedChanges: doNotCheck
+            databaseAction: update
+        }
+        serverSideCondition {
+            type: itemIsNotNull
+            item: P27_ID
+        }
+    )
+
+    dynamicAction cancel-dialog (
+        name: Cancel Dialog
+        execution {
+            sequence: 10
+        }
+        when {
+            event: click
+            selectionType: button
+            button: @cancel
+        }
+
+        action native-dialog-cancel (
+            action: cancelDialog
+            execution {
+                sequence: 10
+                fireOnInit: false
+            }
+        )
+
+    )
+
+    validation p27-actualizado-el-must-be-timestamp (
+        name: P27_ACTUALIZADO_EL must be timestamp
+        execution {
+            sequence: 220
+        }
+        validation {
+            type: itemIsAValidTimestamp
+            item: P27_ACTUALIZADO_EL
+        }
+        error {
+            errorMessage: #LABEL# must be a valid timestamp.
+            associatedItem: @P27_ACTUALIZADO_EL
+        }
+    )
+
+    validation p27-creado-el-must-be-timestamp (
+        name: P27_CREADO_EL must be timestamp
+        execution {
+            sequence: 200
+        }
+        validation {
+            type: itemIsAValidTimestamp
+            item: P27_CREADO_EL
+        }
+        error {
+            errorMessage: #LABEL# must be a valid timestamp.
+            associatedItem: @P27_CREADO_EL
+        }
+    )
+
+    validation p27-fecha-implementación-must-be-timestamp (
+        name: P27_FECHA_IMPLEMENTACIÓN must be timestamp
+        execution {
+            sequence: 170
+        }
+        validation {
+            type: itemIsAValidTimestamp
+            item: P27_FECHA_IMPLEMENTACIÓN
+        }
+        error {
+            errorMessage: #LABEL# must be a valid timestamp.
+            associatedItem: @P27_FECHA_IMPLEMENTACIÓN
+        }
+    )
+
+    process close-dialog (
+        name: Close Dialog
+        type: closeDialog
+        execution {
+            sequence: 50
+        }
+        advanced {
+            executionMappingIdentifier: 42627048449219534101
+        }
+        serverSideCondition {
+            type: requestIsContainedInValue
+            value: CREATE,SAVE,DELETE
+        }
+    )
+
+    process initialize-form-sgt-form-enlaces-fo (
+        name: Initialize form SGT_FORM_ENLACES_FO
+        type: formInitialization
+        formRegion: @sgt-form-enlaces-fo
+        execution {
+            sequence: 10
+            point: beforeHeader
+        }
+        advanced {
+            executionMappingIdentifier: 42627047619207534100
+        }
+    )
+
+    process process-form-sgt-form-enlaces-fo (
+        name: Process form SGT_FORM_ENLACES_FO
+        type: formAutoRowProcessing
+        formRegion: @sgt-form-enlaces-fo
+        execution {
+            sequence: 10
+        }
+        advanced {
+            executionMappingIdentifier: 42627048039742534100
+        }
+    )
+
+)
+

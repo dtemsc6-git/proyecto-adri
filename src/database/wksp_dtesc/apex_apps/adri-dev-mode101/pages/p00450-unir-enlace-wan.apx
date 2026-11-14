@@ -1,0 +1,502 @@
+page 450 (
+    name: Unir Enlace Wan
+    alias: UNIR-ENLACE-WAN
+    title: Unir Enlace Wan
+    appearance {
+        pageTemplate: @/standard
+        templateOptions: #DEFAULT#
+    }
+    navigation {
+        cursorFocus: doNotFocusCursor
+    }
+    javaScript {
+        fileUrls: [
+            https://unpkg.com/vis-network/standalone/umd/vis-network.min.js
+            #APP_FILES#p400_vista_conexiones#MIN#.js
+        ]
+        functionAndGlobalVariableDeclaration:
+            ```javascript-browser
+            var level = 0;
+            
+            var nodes = new vis.DataSet();
+            var edges = new vis.DataSet();
+            
+            var nodoSeleccionado = null;
+            
+            var data = {
+                nodes: nodes,
+                edges: edges
+            };
+            
+            // Mostrar mensajes (puedes personalizar con un toast o alert)
+            function mostrarMensaje(mensaje, tipo = "info") {
+                console.log(mensaje);
+                // Puedes usar un toast de APEX o cualquier otra librería
+                if (typeof apex !== "undefined") {
+                    apex.message.showPageSuccess(mensaje);
+                } else {
+                    alert(mensaje);
+                }
+            }
+            
+            function limpiarSeleccion() {
+                if (nodoSeleccionado !== null) {
+                    resaltarNodo(nodoSeleccionado, false);
+                    nodoSeleccionado = null;
+                }
+            }
+            
+            var options = {
+                    interaction: { hover: true },
+                    
+                    layout: {
+                        improvedLayout: true
+                        ,hierarchical: {
+                          enabled: true,
+                      //  nodeSpacing: 200,
+                          levelSeparation: 75,
+                          direction: "LR"
+                        }
+                    }
+                   ,physics: { enabled: false, solver: "forceAtlas2Based" }
+                  };
+            
+            
+             function mostrarMenuContextual(event, nodeId) {
+                // Implementar menú contextual personalizado
+                var menu = document.createElement("div");
+                menu.className = "context-menu";
+                menu.style.position = "absolute";
+                menu.style.left = event.clientX + "px";
+                menu.style.top = event.clientY + "px";
+                menu.style.backgroundColor = "white";
+                menu.style.border = "1px solid #ccc";
+                menu.style.padding = "5px";
+                menu.style.zIndex = "1000";
+                
+                menu.innerHTML = `
+                    <ul style="list-style: none; margin: 0; padding: 0;">
+                        <li style="padding: 5px 10px; cursor: pointer;" onclick="iniciarConexion('${nodeId}')">
+                            Iniciar conexión desde aquí
+                        </li>
+                        <li style="padding: 5px 10px; cursor: pointer;" onclick="verInfoNodo('${nodeId}')">
+                            Ver información
+                        </li>
+                        <li style="padding: 5px 10px; cursor: pointer;" onclick="eliminarNodo('${nodeId}')">
+                            Eliminar nodo
+                        </li>
+                    </ul>
+                `;
+                
+                document.body.appendChild(menu);
+                
+                // Cerrar menú al hacer click fuera
+                setTimeout(function() {
+                    document.addEventListener("click", function cerrarMenu() {
+                        document.body.removeChild(menu);
+                        document.removeEventListener("click", cerrarMenu);
+                    });
+                }, 100);
+            }     
+            
+            
+             function obtenerNombreNodo(nodeId) {
+                var node = nodes.get(nodeId);
+                return node ? node.label : nodeId;
+            }    
+            
+            // Función para resaltar nodo
+            function resaltarNodo(nodeId, resaltar) {
+                var node = nodes.get(nodeId);
+                if (node) {
+                    if (resaltar) {
+                        node.color = {
+                            background: "#FFD700",
+                            border: "#FFA500",
+                            highlight: {
+                                background: "#FFD700",
+                                border: "#FFA500"
+                            }
+                        };
+                        node.borderWidth = 3;
+                    } else {
+                        // Restaurar color original
+                        node.color = {
+                            background: "#97C2FC",
+                            border: "#2B7CE9",
+                            highlight: {
+                                background: "#D2E5FF",
+                                border: "#2B7CE9"
+                            }
+                        };
+                        node.borderWidth = 1;
+                    }
+                    nodes.update(node);
+                }
+            }
+            
+            // Función para crear la conexión
+            function crearConexion(fromNode, toNode) {
+                if (fromNode === toNode) {
+                    mostrarMensaje("No se puede conectar un nodo consigo mismo", "error");
+                    return;
+                }
+                
+                // Verificar si ya existe una conexión
+                var conexionExistente = edges.get({
+                    filter: function(edge) {
+                        return (edge.from === fromNode && edge.to === toNode) ||
+                               (edge.from === toNode && edge.to === fromNode);
+                    }
+                });
+                
+                if (conexionExistente.length > 0) {
+                    mostrarMensaje("Ya existe una conexión entre estos nodos", "warning");
+                    return;
+                }
+                
+                // Crear nuevo edge
+                var nuevoEdge = {
+                    id: Date.now(), // ID único
+                    from: fromNode,
+                    to: toNode,
+                    label: "Nueva Conexión",
+                    title: "Conexión creada manualmente",
+                    arrows: "to", // Dirección de la flecha
+                    color: {
+                        color: "#2B7CE9"
+                    }
+                };
+                
+                // Agregar el edge al DataSet
+                edges.add(nuevoEdge);
+                
+                mostrarMensaje("Conexión creada entre " + 
+                               obtenerNombreNodo(fromNode) + " y " + 
+                               obtenerNombreNodo(toNode), "success");
+                
+                // Opcional: Guardar en el servidor
+                //guardarConexionEnServidor(fromNode, toNode);
+            }
+            
+            
+            function configurarEventosRed() {
+                // Evento para click derecho en nodo (seleccionar primer nodo)
+                network.on("oncontext", function(params) {
+                    // Prevenir menú contextual del navegador
+                    params.event.preventDefault();
+                    // Verificar si se presionó Ctrl
+                    var ctrlPressed = params.event.ctrlKey || params.event.metaKey;
+                    
+                    if (ctrlPressed && params.nodes.length > 0) {
+                        // Modo de conexión con Ctrl
+                        if (nodoSeleccionado === null) {
+                            nodoSeleccionado = params.nodes[0];
+                            resaltarNodo(nodoSeleccionado, true);
+                            mostrarMensaje("Nodo origen seleccionado. Ctrl+Click derecho en otro nodo para conectar");
+                        } else {
+                            crearConexion(nodoSeleccionado, params.nodes[0]);
+                            limpiarSeleccion();
+                        }
+                    } else if (params.nodes.length > 0) {
+                        // Click derecho normal - mostrar menú contextual
+                        mostrarMenuContextual(params.event, params.nodes[0]);
+                    }
+                });
+            
+            };
+            
+            
+            var container = document.getElementById("network");
+            var network = new vis.Network(container, data, options);
+            configurarEventosRed();   
+            
+            
+            // Clase para manejar el grafo jerárquico
+            /*
+            class HierarchicalGraph {
+                constructor(containerId) {
+                    this.container = document.getElementById(containerId);
+                    this.nodes = new vis.DataSet();
+                    this.edges = new vis.DataSet();
+                    this.network = null;
+                    this.init();
+                }
+                
+                init() {
+                    var options = {
+                        layout: {
+                            hierarchical: {
+                                enabled: true,
+                                direction: "LR",
+                                levelSeparation: 150,
+                                nodeSpacing: 100
+                            }
+                        },
+                        physics: { enabled: false },
+                        edges: { arrows: { to: { enabled: true } } }
+                    };
+                    
+                    this.network = new vis.Network(this.container, {
+                        nodes: this.nodes,
+                        edges: this.edges
+                    }, options);
+                }
+                
+                agregarNodoConHijos(parentId, parentLabel, hijos) {
+                    // Verificar si el padre ya existe
+                    if (!this.nodes.get(parentId)) {
+                        this.nodes.add({
+                            id: parentId,
+                            label: parentLabel,
+                            level: 0,
+                            shape: "box"
+                        });
+                    }
+                    
+                    // Agregar hijos
+                    hijos.forEach((hijo, index) => {
+                        var childId = `${parentId}_${index}`;
+                        
+                        this.nodes.add({
+                            id: childId,
+                            label: hijo.label,
+                            level: 1,
+                            shape: "ellipse"
+                        });
+                        
+                        this.edges.add({
+                            from: parentId,
+                            to: childId,
+                            label: hijo.relacion || "conexión"
+                        });
+                    });
+                    
+                    // Refrescar vista
+                    this.network.fit();
+                }
+                
+                expandirNodo(nodeId, hijos) {
+                    var node = this.nodes.get(nodeId);
+                    var currentLevel = node.level || 0;
+                    
+                    hijos.forEach((hijo, index) => {
+                        var childId = `${nodeId}_child_${index}`;
+                        
+                        this.nodes.add({
+                            id: childId,
+                            label: hijo.label,
+                            level: currentLevel + 1,
+                            shape: "ellipse"
+                        });
+                        
+                        this.edges.add({
+                            from: nodeId,
+                            to: childId,
+                            label: hijo.relacion
+                        });
+                    });
+                    
+                    // Forzar recálculo del layout
+                    this.network.setOptions({ physics: true });
+                    setTimeout(() => {
+                        this.network.setOptions({ physics: false });
+                        this.network.fit();
+                    }, 500);
+                }
+            }
+            
+            // Uso en APEX
+            var miGrafo = new HierarchicalGraph("network");
+            
+            // Agregar nodo con hijos
+            miGrafo.agregarNodoConHijos("JumboSW_SMI", "JumboSW_SMI", [
+                { label: "S1_TC3840A_GE1/2", relacion: "interfaz" },
+                { label: "S1_TC3840A_GE2/3", relacion: "interfaz" },
+                { label: "S1_TC3840A_GE3/4", relacion: "interfaz" }
+            ]);
+            
+            // Expandir nodo existente
+            miGrafo.expandirNodo("JumboSW_SMI_child_0", [
+                { label: "DO_SMI_PCA_ARMOR2", relacion: "conexión" }
+            ]); */
+            
+            ```
+    }
+    security {
+        pageAccessProtection: argumentsMustHaveChecksum
+        formAutoComplete: false
+    }
+
+    region breadcrumb (
+        name: Breadcrumb
+        type: breadcrumb
+        source {
+            breadcrumb: @breadcrumb
+        }
+        layout {
+            sequence: 10
+            slot: breadcrumbBar
+        }
+        appearance {
+            template: @/title-bar
+            templateOptions: [
+                #DEFAULT#
+                t-BreadcrumbRegion--useBreadcrumbTitle
+            ]
+        }
+        componentAppearance {
+            breadcrumbTemplate: @/breadcrumb
+            templateOptions: #DEFAULT#
+        }
+    )
+
+    region controles (
+        name: controles
+        type: staticContent
+        layout {
+            sequence: 20
+            slot: body
+        }
+        appearance {
+            template: @/standard
+            templateOptions: [
+                #DEFAULT#
+                t-Region--scrollBody
+            ]
+        }
+    )
+
+    region network (
+        name: network
+        type: staticContent
+        layout {
+            sequence: 10
+            slot: body
+        }
+        appearance {
+            template: @/standard
+            templateOptions: [
+                #DEFAULT#
+                i-h640
+                t-Region--scrollBody
+            ]
+        }
+        advanced {
+            htmlDomId: network
+        }
+    )
+
+    pageItem P450_EQUIPOS (
+        type: popupLov
+        label {
+            label: Equipos
+            alignment: left
+        }
+        lov {
+            type: sqlQuery
+            sqlQuery:
+                ```sql
+                select nombre, id from sgt_equipos
+                where rack_id = :P450_RACKS
+                ```
+        }
+        cascadingLov {
+            parentItems: P450_RACKS
+            itemsToSubmit: P450_RACKS
+        }
+        layout {
+            sequence: 30
+            region: @controles
+            slot: regionBody
+            alignment: left
+            startNewRow: false
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+            width: 30
+        }
+    )
+
+    pageItem P450_RACKS (
+        type: popupLov
+        label {
+            label: New
+            alignment: left
+        }
+        lov {
+            type: sharedComponent
+            lov: @racks-nombre-compuesto
+        }
+        layout {
+            sequence: 10
+            region: @controles
+            slot: regionBody
+            alignment: left
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+            width: 30
+        }
+    )
+
+    button agregar (
+        buttonName: Agregar
+        label: Agregar
+        layout {
+            sequence: 40
+            region: @controles
+            slot: regionBody
+            startNewRow: false
+        }
+        appearance {
+            buttonTemplate: @/text
+            templateOptions: #DEFAULT#
+        }
+        behavior {
+            action: definedByDynamicAction
+        }
+    )
+
+    dynamicAction agregar (
+        name: Agregar
+        execution {
+            sequence: 10
+        }
+        when {
+            event: click
+            selectionType: button
+            button: @agregar
+        }
+
+        action native-javascript-code (
+            action: executeJsCode
+            settings {
+                jsCode:
+                    ```javascript-browser
+                    level =+10;
+                    
+                    data.nodes.add(
+                        {
+                            id:  $v("P450_EQUIPOS"),
+                            label: $("#P450_EQUIPOS").val()+": "+ $v("P450_EQUIPOS"),
+                            shape: "box", // Forma para interfaces
+                            level: level
+                        }
+                    );
+                    
+                    network.redraw();
+                    ```
+            }
+            execution {
+                sequence: 10
+                fireOnInit: false
+            }
+        )
+
+    )
+
+)
+

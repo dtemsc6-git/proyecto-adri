@@ -1,0 +1,414 @@
+page 50 (
+    name: Step 1
+    alias: STEP-1
+    title: Datos del Servicio
+    pageGroup: @wzrd-servicios
+    appearance {
+        pageMode: modalDialog
+        dialogTemplate: @/wizard-modal-dialog
+        templateOptions: #DEFAULT#
+    }
+    dialog {
+        width: 780
+        height: 580
+    }
+    navigation {
+        cursorFocus: doNotFocusCursor
+    }
+    security {
+        authorizationScheme: @implementador-rights
+        pageAccessProtection: argumentsMustHaveChecksum
+    }
+
+    region buttons (
+        name: Buttons
+        type: staticContent
+        layout {
+            sequence: 10
+            slot: wizardButtons
+        }
+        appearance {
+            template: @/buttons-container
+            templateOptions: #DEFAULT#
+        }
+    )
+
+    region form-servicios (
+        name: FORM_SERVICIOS
+        type: form
+        source {
+            location: localDatabase
+            tableName: SGT_SERVICIOS
+        }
+        layout {
+            sequence: 10
+            parentRegion: @step
+            slot: subRegions
+        }
+        appearance {
+            template: @/standard
+            templateOptions: [
+                #DEFAULT#
+                t-Region--removeHeader js-removeLandmark
+                t-Region--scrollBody
+            ]
+        }
+    )
+
+    region step (
+        name: Step 1
+        type: staticContent
+        layout {
+            sequence: 20
+            slot: wizardBody
+            startNewRow: false
+        }
+        appearance {
+            template: @/blank-with-attributes
+            templateOptions: #DEFAULT#
+        }
+    )
+
+    region wizard-progress (
+        name: Wizard Progress
+        type: list
+        source {
+            list: @asistente-servicios
+        }
+        layout {
+            sequence: 10
+            slot: wizardProgressBar
+        }
+        appearance {
+            template: @/blank-with-attributes
+            templateOptions: #DEFAULT#
+        }
+        componentAppearance {
+            listTemplate: @/wizard-progress
+            templateOptions: [
+                #DEFAULT#
+                t-WizardSteps--displayLabels
+            ]
+        }
+    )
+
+    pageItem P50_ACTUALIZADO_EL (
+        type: hidden
+        layout {
+            sequence: 100
+            region: @form-servicios
+            slot: regionBody
+        }
+        source {
+            formRegion: @form-servicios
+            column: ACTUALIZADO_EL
+            dataType: date
+        }
+    )
+
+    pageItem P50_ACTUALIZADO_POR (
+        type: hidden
+        layout {
+            sequence: 90
+            region: @form-servicios
+            slot: regionBody
+        }
+        source {
+            formRegion: @form-servicios
+            column: ACTUALIZADO_POR
+            dataType: varchar2
+        }
+    )
+
+    pageItem P50_CREADO_EL (
+        type: hidden
+        layout {
+            sequence: 80
+            region: @form-servicios
+            slot: regionBody
+        }
+        source {
+            formRegion: @form-servicios
+            column: CREADO_EL
+            dataType: date
+        }
+    )
+
+    pageItem P50_CREADO_POR (
+        type: hidden
+        layout {
+            sequence: 70
+            region: @form-servicios
+            slot: regionBody
+        }
+        source {
+            formRegion: @form-servicios
+            column: CREADO_POR
+            dataType: varchar2
+        }
+    )
+
+    pageItem P50_DESCRIPCION (
+        type: textarea
+        label {
+            label: Descripción
+            alignment: left
+        }
+        settings {
+            charCounter: true
+        }
+        layout {
+            sequence: 60
+            region: @form-servicios
+            slot: regionBody
+            alignment: left
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+            width: 30
+            height: 5
+        }
+        validation {
+            maxLength: 4000
+        }
+        source {
+            formRegion: @form-servicios
+            column: DESCRIPCION
+            dataType: varchar2
+        }
+        sessionState {
+            storage: session
+        }
+    )
+
+    pageItem P50_ID (
+        type: hidden
+        layout {
+            sequence: 10
+            region: @form-servicios
+            slot: regionBody
+        }
+        source {
+            formRegion: @form-servicios
+            column: ID
+            dataType: number
+            queryOnly: true
+            primaryKey: true
+        }
+        sessionState {
+            storage: session
+        }
+        security {
+            sessionStateProtection: checksumRequiredSessionLevel
+        }
+    )
+
+    pageItem P50_LADO_A (
+        type: popupLov
+        label {
+            label: Lado A
+            alignment: left
+        }
+        lov {
+            type: sharedComponent
+            lov: @lov-sitios-sf
+        }
+        layout {
+            sequence: 30
+            region: @form-servicios
+            slot: regionBody
+            alignment: left
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+            width: 30
+        }
+        config {
+            buildOption: @commented-out
+        }
+    )
+
+    pageItem P50_LADO_Z (
+        type: popupLov
+        label {
+            label: Lado Z
+            alignment: left
+        }
+        lov {
+            type: sharedComponent
+            lov: @lov-sitios-sf
+        }
+        layout {
+            sequence: 40
+            region: @form-servicios
+            slot: regionBody
+            alignment: left
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+            width: 30
+        }
+        config {
+            buildOption: @commented-out
+        }
+    )
+
+    pageItem P50_NIVEL_DE_PRIORIDAD (
+        type: selectOne
+        label {
+            label: Nivel De Prioridad
+            alignment: left
+        }
+        settings {
+            infiniteScroll: false
+        }
+        lov {
+            type: sharedComponent
+            lov: @servicios-nivel-prioridad
+        }
+        layout {
+            sequence: 50
+            region: @form-servicios
+            slot: regionBody
+            alignment: left
+        }
+        appearance {
+            template: @/required-floating
+            templateOptions: #DEFAULT#
+            width: 30
+        }
+        validation {
+            valueRequired: true
+        }
+        source {
+            formRegion: @form-servicios
+            column: NIVEL_DE_PRIORIDAD
+            dataType: number
+        }
+        sessionState {
+            storage: session
+        }
+    )
+
+    pageItem P50_NOMBRE (
+        type: textField
+        label {
+            label: Nombre
+            alignment: left
+        }
+        layout {
+            sequence: 20
+            region: @form-servicios
+            slot: regionBody
+            alignment: left
+        }
+        appearance {
+            template: @/required-floating
+            templateOptions: #DEFAULT#
+            width: 30
+        }
+        validation {
+            valueRequired: true
+            maxLength: 255
+        }
+        source {
+            formRegion: @form-servicios
+            column: NOMBRE
+            dataType: varchar2
+        }
+        sessionState {
+            storage: session
+        }
+    )
+
+    button cancel (
+        buttonName: CANCEL
+        label: Cancel
+        layout {
+            sequence: 10
+            region: @buttons
+            slot: close
+        }
+        appearance {
+            buttonTemplate: @/text
+            templateOptions: #DEFAULT#
+        }
+        behavior {
+            action: definedByDynamicAction
+        }
+    )
+
+    button next (
+        buttonName: NEXT
+        label: Next
+        layout {
+            sequence: 30
+            region: @buttons
+            slot: next
+        }
+        appearance {
+            buttonTemplate: @/text-with-icon
+            hot: true
+            templateOptions: t-Button--iconRight
+            icon: fa-chevron-right
+        }
+        behavior {
+            warnOnUnsavedChanges: doNotCheck
+        }
+    )
+
+    dynamicAction cancel-dialog (
+        name: Cancel Dialog
+        execution {
+            sequence: 10
+        }
+        when {
+            event: click
+            selectionType: button
+            button: @cancel
+        }
+
+        action native-dialog-cancel (
+            action: cancelDialog
+            execution {
+                sequence: 10
+                fireOnInit: false
+            }
+        )
+
+    )
+
+    process initialize-form-step (
+        name: Initialize form Step 1
+        type: formInitialization
+        formRegion: @form-servicios
+        execution {
+            sequence: 10
+            point: beforeHeader
+        }
+        advanced {
+            executionMappingIdentifier: 64554408085986252538
+        }
+    )
+
+    branch (
+        name: Go To Page 51
+        execution {
+            sequence: 20
+            point: afterSubmit
+        }
+        behavior {
+            target: {
+                page: 51
+            }
+        }
+        serverSideCondition {
+            whenButtonPressed: @next
+        }
+    )
+
+)
+

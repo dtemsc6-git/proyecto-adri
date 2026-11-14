@@ -1,0 +1,91 @@
+app ADRI-DEV-MODE (
+    name: adri-dev
+    version: DEV MOD 1.0
+    logo {
+        type: text
+        text: adri-demo
+    }
+    navigation {
+        homeUrl: {
+            page: 1
+        }
+        loginUrl: {
+            page: LOGIN
+        }
+    }
+    navigationMenu {
+        listTemplate: @/side-navigation-menu
+        templateOptions: [
+            #DEFAULT#
+            js-defaultCollapsed
+            js-navCollapsed--hidden
+            t-TreeNav--styleA
+        ]
+        list: @menu
+    }
+    navigationBar {
+        list: @navigation-bar
+        listTemplate: @/navigation-bar
+        templateOptions: #DEFAULT#
+    }
+    userInterface {
+        currentTheme: @universal-theme
+        globalPage: 0
+        addBuiltWithApexToFooter: false
+    }
+    appFormatMasks {
+        date: DD-MON-YYYY
+        dateTime: DD-MON-YYYY
+        timestamp: DD-MON-YYYY
+        timestampTimeZone: DD-MON-YYYY HH:MIPM
+    }
+    authentication {
+        scheme: @oracle-apex-accounts
+        publicUser: APEX_PUBLIC_USER
+    }
+    authorization {
+        scheme: @reader-rights
+    }
+    sessionStateProtection {
+        checksumSalt: 57E9D659780CE21C1892B7F0FDC257CC08FB4CBF802B2E77AE60FA12F3A1ADCD
+    }
+    globalization {
+        primaryLanguage: es-py
+        documentDirection: leftToRight
+        autoTimeZone: true
+    }
+    reportPrinting {
+        type: useInstanceSettings
+    }
+    runtime {
+        allowFeedback: true
+        compatibilityMode: 21.2
+    }
+    advanced {
+        modernizeApp: true
+    }
+
+    substitution APP_NAME (
+        value {
+            staticValue: adri-dev-mode
+        }
+    )
+
+    appSetting ACCESS_CONTROL_SCOPE (
+        value {
+            staticValue: ALL_USERS
+            onUpgradeKeepValue: true
+        }
+        validation {
+            validValues: ACL_ONLY, ALL_USERS
+        }
+        config {
+            buildOption: @feature-access-control
+        }
+        comments {
+            comments: The default access level given to authenticated users who are not in the access control list
+        }
+    )
+
+)
+

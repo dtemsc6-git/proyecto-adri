@@ -1,0 +1,886 @@
+page 55 (
+    name: Conexiones V2
+    alias: CONEXIONES-V2
+    title: Conexiones V2
+    appearance {
+        pageTemplate: @/standard
+        templateOptions: #DEFAULT#
+    }
+    navigation {
+        cursorFocus: doNotFocusCursor
+    }
+    security {
+        authorizationScheme: @implementador-rights
+        pageAccessProtection: argumentsMustHaveChecksum
+        formAutoComplete: false
+    }
+
+    region conexiones-v (
+        name: Conexiones V2
+        type: interactiveGrid
+        source {
+            location: localDatabase
+            type: sqlQuery
+            sqlQuery:
+                ```sql
+                -- 1. Eliminamos el 1=1. No aporta nada.
+                -- 2. Reemplazamos las subconsultas IN por EXISTS. Es mucho más eficiente.
+                -- 3. Añadimos comentarios sobre la necesidad de índices.
+                
+                SELECT et.ID,
+                       sa.ID SITIO_A,
+                       et.EQUIPO_A_ID,  -- Asumimos que existe en la tabla, lo añadimos por claridad
+                       et.INTERFAZ_A_ID,
+                       sitio_b.ID SITIO_B,
+                       et.EQUIPO_B_ID,
+                       et.INTERFAZ_B_ID,
+                       et.TIPO_CONEXION,
+                       et.ACTUALIZADO_EL
+                FROM SGT_ENLACES_TRAMOS et
+                INNER JOIN SGT_EQUIPOS ea ON et.equipo_a_id = ea.id
+                INNER JOIN sgt_racks r ON ea.rack_id = r.id
+                INNER JOIN sgt_salas s ON r.sala_id = s.id
+                INNER JOIN sgt_sitios sa ON s.sitio_id = sa.id
+                INNER JOIN SGT_EQUIPOS eb ON et.equipo_b_id = eb.id
+                INNER JOIN sgt_racks rb ON eb.rack_id = rb.id
+                INNER JOIN sgt_salas sb ON rb.sala_id = sb.id
+                INNER JOIN sgt_sitios sitio_b ON sb.sitio_id = sitio_b.id
+                WHERE 1=1  -- <<< ELIMINADO: Esto sobra.
+                      AND (:P55_EQUIPO_A IS NULL OR EQUIPO_A_ID = :P55_EQUIPO_A OR EQUIPO_B_ID = :P55_EQUIPO_A)
+                       
+                      AND (:P55_INTERFAZ_A IS NULL OR INTERFAZ_A_ID = :P55_INTERFAZ_A OR INTERFAZ_B_ID = :P55_INTERFAZ_A)
+                      --AND (:P55_INTERFAZ_B IS NULL OR INTERFAZ_B_ID = :P55_INTERFAZ_B)
+                      AND (:P55_TIPO_CONEXION IS NULL OR TIPO_CONEXION = :P55_TIPO_CONEXION)
+                      -- MEJORA CLAVE: Usamos EXISTS en lugar de IN
+                      AND (:P55_ENLACE_WAN IS NULL OR EXISTS (
+                          SELECT 1
+                          FROM SGT_CONEXIONES_ENLACE_WAN CEW
+                          WHERE CEW.ENLACE_WAN_ID = :P55_ENLACE_WAN
+                            AND CEW.ENLACE_TRAMO_ID = et.ID  -- Correlacionamos con la fila exterior
+                      ))
+                      -- MEJORA CLAVE: Usamos EXISTS en lugar de IN
+                      AND (:P55_SERVICIO IS NULL OR EXISTS (
+                          SELECT 1
+                          FROM SGT_CONEXIONES_SERVICIO CS
+                          WHERE CS.SERVICIO_ID = :P55_SERVICIO
+                            AND CS.ENLACE_TRAMO_ID = et.ID  -- Correlacionamos con la fila exterior
+                      ));
+                ```
+            pageItemsToSubmit: [
+                P55_EQUIPO_A
+                P55_INTERFAZ_A
+                P55_EQUIPO_B
+                P55_INTERFAZ_B
+                P55_TIPO_CONEXION
+                P55_SERVICIO
+                P55_ENLACE_WAN
+            ]
+        }
+        layout {
+            sequence: 30
+            slot: body
+        }
+        appearance {
+            template: @/interactive-report
+            templateOptions: [
+                #DEFAULT#
+                t-IRR-region--hideHeader js-addHiddenHeadingRoleDesc
+            ]
+        }
+        edit {
+            enabled: true
+            allowedOperations: [
+                add
+                update
+                delete
+            ]
+        }
+        editAuthorization {
+            add: @implementador-rights
+            update: @implementador-rights
+            delete: @implementador-rights
+        }
+        performance {
+            lazyLoading: true
+        }
+        componentAppearance {
+            selectFirstRow: false
+        }
+        toolbar {
+            controls: [
+                searchCol
+                searchField
+                actionsMenu
+                resetButton
+                saveButton
+            ]
+        }
+        download {
+            formats: [
+                csv
+                html
+                pdf
+                excel
+            ]
+        }
+        advanced {
+            savedReportMappingIdentifier: 15121892876853299
+        }
+
+        savedReport 151223 (
+            visibility: primary
+            view {
+                default: grid
+            }
+            singleRowView {
+                displayedColumns: true
+            }
+
+            displayColumn (
+                column: @ACTUALIZADO_EL
+                layout {
+                    sequence: 3
+                }
+            )
+
+            displayColumn (
+                column: @APEX$ROW_ACTION
+                layout {
+                    frozen: true
+                    sequence: 1
+                }
+            )
+
+            displayColumn (
+                column: @ID
+                layout {
+                    sequence: 2
+                }
+            )
+
+            displayColumn (
+                column: @EQUIPO_A_ID
+                layout {
+                    width: 81
+                    sequence: 5
+                }
+            )
+
+            displayColumn (
+                column: @INTERFAZ_A_ID
+                layout {
+                    width: 308
+                    sequence: 6
+                }
+            )
+
+            displayColumn (
+                column: @EQUIPO_B_ID
+                layout {
+                    width: 117
+                    sequence: 8
+                }
+            )
+
+            displayColumn (
+                column: @INTERFAZ_B_ID
+                layout {
+                    width: 419
+                    sequence: 9
+                }
+            )
+
+            displayColumn (
+                column: @TIPO_CONEXION
+                layout {
+                    sequence: 10
+                }
+            )
+
+            displayColumn (
+                column: @SITIO_B
+                layout {
+                    width: 67
+                    sequence: 7
+                }
+            )
+
+            displayColumn (
+                column: @OBSERVACIONES
+                layout {
+                    sequence: 11
+                }
+            )
+
+            displayColumn (
+                column: @SITIO_A
+                layout {
+                    width: 65
+                    sequence: 4
+                }
+            )
+
+        )
+
+        column ACTUALIZADO_EL (
+            type: datePicker
+            heading {
+                heading: Actualizado El
+            }
+            layout {
+                sequence: 140
+            }
+            source {
+                databaseColumn: ACTUALIZADO_EL
+                dataType: timestamp
+            }
+        )
+
+        column APEX$ROW_ACTION (
+            type: actionsMenu
+            layout {
+                sequence: 20
+            }
+        )
+
+        column APEX$ROW_SELECTOR (
+            type: rowSelector
+            layout {
+                sequence: 10
+            }
+        )
+
+        column EQUIPO_A_ID (
+            type: popupLov
+            heading {
+                heading: Equipo A
+                alignment: center
+            }
+            lov {
+                type: sqlQuery
+                sqlQuery:
+                    ```sql
+                    SELECT e.nombre, E.ID   
+                            
+                     FROM SGT_EQUIPOS E  
+                     LEFT JOIN SGT_RACKS R ON E.RACK_ID = R.ID  
+                     LEFT JOIN SGT_SALAS S ON R.SALA_ID = S.ID  
+                     LEFT JOIN SGT_SITIOS SS ON S.SITIO_ID = SS.ID  
+                     WHERE
+                    1=1 AND 
+                    ss.id = :sitio_a
+                    ```
+            }
+            cascadingLov {
+                parentColumns: SITIO_A
+                itemsToSubmit: SITIO_A
+            }
+            layout {
+                sequence: 60
+            }
+            validation {
+                valueRequired: true
+            }
+            source {
+                databaseColumn: EQUIPO_A_ID
+                dataType: number
+            }
+        )
+
+        column EQUIPO_B_ID (
+            type: popupLov
+            heading {
+                heading: Equipo B
+                alignment: center
+            }
+            lov {
+                type: sqlQuery
+                sqlQuery:
+                    ```sql
+                    SELECT e.nombre, E.ID   
+                            
+                     FROM SGT_EQUIPOS E  
+                     LEFT JOIN SGT_RACKS R ON E.RACK_ID = R.ID  
+                     LEFT JOIN SGT_SALAS S ON R.SALA_ID = S.ID  
+                     LEFT JOIN SGT_SITIOS SS ON S.SITIO_ID = SS.ID  
+                     WHERE
+                    1=1 AND 
+                    ss.id = :sitio_B
+                    ```
+            }
+            cascadingLov {
+                parentColumns: SITIO_B
+                itemsToSubmit: SITIO_B
+            }
+            layout {
+                sequence: 100
+            }
+            validation {
+                valueRequired: true
+            }
+            source {
+                databaseColumn: EQUIPO_B_ID
+                dataType: number
+            }
+        )
+
+        column ID (
+            type: hidden
+            layout {
+                sequence: 30
+            }
+            source {
+                databaseColumn: ID
+                dataType: number
+                queryOnly: true
+                primaryKey: true
+            }
+            exportPrinting {
+                includeInExportPrint: false
+            }
+        )
+
+        column INTERFAZ_A_ID (
+            type: popupLov
+            heading {
+                heading: Interfaz A
+                alignment: center
+            }
+            lov {
+                type: sqlQuery
+                sqlQuery:
+                    ```sql
+                    SELECT 
+                    CASE WHEN ETIQUETA IS NOT NULL THEN NOMBRE ||':'||ETIQUETA  ELSE NOMBRE END DISPLAY, ID VALUE FROM SGT_INTERFACES
+                    where EQUIPO_ID = :EQUIPO_A_ID
+                    ORDER BY ID
+                    ```
+                nullDisplayValue: Seleccione Una
+            }
+            cascadingLov {
+                parentColumns: EQUIPO_A_ID
+                itemsToSubmit: EQUIPO_A_ID
+            }
+            layout {
+                sequence: 70
+            }
+            source {
+                databaseColumn: INTERFAZ_A_ID
+                dataType: number
+            }
+        )
+
+        column INTERFAZ_B_ID (
+            type: popupLov
+            heading {
+                heading: Interfaz B
+                alignment: center
+            }
+            lov {
+                type: sqlQuery
+                sqlQuery:
+                    ```sql
+                    SELECT 
+                    CASE WHEN ETIQUETA IS NOT NULL THEN NOMBRE ||':'||ETIQUETA  ELSE NOMBRE END DISPLAY, ID VALUE FROM SGT_INTERFACES
+                    where EQUIPO_ID = :EQUIPO_B_ID
+                    ORDER BY ID
+                    ```
+                nullDisplayValue: Seleccione Una
+            }
+            cascadingLov {
+                parentColumns: EQUIPO_B_ID
+                itemsToSubmit: EQUIPO_B_ID
+            }
+            layout {
+                sequence: 110
+            }
+            source {
+                databaseColumn: INTERFAZ_B_ID
+                dataType: number
+            }
+        )
+
+        column OBSERVACIONES (
+            type: displayOnly
+            heading {
+                heading: Observaciones
+                alignment: center
+            }
+            layout {
+                sequence: 130
+            }
+            source {
+                type: none
+            }
+        )
+
+        column SITIO_A (
+            type: popupLov
+            heading {
+                heading: Sitio A
+                alignment: center
+            }
+            lov {
+                type: sharedComponent
+                lov: @sgt-sitios-siglas
+            }
+            layout {
+                sequence: 40
+            }
+            validation {
+                valueRequired: true
+                maxLength: 50
+            }
+            source {
+                databaseColumn: SITIO_A
+                dataType: number
+                queryOnly: true
+            }
+            columnFilter {
+                performanceImpactingOperators: [
+                    contains
+                    startsWith
+                    caseInsensitive
+                    regexp
+                ]
+                lovType: useLov
+            }
+        )
+
+        column SITIO_B (
+            type: popupLov
+            heading {
+                heading: Sitio B
+                alignment: center
+            }
+            lov {
+                type: sharedComponent
+                lov: @sgt-sitios-siglas
+            }
+            layout {
+                sequence: 90
+            }
+            validation {
+                valueRequired: true
+            }
+            source {
+                databaseColumn: SITIO_B
+                dataType: number
+                queryOnly: true
+            }
+            columnFilter {
+                performanceImpactingOperators: [
+                    contains
+                    startsWith
+                    caseInsensitive
+                    regexp
+                ]
+            }
+        )
+
+        column TIPO_CONEXION (
+            type: selectList
+            heading {
+                heading: Tipo de conexión
+                alignment: center
+            }
+            lov {
+                type: staticValues
+                staticValues: STATIC:Física;Física,Lógica;Lógica,Trasera;Trasera
+                displayExtraValues: false
+                nullDisplayValue: Seleccione una
+            }
+            layout {
+                sequence: 120
+            }
+            validation {
+                valueRequired: true
+            }
+            source {
+                databaseColumn: TIPO_CONEXION
+                dataType: varchar2
+            }
+            columnFilter {
+                performanceImpactingOperators: [
+                    contains
+                    startsWith
+                    caseInsensitive
+                    regexp
+                ]
+                lovType: useLov
+            }
+        )
+
+        page {
+            borderWidth: 0.5
+            borderColor: #666666
+        }
+        pageHeader {
+            pageHeaderText: Conexiones V2
+        }
+    )
+
+    region filtrado (
+        name: FILTRADO
+        title: Filtro Personalizado
+        type: staticContent
+        layout {
+            sequence: 10
+            slot: body
+        }
+        appearance {
+            template: @/collapsible
+            templateOptions: [
+                #DEFAULT#
+                is-expanded
+                t-Region--scrollBody
+            ]
+        }
+    )
+
+    pageItem P55_ENLACE_WAN (
+        type: popupLov
+        label {
+            label: Enlace Wan
+            alignment: left
+        }
+        lov {
+            type: sqlQuery
+            sqlQuery:
+                ```sql
+                select nombre display, id value from sgt_enlaces_wan
+                where 
+                1=1
+                and 
+                (:P55_SERVICIO IS NULL 
+                OR id in 
+                (select enlace_id from 
+                sgt_enlaces_wan_servicio where servicio_id = :P55_servicio 
+                )
+                )
+                ```
+            nullDisplayValue: Seleccione Una
+        }
+        cascadingLov {
+            parentItems: P55_SERVICIO
+            itemsToSubmit: P55_SERVICIO
+        }
+        layout {
+            sequence: 20
+            region: @filtrado
+            slot: regionBody
+            alignment: left
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+            width: 30
+        }
+    )
+
+    pageItem P55_EQUIPO_A (
+        type: popupLov
+        label {
+            label: Equipo A
+            alignment: left
+        }
+        lov {
+            type: sqlQuery
+            sqlQuery:
+                ```sql
+                select distinct e.nombre , e.id
+                from
+                sgt_equipos e
+                inner join 
+                  (
+                    SELECT EQUIPO_A_ID EQUIPO_ID FROM SGT_ENLACES_TRAMOS
+                    UNION
+                    SELECT EQUIPO_B_ID EQUIPO_ID FROM SGT_ENLACES_TRAMOS
+                  ) conexiones
+                
+                
+                 ON e.id = conexiones.equipo_id  
+                WHERE 
+                1=1 
+                AND 
+                (:P55_ENLACE_WAN IS NULL OR 
+                
+                exists  (SELECT 1
+                      FROM SGT_CONEXIONES_ENLACE_WAN WHERE ENLACE_WAN_ID = :P55_ENLACE_WAN )
+                 )
+                 AND 
+                 (:P55_SERVICIO IS NULL OR
+                 
+                exists  (SELECT 1
+                      FROM SGT_CONEXIONES_SERVICIO WHERE SERVICIO_ID = :P55_SERVICIO )
+                 )
+                 
+                ```
+            nullDisplayValue: Seleccione una
+        }
+        cascadingLov {
+            parentItems: [
+                P55_SERVICIO
+                P55_ENLACE_WAN
+            ]
+            itemsToSubmit: [
+                P55_SERVICIO
+                P55_ENLACE_WAN
+            ]
+        }
+        layout {
+            sequence: 40
+            region: @filtrado
+            slot: regionBody
+            alignment: left
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+            width: 30
+        }
+    )
+
+    pageItem P55_EQUIPO_B (
+        type: popupLov
+        label {
+            label: Equipo B
+            alignment: left
+        }
+        lov {
+            type: sqlQuery
+            sqlQuery:
+                ```sql
+                select distinct e.nombre , e.id
+                from
+                sgt_equipos e
+                inner join SGT_ENLACES_TRAMOS ET ON e.id = et.equipo_b_id  
+                WHERE 
+                1=1 
+                AND 
+                (:P55_ENLACE_WAN IS NULL OR 
+                
+                et.ID IN (SELECT ENLACE_TRAMO_ID
+                      FROM SGT_CONEXIONES_ENLACE_WAN WHERE ENLACE_WAN_ID = :P55_ENLACE_WAN )
+                 )
+                 AND 
+                 (:P55_SERVICIO IS NULL OR
+                 
+                et.ID IN (SELECT cs.ENLACE_TRAMO_ID
+                      FROM SGT_CONEXIONES_SERVICIO cs WHERE cs.SERVICIO_ID = :P55_SERVICIO )
+                 )
+                 
+                ```
+            nullDisplayValue: Seleccione una
+        }
+        layout {
+            sequence: 60
+            region: @filtrado
+            slot: regionBody
+            alignment: left
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+            width: 30
+        }
+        config {
+            buildOption: @commented-out
+        }
+    )
+
+    pageItem P55_INTERFAZ_A (
+        type: popupLov
+        label {
+            label: Interfaz A
+            alignment: left
+        }
+        lov {
+            type: sqlQuery
+            sqlQuery:
+                ```sql
+                SELECT 
+                CASE WHEN ETIQUETA IS NOT NULL THEN NOMBRE ||':'||ETIQUETA  ELSE NOMBRE END DISPLAY, ID VALUE FROM SGT_INTERFACES
+                where EQUIPO_ID = :P55_EQUIPO_A
+                ORDER BY ID
+                ```
+            nullDisplayValue: Seleccione una
+        }
+        cascadingLov {
+            parentItems: P55_EQUIPO_A
+            itemsToSubmit: P55_EQUIPO_A
+        }
+        layout {
+            sequence: 50
+            region: @filtrado
+            slot: regionBody
+            alignment: left
+            startNewRow: false
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+            width: 30
+        }
+    )
+
+    pageItem P55_INTERFAZ_B (
+        type: popupLov
+        label {
+            label: Interfaz B
+            alignment: left
+        }
+        lov {
+            type: sqlQuery
+            sqlQuery:
+                ```sql
+                SELECT 
+                CASE WHEN ETIQUETA IS NOT NULL THEN NOMBRE ||':'||ETIQUETA  ELSE NOMBRE END DISPLAY, ID VALUE FROM SGT_INTERFACES
+                where EQUIPO_ID = :P55_EQUIPO_B
+                ORDER BY ID
+                ```
+            nullDisplayValue: Seleccione una
+        }
+        cascadingLov {
+            parentItems: P55_EQUIPO_B
+            itemsToSubmit: P55_INTERFAZ_B
+        }
+        layout {
+            sequence: 70
+            region: @filtrado
+            slot: regionBody
+            alignment: left
+            startNewRow: false
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+            width: 30
+        }
+        config {
+            buildOption: @commented-out
+        }
+    )
+
+    pageItem P55_SERVICIO (
+        type: popupLov
+        label {
+            label: Servicio
+            alignment: left
+        }
+        lov {
+            type: sharedComponent
+            lov: @servicios-nombre
+            nullDisplayValue: Seleccione Una
+        }
+        layout {
+            sequence: 10
+            region: @filtrado
+            slot: regionBody
+            alignment: left
+            startNewRow: false
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+            width: 30
+        }
+    )
+
+    pageItem P55_TIPO_CONEXION (
+        type: selectList
+        label {
+            label: Tipo Conexión
+            alignment: left
+        }
+        lov {
+            type: sqlQuery
+            sqlQuery:
+                ```sql
+                select distinct tipo_conexion display, tipo_conexion value from sgt_enlaces_tramos et
+                where 1=1
+                
+                and 
+                (: P55_ENLACE_WAN is null or
+                et.ID IN (SELECT ENLACE_TRAMO_ID
+                      FROM SGT_CONEXIONES_ENLACE_WAN WHERE ENLACE_WAN_ID = :P55_ENLACE_WAN )
+                )
+                AND 
+                (:P55_SERVICIO IS NULL OR 
+                  et.ID IN (SELECT cs.ENLACE_TRAMO_ID
+                      FROM SGT_CONEXIONES_SERVICIO cs WHERE cs.SERVICIO_ID = :P55_SERVICIO )
+                 )
+                
+                ```
+            nullDisplayValue: Seleccione Una
+        }
+        cascadingLov {
+            parentItems: [
+                P55_SERVICIO
+                P55_ENLACE_WAN
+            ]
+            itemsToSubmit: [
+                P55_SERVICIO
+                P55_ENLACE_WAN
+            ]
+        }
+        layout {
+            sequence: 80
+            region: @filtrado
+            slot: regionBody
+            alignment: left
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+            height: 1
+        }
+    )
+
+    dynamicAction change (
+        name: CHANGE
+        execution {
+            sequence: 30
+        }
+        when {
+            selectionType: items
+            items: [
+                P55_EQUIPO_A
+                P55_INTERFAZ_A
+                P55_EQUIPO_B
+                P55_INTERFAZ_B
+                P55_TIPO_CONEXION
+                P55_SERVICIO
+                P55_ENLACE_WAN
+            ]
+        }
+
+        action refresh-conexiones-v (
+            name: REFRESH_CONEXIONES_V2
+            action: refresh
+            affectedElements {
+                selectionType: region
+                region: @conexiones-v
+            }
+            execution {
+                sequence: 10
+                fireOnInit: false
+            }
+        )
+
+    )
+
+    process conexiones-v2-guardar-datos-de-cuadrícula-interactiva (
+        name: Conexiones V2: Guardar Datos de Cuadrícula Interactiva
+        type: interactiveGridAutoRowProcessing
+        editableRegion: @conexiones-v
+        execution {
+            sequence: 10
+        }
+        advanced {
+            executionMappingIdentifier: 15139105256853318
+        }
+    )
+
+)
+

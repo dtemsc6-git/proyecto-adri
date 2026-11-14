@@ -1,0 +1,1071 @@
+page 120 (
+    name: DETALLE OT
+    alias: DETALLE-OT
+    title: DETALLE OT
+    appearance {
+        pageTemplate: @/standard
+        templateOptions: #DEFAULT#
+    }
+    navigation {
+        cursorFocus: doNotFocusCursor
+    }
+    security {
+        pageAccessProtection: argumentsMustHaveChecksum
+        formAutoComplete: false
+    }
+
+    region breadcrumb (
+        name: Breadcrumb
+        type: breadcrumb
+        source {
+            breadcrumb: @breadcrumb
+        }
+        layout {
+            sequence: 10
+            slot: breadcrumbBar
+        }
+        appearance {
+            template: @/title-bar
+            templateOptions: [
+                #DEFAULT#
+                t-BreadcrumbRegion--useBreadcrumbTitle
+            ]
+        }
+        componentAppearance {
+            breadcrumbTemplate: @/breadcrumb
+            templateOptions: #DEFAULT#
+        }
+    )
+
+    region cabecera-ot (
+        name: Cabecera OT
+        type: staticContent
+        layout {
+            sequence: 20
+            parentRegion: @detalle-ot
+            slot: regionBody
+        }
+        appearance {
+            template: @/blank-with-attributes
+            templateOptions: #DEFAULT#
+        }
+    )
+
+    region conectividad (
+        name: Conectividad
+        title: Conectividad
+        type: classicReport
+        source {
+            location: localDatabase
+            type: sqlQuery
+            sqlQuery:
+                ```sql
+                select ID_SRV,
+                       SERVICIO,
+                       NIVEL_DE_PRIORIDAD,
+                       SITIOS,
+                       WAN,
+                       EQUIPO,
+                       INTERFACE,
+                       FO,
+                       SEQ,
+                       WAN_SEQ
+                  from V_SERVICIOS V
+                   JOIN SGT_OT_SERVICIO OS
+                    ON OS.SERVICIO_ID = V.ID_SRV
+                 where OS.OT_ID = :P120_ID
+                ```
+            pageItemsToSubmit: P120_ID
+        }
+        layout {
+            sequence: 90
+            parentRegion: @detalle-ot
+            slot: regionBody
+        }
+        appearance {
+            template: @/standard
+            templateOptions: [
+                #DEFAULT#
+                t-Region--scrollBody
+            ]
+        }
+        componentAppearance {
+            template: @/standard
+            templateOptions: [
+                #DEFAULT#
+                t-Report--altRowsDefault
+                t-Report--rowHighlight
+            ]
+        }
+        pagination {
+            type: nextAndPreviousLinks
+        }
+
+        column EQUIPO (
+            reportColumnQueryId: 6
+            derivedColumn: N
+            heading {
+                heading: Equipo
+            }
+            layout {
+                sequence: 120
+            }
+        )
+
+        column FO (
+            reportColumnQueryId: 8
+            derivedColumn: N
+            heading {
+                heading: Fo
+            }
+            layout {
+                sequence: 140
+            }
+        )
+
+        column ID_SRV (
+            reportColumnQueryId: 1
+            derivedColumn: N
+            heading {
+                heading: Id Srv
+                alignment: end
+            }
+            layout {
+                sequence: 90
+                columnAlignment: end
+            }
+        )
+
+        column INTERFACE (
+            reportColumnQueryId: 7
+            derivedColumn: N
+            heading {
+                heading: Interface
+            }
+            layout {
+                sequence: 130
+            }
+        )
+
+        column NIVEL_DE_PRIORIDAD (
+            reportColumnQueryId: 3
+            derivedColumn: N
+            heading {
+                heading: Nivel De Prioridad
+                alignment: end
+            }
+            layout {
+                sequence: 100
+                columnAlignment: end
+            }
+        )
+
+        column SEQ (
+            reportColumnQueryId: 9
+            derivedColumn: N
+            heading {
+                heading: Seq
+                alignment: end
+            }
+            layout {
+                sequence: 150
+                columnAlignment: end
+            }
+        )
+
+        column SERVICIO (
+            reportColumnQueryId: 2
+            derivedColumn: N
+            heading {
+                heading: Servicio
+            }
+            layout {
+                sequence: 10
+            }
+            sorting {
+                sortable: false
+            }
+        )
+
+        column SITIOS (
+            reportColumnQueryId: 4
+            derivedColumn: N
+            heading {
+                heading: Sitios
+            }
+            layout {
+                sequence: 110
+            }
+        )
+
+        column WAN (
+            reportColumnQueryId: 5
+            derivedColumn: N
+            heading {
+                heading: Wan
+            }
+            layout {
+                sequence: 80
+            }
+            sorting {
+                sortable: false
+            }
+        )
+
+        column WAN_SEQ (
+            reportColumnQueryId: 10
+            derivedColumn: N
+            heading {
+                heading: Wan Seq
+                alignment: end
+            }
+            layout {
+                sequence: 160
+                columnAlignment: end
+            }
+        )
+
+    )
+
+    region conectividad-old (
+        name: Conectividad_old
+        title: Conectividad_old
+        type: classicReport
+        source {
+            location: localDatabase
+            type: sqlQuery
+            sqlQuery:
+                ```sql
+                SELECT
+                       V.SERV_ID,
+                       V.SERVICIO,
+                       V.NIVEL_DE_PRIORIDAD,
+                       V.EQ_ID,
+                       V.EQ,
+                       V.IFACE_ID,
+                       V.IFACE,
+                       V.EQ_B_ID,
+                       V.EQ_B,
+                       V.IFACE_B_ID,
+                       V.IFACE_B,
+                       V.CONN_ID,
+                       V.TIPO_CONEXION,
+                       V.FO_ID,
+                       V.FO_NOMBRE,
+                       V.SEQ,
+                       V.WAN_ID,
+                       V.WAN,
+                       V.SEQ_WAN
+                  FROM V_CONEXIONES_GENERAL_V2 V
+                  JOIN SGT_OT_SERVICIO OS
+                    ON OS.SERVICIO_ID = V.SERV_ID
+                 WHERE OS.OT_ID = :P120_ID
+                 ORDER BY V.SEQ NULLS LAST, V.SEQ_WAN NULLS LAST, V.CONN_ID
+                ```
+            pageItemsToSubmit: P120_ID
+        }
+        layout {
+            sequence: 80
+            parentRegion: @detalle-ot
+            slot: regionBody
+        }
+        appearance {
+            template: @/standard
+            templateOptions: [
+                #DEFAULT#
+                t-Region--scrollBody
+            ]
+        }
+        config {
+            buildOption: @commented-out
+        }
+        componentAppearance {
+            template: @/standard
+            templateOptions: [
+                #DEFAULT#
+                t-Report--altRowsDefault
+                t-Report--rowHighlight
+            ]
+        }
+        pagination {
+            type: nextAndPreviousLinks
+        }
+
+        column EQ (
+            reportColumnQueryId: 5
+            derivedColumn: N
+            heading {
+                heading: Eq
+            }
+            layout {
+                sequence: 50
+            }
+            sorting {
+                sortable: false
+            }
+        )
+
+        column EQ_B (
+            reportColumnQueryId: 9
+            derivedColumn: N
+            heading {
+                heading: Eq B
+            }
+            layout {
+                sequence: 90
+            }
+            sorting {
+                sortable: false
+            }
+        )
+
+        column FO_NOMBRE (
+            reportColumnQueryId: 15
+            derivedColumn: N
+            heading {
+                heading: Fo Nombre
+            }
+            layout {
+                sequence: 150
+            }
+            sorting {
+                sortable: false
+            }
+        )
+
+        column IFACE (
+            reportColumnQueryId: 7
+            derivedColumn: N
+            heading {
+                heading: Iface
+            }
+            layout {
+                sequence: 70
+            }
+            sorting {
+                sortable: false
+            }
+        )
+
+        column IFACE_B (
+            reportColumnQueryId: 11
+            derivedColumn: N
+            heading {
+                heading: Iface B
+            }
+            layout {
+                sequence: 110
+            }
+            sorting {
+                sortable: false
+            }
+        )
+
+        column SERVICIO (
+            reportColumnQueryId: 2
+            derivedColumn: N
+            heading {
+                heading: Servicio
+            }
+            layout {
+                sequence: 20
+            }
+            sorting {
+                sortable: false
+            }
+        )
+
+        column TIPO_CONEXION (
+            reportColumnQueryId: 13
+            derivedColumn: N
+            heading {
+                heading: Tipo Conexion
+            }
+            layout {
+                sequence: 130
+            }
+            sorting {
+                sortable: false
+            }
+        )
+
+        column WAN (
+            reportColumnQueryId: 18
+            derivedColumn: N
+            heading {
+                heading: Wan
+            }
+            layout {
+                sequence: 160
+            }
+            sorting {
+                sortable: false
+            }
+        )
+
+    )
+
+    region detalle-ot (
+        name: DETALLE OT
+        type: form
+        source {
+            location: localDatabase
+            tableName: SGT_OT
+        }
+        layout {
+            sequence: 10
+            slot: body
+        }
+        appearance {
+            template: @/standard
+            templateOptions: [
+                #DEFAULT#
+                t-Region--hideHeader js-addHiddenHeadingRoleDesc
+                t-Region--scrollBody
+            ]
+        }
+        edit {
+            enabled: true
+            allowedOperations: [
+                add
+                update
+                delete
+            ]
+        }
+    )
+
+    region servicio-asociado (
+        name: Servicio Asociado
+        type: classicReport
+        source {
+            location: localDatabase
+            type: sqlQuery
+            sqlQuery:
+                ```sql
+                SELECT O.CODIGO,
+                       S.ID SERVICIO_ID,
+                       S.NOMBRE SERVICIO,
+                       OS.CREADO_EL
+                  FROM SGT_OT O
+                  JOIN SGT_OT_SERVICIO OS ON OS.OT_ID = O.ID
+                  JOIN SGT_SERVICIOS S ON S.ID = OS.SERVICIO_ID
+                 WHERE O.ID = :P120_ID
+                ```
+        }
+        layout {
+            sequence: 60
+            parentRegion: @detalle-ot
+            slot: regionBody
+        }
+        appearance {
+            template: @/standard
+            templateOptions: [
+                #DEFAULT#
+                t-Region--scrollBody
+            ]
+        }
+        componentAppearance {
+            template: @/standard
+            templateOptions: [
+                #DEFAULT#
+                t-Report--altRowsDefault
+                t-Report--rowHighlight
+            ]
+        }
+        pagination {
+            type: nextAndPreviousLinks
+        }
+
+        column CREADO_EL (
+            reportColumnQueryId: 4
+            derivedColumn: N
+            heading {
+                heading: Creado El
+            }
+            layout {
+                sequence: 40
+            }
+        )
+
+        column SERVICIO (
+            reportColumnQueryId: 3
+            derivedColumn: N
+            heading {
+                heading: Servicio
+            }
+            layout {
+                sequence: 30
+            }
+        )
+
+    )
+
+    region topologia (
+        name: Topologia
+        title: Contexto físico del servicio
+        type: classicReport
+        source {
+            location: localDatabase
+            type: sqlQuery
+            sqlQuery:
+                ```sql
+                SELECT DISTINCT
+                       OS.OT_ID,
+                       S.ID AS SERVICIO_ID,
+                       S.NOMBRE AS SERVICIO_NOMBRE,
+                       SS.SITIO_ID,
+                       SI.SIGLAS AS SITIO_SIGLAS,
+                       SI.NOMBRE AS SITIO_NOMBRE,
+                       R.ID AS RACK_ID,
+                       R.NOMBRE AS RACK_NOMBRE
+                  FROM SGT_OT_SERVICIO OS
+                  JOIN SGT_SERVICIOS S ON S.ID = OS.SERVICIO_ID
+                  LEFT JOIN SGT_SITIOS_SERVICIO SS ON SS.SERVICIO_ID = OS.SERVICIO_ID
+                  LEFT JOIN SGT_SITIOS SI ON SI.ID = SS.SITIO_ID
+                  LEFT JOIN SGT_SALAS SA ON SA.SITIO_ID = SI.ID
+                  LEFT JOIN SGT_RACKS R ON R.SALA_ID = SA.ID
+                 WHERE OS.OT_ID = :P120_ID
+                 ORDER BY SI.NOMBRE, R.NOMBRE
+                ```
+            pageItemsToSubmit: P120_ID
+        }
+        layout {
+            sequence: 70
+            parentRegion: @detalle-ot
+            slot: regionBody
+        }
+        appearance {
+            template: @/standard
+            templateOptions: [
+                #DEFAULT#
+                t-Region--scrollBody
+            ]
+        }
+        config {
+            buildOption: @commented-out
+        }
+        componentAppearance {
+            template: @/standard
+            templateOptions: [
+                #DEFAULT#
+                t-Report--altRowsDefault
+                t-Report--rowHighlight
+            ]
+        }
+        pagination {
+            type: nextAndPreviousLinks
+        }
+
+        column RACK_NOMBRE (
+            reportColumnQueryId: 8
+            derivedColumn: N
+            heading {
+                heading: Rack Nombre
+            }
+            layout {
+                sequence: 80
+            }
+            sorting {
+                sortable: false
+            }
+        )
+
+        column SERVICIO_NOMBRE (
+            reportColumnQueryId: 3
+            derivedColumn: N
+            heading {
+                heading: Servicio Nombre
+            }
+            layout {
+                sequence: 30
+            }
+            sorting {
+                sortable: false
+            }
+        )
+
+        column SITIO_NOMBRE (
+            reportColumnQueryId: 6
+            derivedColumn: N
+            heading {
+                heading: Sitio Nombre
+            }
+            layout {
+                sequence: 60
+            }
+            sorting {
+                sortable: false
+            }
+        )
+
+        column SITIO_SIGLAS (
+            reportColumnQueryId: 5
+            derivedColumn: N
+            heading {
+                heading: Sitio Siglas
+            }
+            layout {
+                sequence: 50
+            }
+            sorting {
+                sortable: false
+            }
+        )
+
+    )
+
+    region vinculación-a-servicio (
+        name: Vinculación a Servicio
+        type: staticContent
+        layout {
+            sequence: 50
+            parentRegion: @detalle-ot
+            slot: regionBody
+        }
+        appearance {
+            template: @/blank-with-attributes
+            templateOptions: #DEFAULT#
+        }
+    )
+
+    pageItem P120_ASIGNADO_A (
+        type: displayOnly
+        label {
+            label: Asignado
+            alignment: left
+        }
+        layout {
+            sequence: 80
+            region: @cabecera-ot
+            slot: regionBody
+            alignment: left
+            startNewRow: false
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+        }
+        source {
+            formRegion: @detalle-ot
+            column: ASIGNADO_A
+            dataType: varchar2
+        }
+    )
+
+    pageItem P120_CODIGO (
+        type: displayOnly
+        label {
+            label: Codigo
+            alignment: left
+        }
+        layout {
+            sequence: 30
+            region: @cabecera-ot
+            slot: regionBody
+            alignment: left
+            startNewRow: false
+        }
+        appearance {
+            template: @/required-floating
+            templateOptions: #DEFAULT#
+        }
+        source {
+            formRegion: @detalle-ot
+            column: CODIGO
+            dataType: varchar2
+        }
+    )
+
+    pageItem P120_DESCRIPCION (
+        type: textarea
+        label {
+            label: Descripcion
+            alignment: left
+        }
+        layout {
+            sequence: 50
+            region: @cabecera-ot
+            slot: regionBody
+            alignment: left
+        }
+        appearance {
+            template: @/required-floating
+            templateOptions: #DEFAULT#
+            width: 60
+            height: 4
+        }
+        validation {
+            valueRequired: true
+            maxLength: 2000
+        }
+        source {
+            formRegion: @detalle-ot
+            column: DESCRIPCION
+            dataType: varchar2
+        }
+    )
+
+    pageItem P120_ESTADO_ID (
+        type: displayOnly
+        label {
+            label: Estado
+            alignment: left
+        }
+        settings {
+            basedOn: lov
+        }
+        lov {
+            type: sharedComponent
+            lov: @sgt-cat-ot-estado-codigo
+            displayExtraValues: false
+        }
+        layout {
+            sequence: 70
+            region: @cabecera-ot
+            slot: regionBody
+            alignment: left
+            startNewRow: false
+        }
+        appearance {
+            template: @/required-floating
+            templateOptions: #DEFAULT#
+        }
+        source {
+            formRegion: @detalle-ot
+            column: ESTADO_ID
+            dataType: number
+        }
+    )
+
+    pageItem P120_ID (
+        type: hidden
+        layout {
+            sequence: 10
+            region: @cabecera-ot
+            slot: regionBody
+        }
+        source {
+            formRegion: @detalle-ot
+            column: ID
+            dataType: number
+            queryOnly: true
+            primaryKey: true
+        }
+        security {
+            sessionStateProtection: checksumRequiredSessionLevel
+        }
+    )
+
+    pageItem P120_REPORTADO_POR (
+        type: textField
+        label {
+            label: Reportado Por
+            alignment: left
+        }
+        layout {
+            sequence: 60
+            region: @cabecera-ot
+            slot: regionBody
+            alignment: left
+        }
+        appearance {
+            template: @/required-floating
+            templateOptions: #DEFAULT#
+            width: 32
+        }
+        validation {
+            valueRequired: true
+            maxLength: 255
+        }
+        source {
+            formRegion: @detalle-ot
+            column: REPORTADO_POR
+            dataType: varchar2
+        }
+    )
+
+    pageItem P120_SERVICIO_ID (
+        type: popupLov
+        label {
+            label: Servicio
+            alignment: left
+        }
+        lov {
+            type: sqlQuery
+            sqlQuery:
+                ```sql
+                SELECT NOMBRE d, ID r
+                  FROM SGT_SERVICIOS
+                 ORDER BY NOMBRE
+                ```
+        }
+        layout {
+            sequence: 10
+            region: @vinculación-a-servicio
+            slot: regionBody
+            alignment: left
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+            width: 30
+        }
+    )
+
+    pageItem P120_TITULO (
+        type: textField
+        label {
+            label: Titulo
+            alignment: left
+        }
+        layout {
+            sequence: 20
+            region: @cabecera-ot
+            slot: regionBody
+            alignment: left
+            startNewRow: false
+            newColumn: false
+        }
+        appearance {
+            template: @/required-floating
+            templateOptions: #DEFAULT#
+            width: 32
+        }
+        validation {
+            valueRequired: true
+            maxLength: 255
+        }
+        source {
+            formRegion: @detalle-ot
+            column: TITULO
+            dataType: varchar2
+        }
+    )
+
+    button btn-asignacion (
+        buttonName: BTN_ASIGNACION
+        label: Ir a Asignación
+        layout {
+            sequence: 30
+            region: @detalle-ot
+            slot: regionBody
+        }
+        appearance {
+            buttonTemplate: @/text
+            templateOptions: #DEFAULT#
+        }
+        behavior {
+            action: redirectThisApp
+            target: {
+                page: 130
+                items: {
+                    P130_OT_ID: &P120_ID.
+                }
+            }
+            warnOnUnsavedChanges: doNotCheck
+        }
+        serverSideCondition {
+            type: itemIsNotNull
+            item: P120_ID
+        }
+    )
+
+    button btn-ver-historial (
+        buttonName: BTN_VER_HISTORIAL
+        label: Ver historial
+        layout {
+            sequence: 40
+            region: @detalle-ot
+            slot: regionBody
+            startNewRow: false
+            newColumn: false
+        }
+        appearance {
+            buttonTemplate: @/text
+            templateOptions: #DEFAULT#
+        }
+        behavior {
+            action: redirectThisApp
+            target: {
+                page: 160
+                items: {
+                    P160_OT_ID: &P120_ID.
+                }
+            }
+            warnOnUnsavedChanges: doNotCheck
+        }
+    )
+
+    button btn-vincular-servicio (
+        buttonName: Btn_Vincular_Servicio
+        label: Vincular Servicio
+        layout {
+            sequence: 20
+            region: @vinculación-a-servicio
+            slot: regionBody
+            startNewRow: false
+        }
+        appearance {
+            buttonTemplate: @/text
+            hot: true
+            templateOptions: [
+                #DEFAULT#
+                t-Button--padTop
+            ]
+        }
+        behavior {
+            warnOnUnsavedChanges: doNotCheck
+        }
+    )
+
+    button cancel (
+        buttonName: CANCEL
+        label: Cancel
+        layout {
+            sequence: 10
+            region: @detalle-ot
+            slot: close
+        }
+        appearance {
+            buttonTemplate: @/text
+            templateOptions: #DEFAULT#
+        }
+        behavior {
+            action: redirectThisApp
+            target: {
+                page: 1
+            }
+            warnOnUnsavedChanges: doNotCheck
+        }
+    )
+
+    button create (
+        buttonName: CREATE
+        label: Create
+        layout {
+            sequence: 40
+            region: @detalle-ot
+            slot: create
+        }
+        appearance {
+            buttonTemplate: @/text
+            hot: true
+            templateOptions: #DEFAULT#
+        }
+        behavior {
+            warnOnUnsavedChanges: doNotCheck
+            databaseAction: insert
+        }
+        serverSideCondition {
+            type: itemIsNull
+            item: P120_ID
+        }
+    )
+
+    button delete (
+        buttonName: DELETE
+        label: Delete
+        layout {
+            sequence: 20
+            region: @detalle-ot
+            slot: delete
+        }
+        appearance {
+            buttonTemplate: @/text
+            templateOptions: #DEFAULT#
+        }
+        behavior {
+            executeValidations: false
+            warnOnUnsavedChanges: doNotCheck
+            databaseAction: delete
+            requiresConfirmation: true
+        }
+        confirmation {
+            message: &APP_TEXT$DELETE_MSG!RAW.
+            style: danger
+        }
+        serverSideCondition {
+            type: itemIsNotNull
+            item: P120_ID
+        }
+    )
+
+    button save (
+        buttonName: SAVE
+        label: Apply Changes
+        layout {
+            sequence: 30
+            region: @detalle-ot
+            slot: change
+        }
+        appearance {
+            buttonTemplate: @/text
+            hot: true
+            templateOptions: #DEFAULT#
+        }
+        behavior {
+            warnOnUnsavedChanges: doNotCheck
+            databaseAction: update
+        }
+        serverSideCondition {
+            type: itemIsNotNull
+            item: P120_ID
+        }
+    )
+
+    process initialize-form-detalle-ot (
+        name: Initialize form DETALLE OT
+        type: formInitialization
+        formRegion: @detalle-ot
+        execution {
+            sequence: 10
+            point: beforeHeader
+        }
+        advanced {
+            executionMappingIdentifier: 21830798270597746
+        }
+    )
+
+    process prc-p120-vincular-serv (
+        name: PRC_P120_VINCULAR_SERV
+        type: executeCode
+        source {
+            plsqlCode:
+                ```plsql
+                BEGIN
+                  SGT_OT_PKG.VINCULAR_SERVICIO_OT(
+                        P_OT_ID       => :P120_ID,
+                        P_SERVICIO_ID => :P120_SERVICIO_ID,
+                        P_USUARIO     => :APP_USER
+                    );
+                END;
+                ```
+        }
+        execution {
+            sequence: 20
+        }
+        advanced {
+            executionMappingIdentifier: 20412501556160950
+        }
+        serverSideCondition {
+            whenButtonPressed: @btn-vincular-servicio
+        }
+    )
+
+    process process-form-detalle-ot (
+        name: Process form DETALLE OT
+        type: formAutoRowProcessing
+        formRegion: @detalle-ot
+        execution {
+            sequence: 10
+        }
+        advanced {
+            executionMappingIdentifier: 21831187209597746
+        }
+        config {
+            buildOption: @commented-out
+        }
+    )
+
+)
+

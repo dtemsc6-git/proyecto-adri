@@ -1,0 +1,2378 @@
+page 66 (
+    name: Detalles Equipos
+    alias: DETALLES-EQUIPOS
+    title: Detalles Equipos
+    appearance {
+        pageTemplate: @/marquee
+        templateOptions: #DEFAULT#
+    }
+    navigation {
+        cursorFocus: doNotFocusCursor
+    }
+    css {
+        inline:
+            ```css
+            .a-Cards {
+                scroll-snap-type: x mandatory;
+                overflow-x: auto;
+            }
+            
+            .a-Card {
+                scroll-snap-align: center;
+            }
+            ```
+    }
+    security {
+        pageAccessProtection: argumentsMustHaveChecksum
+        formAutoComplete: false
+    }
+
+    region acciones (
+        name: Acciones
+        type: list
+        source {
+            list: @acciones-equipos
+        }
+        layout {
+            sequence: 60
+            slot: rightSideColumn
+        }
+        appearance {
+            template: @/standard
+            templateOptions: [
+                #DEFAULT#
+                t-Region--noPadding
+                t-Region--hideHeader js-addHiddenHeadingRoleDesc
+                t-Region--stacked
+                t-Region--hiddenOverflow
+            ]
+        }
+        advanced {
+            htmlDomId: lstAcciones
+        }
+        componentAppearance {
+            listTemplate: @/links-list
+            templateOptions: [
+                #DEFAULT#
+                t-LinksList--showIcons
+            ]
+        }
+    )
+
+    region breadcrumb (
+        name: Breadcrumb
+        type: breadcrumb
+        source {
+            breadcrumb: @breadcrumb
+        }
+        layout {
+            sequence: 10
+            slot: breadcrumbBar
+        }
+        appearance {
+            template: @/title-bar
+            templateOptions: [
+                #DEFAULT#
+                t-BreadcrumbRegion--useBreadcrumbTitle
+            ]
+        }
+        componentAppearance {
+            breadcrumbTemplate: @/breadcrumb
+            templateOptions: #DEFAULT#
+        }
+    )
+
+    region comentarios (
+        name: Comentarios
+        type: themeTemplateComponent/comments
+        source {
+            location: localDatabase
+            type: sqlQuery
+            sqlQuery:
+                ```sql
+                select ID,
+                       ENTIDAD,
+                       PK_ID,
+                       COMENTARIO,
+                       CREADO_POR,
+                       SUBSTR(CREADO_POR, 1, 2) iniciales,
+                       CREADO_EL,
+                       actualizado_POR,
+                       actualizado_EL
+                  from SGT_COMENTARIOS
+                 where entidad =4 and pk_id = :P66_ID
+                ```
+            pageItemsToSubmit: P66_ID
+        }
+        orderBy {
+            type: item
+            item: {
+                itemName: P66_ORDER_BY
+                orderBys: {
+                    CREADO_EL: 1 desc
+                    Comentarios: 2 asc
+                    CREADO_POR: 3 asc
+                }
+            }
+        }
+        layout {
+            sequence: 70
+            slot: body
+        }
+        appearance {
+            template: @/blank-with-attributes
+            templateOptions: #DEFAULT#
+        }
+        accessibility {
+            landmarkType: region
+        }
+        advanced {
+            htmlDomId: rptComentarios
+            regionDisplaySelector: true
+        }
+        componentAppearance {
+            display: report
+        }
+        settings {
+            commentText: COMENTARIO
+            userName: CREADO_POR
+            date: ACTUALIZADO_EL
+            style: chatSpeechBubbles
+        }
+        plugin-avatar {
+            type: initials
+            initials: INICIALES
+        }
+
+        column ACTUALIZADO_EL (
+            layout {
+                sequence: 110
+            }
+            source {
+                databaseColumn: ACTUALIZADO_EL
+                dataType: timestamp
+            }
+        )
+
+        column ACTUALIZADO_POR (
+            layout {
+                sequence: 100
+            }
+            source {
+                databaseColumn: ACTUALIZADO_POR
+                dataType: varchar2
+            }
+        )
+
+        column COMENTARIO (
+            layout {
+                sequence: 40
+            }
+            source {
+                databaseColumn: COMENTARIO
+                dataType: varchar2
+            }
+        )
+
+        column CREADO_EL (
+            layout {
+                sequence: 60
+            }
+            source {
+                databaseColumn: CREADO_EL
+                dataType: timestamp
+            }
+        )
+
+        column CREADO_POR (
+            layout {
+                sequence: 50
+            }
+            source {
+                databaseColumn: CREADO_POR
+                dataType: varchar2
+            }
+        )
+
+        column ENTIDAD (
+            layout {
+                sequence: 20
+            }
+            source {
+                databaseColumn: ENTIDAD
+                dataType: number
+            }
+        )
+
+        column ID (
+            layout {
+                sequence: 10
+            }
+            source {
+                databaseColumn: ID
+                dataType: number
+                primaryKey: true
+            }
+        )
+
+        column INICIALES (
+            layout {
+                sequence: 90
+            }
+            source {
+                databaseColumn: INICIALES
+                dataType: varchar2
+            }
+        )
+
+        column PK_ID (
+            layout {
+                sequence: 30
+            }
+            source {
+                databaseColumn: PK_ID
+                dataType: number
+            }
+        )
+
+    )
+
+    region datos (
+        name: DATOS
+        type: form
+        source {
+            location: localDatabase
+            tableName: SGT_EQUIPOS
+        }
+        layout {
+            sequence: 10
+            parentRegion: @detalle-equipo
+            slot: subRegions
+        }
+        appearance {
+            template: @/standard
+            templateOptions: [
+                #DEFAULT#
+                t-Region--hideHeader js-addHiddenHeadingRoleDesc
+                t-Region--scrollBody
+            ]
+        }
+        advanced {
+            htmlDomId: rptEquipo
+        }
+    )
+
+    region detalle-equipo (
+        name: DETALLE_EQUIPO
+        title: Detalles Equipo
+        type: staticContent
+        layout {
+            sequence: 10
+            slot: body
+        }
+        appearance {
+            template: @/standard
+            templateOptions: [
+                #DEFAULT#
+                t-Region--hideHeader js-addHiddenHeadingRoleDesc
+                t-Region--scrollBody
+            ]
+        }
+        advanced {
+            regionDisplaySelector: true
+        }
+    )
+
+    region enlaces-fo (
+        name: Enlaces FO
+        type: classicReport
+        source {
+            location: localDatabase
+            tableName: SGT_ENLACES_FO
+            whereClause: equipo_id_a = :P66_ID or equipo_id_b = :P66_ID
+            pageItemsToSubmit: P66_ID
+        }
+        layout {
+            sequence: 60
+            slot: body
+        }
+        appearance {
+            template: @/standard
+            templateOptions: [
+                #DEFAULT#
+                t-Region--hideHeader js-addHiddenHeadingRoleDesc
+                t-Region--scrollBody
+            ]
+        }
+        advanced {
+            regionDisplaySelector: true
+        }
+        serverSideCondition {
+            type: rowsReturned
+            sqlQuery:
+                ```sql
+                Select id from sgt_enlaces_fo
+                where
+                equipo_id_a = :P66_ID or 
+                equipo_id_b = :P66_ID
+                ```
+        }
+        componentAppearance {
+            template: @/standard
+            templateOptions: [
+                #DEFAULT#
+                t-Report--altRowsDefault
+                t-Report--rowHighlight
+            ]
+        }
+        pagination {
+            type: nextAndPreviousLinks
+        }
+
+        column ABS_LONGITUD (
+            reportColumnQueryId: 9
+            derivedColumn: N
+            type: hidden
+            layout {
+                sequence: 90
+            }
+        )
+
+        column ACTUALIZADO_EL (
+            reportColumnQueryId: 23
+            derivedColumn: N
+            type: hidden
+            layout {
+                sequence: 240
+            }
+        )
+
+        column ACTUALIZADO_POR (
+            reportColumnQueryId: 22
+            derivedColumn: N
+            type: hidden
+            layout {
+                sequence: 230
+            }
+        )
+
+        column CANTIDAD_DE_PELOS (
+            reportColumnQueryId: 10
+            derivedColumn: N
+            heading {
+                heading: Cantidad de Pelos
+                alignment: center
+            }
+            layout {
+                sequence: 100
+                columnAlignment: end
+            }
+        )
+
+        column CERTIFICACIÓN (
+            reportColumnQueryId: 7
+            derivedColumn: N
+            heading {
+                heading: Certificación
+                alignment: center
+            }
+            layout {
+                sequence: 70
+                columnAlignment: end
+            }
+        )
+
+        column COMENTARIOS (
+            reportColumnQueryId: 16
+            derivedColumn: N
+            type: hidden
+            layout {
+                sequence: 170
+            }
+        )
+
+        column CONECTOR (
+            reportColumnQueryId: 14
+            derivedColumn: N
+            type: hidden
+            layout {
+                sequence: 150
+            }
+        )
+
+        column CREADO_EL (
+            reportColumnQueryId: 21
+            derivedColumn: N
+            type: hidden
+            layout {
+                sequence: 220
+            }
+        )
+
+        column CREADO_POR (
+            reportColumnQueryId: 20
+            derivedColumn: N
+            type: hidden
+            layout {
+                sequence: 210
+            }
+        )
+
+        column EQUIPO_ID_A (
+            reportColumnQueryId: 4
+            derivedColumn: N
+            type: hidden
+            layout {
+                sequence: 40
+            }
+        )
+
+        column EQUIPO_ID_B (
+            reportColumnQueryId: 6
+            derivedColumn: N
+            type: hidden
+            layout {
+                sequence: 60
+            }
+        )
+
+        column ESTADO (
+            reportColumnQueryId: 15
+            derivedColumn: N
+            heading {
+                heading: Estado
+                alignment: center
+            }
+            layout {
+                sequence: 160
+            }
+        )
+
+        column FECHA_IMPLEMENTACIÓN (
+            reportColumnQueryId: 18
+            derivedColumn: N
+            type: hidden
+            layout {
+                sequence: 190
+            }
+        )
+
+        column ID (
+            reportColumnQueryId: 1
+            derivedColumn: N
+            type: hidden
+            layout {
+                sequence: 10
+            }
+        )
+
+        column LT (
+            reportColumnQueryId: 13
+            derivedColumn: N
+            heading {
+                heading: LT
+                alignment: center
+            }
+            layout {
+                sequence: 140
+            }
+        )
+
+        column NOMBRE (
+            reportColumnQueryId: 2
+            derivedColumn: N
+            heading {
+                heading: Nombre
+                alignment: center
+            }
+            layout {
+                sequence: 20
+            }
+        )
+
+        column PROYECTO_DE_IMPLEMENTACIÓN (
+            reportColumnQueryId: 17
+            derivedColumn: N
+            type: hidden
+            layout {
+                sequence: 180
+            }
+        )
+
+        column PUERTOS_LADO_A (
+            reportColumnQueryId: 26
+            derivedColumn: N
+            type: hidden
+            layout {
+                sequence: 270
+            }
+        )
+
+        column PUERTOS_LADO_B (
+            reportColumnQueryId: 27
+            derivedColumn: N
+            type: hidden
+            layout {
+                sequence: 280
+            }
+        )
+
+        column SITIO_ID_A (
+            reportColumnQueryId: 3
+            derivedColumn: N
+            type: hidden
+            layout {
+                sequence: 30
+            }
+        )
+
+        column SITIO_ID_B (
+            reportColumnQueryId: 5
+            derivedColumn: N
+            type: hidden
+            layout {
+                sequence: 50
+            }
+        )
+
+        column TIPO (
+            reportColumnQueryId: 12
+            derivedColumn: N
+            heading {
+                heading: Tipo
+                alignment: center
+            }
+            layout {
+                sequence: 120
+            }
+        )
+
+        column TIPO_CABLE (
+            reportColumnQueryId: 24
+            derivedColumn: N
+            heading {
+                heading: Tipo Cable
+                alignment: center
+            }
+            layout {
+                sequence: 130
+            }
+        )
+
+        column TIPO_DE_FO (
+            reportColumnQueryId: 11
+            derivedColumn: N
+            type: hidden
+            layout {
+                sequence: 110
+            }
+        )
+
+        column TIPO_TENDIDO (
+            reportColumnQueryId: 25
+            derivedColumn: N
+            type: hidden
+            layout {
+                sequence: 260
+            }
+        )
+
+        column UNIDAD_ENCARGADA_ACTUAL (
+            reportColumnQueryId: 19
+            derivedColumn: N
+            type: hidden
+            layout {
+                sequence: 200
+            }
+        )
+
+        column UNIDAD_MEDIDA (
+            reportColumnQueryId: 8
+            derivedColumn: N
+            type: hidden
+            layout {
+                sequence: 80
+            }
+        )
+
+    )
+
+    region enlaces-wan (
+        name: Enlaces WAN
+        type: interactiveGrid
+        source {
+            location: localDatabase
+            tableName: SGT_EQUIPOS_WAN
+            whereClause: EQUIPO_A_ID=:P66_ID
+            pageItemsToSubmit: P66_ID
+        }
+        layout {
+            sequence: 40
+            slot: body
+        }
+        appearance {
+            template: @/interactive-report
+            templateOptions: [
+                #DEFAULT#
+                t-IRR-region--hideHeader js-addHiddenHeadingRoleDesc
+            ]
+        }
+        advanced {
+            regionDisplaySelector: true
+        }
+        serverSideCondition {
+            type: rowsReturned
+            sqlQuery:
+                ```sql
+                select * from 
+                
+                SGT_EQUIPOS_WAN
+                where
+                EQUIPO_A_ID=:P66_ID
+                ```
+        }
+        edit {
+            enabled: true
+            allowedOperations: update
+        }
+        toolbar {
+            controls: saveButton
+        }
+        enableUsersTo {
+            flashback: false
+            defineChartView: false
+            download: false
+        }
+        advanced {
+            savedReportMappingIdentifier: 52963043395803791
+        }
+
+        savedReport 213149 (
+            visibility: primary
+            view {
+                default: grid
+            }
+            singleRowView {
+                displayedColumns: true
+            }
+
+            displayColumn (
+                column: @ID
+                layout {
+                    sequence: 3
+                }
+            )
+
+            displayColumn (
+                column: @WAN_ID
+                layout {
+                    sequence: 4
+                }
+            )
+
+            displayColumn (
+                column: @INTERFAZ_A_ID
+                layout {
+                    sequence: 5
+                }
+            )
+
+            displayColumn (
+                column: @APEX$ROW_ACTION
+                layout {
+                    sequence: 0
+                }
+            )
+
+        )
+
+        column APEX$ROW_ACTION (
+            type: actionsMenu
+            layout {
+                sequence: 20
+            }
+        )
+
+        column APEX$ROW_SELECTOR (
+            type: rowSelector
+            layout {
+                sequence: 10
+            }
+        )
+
+        column ID (
+            type: hidden
+            layout {
+                sequence: 30
+            }
+            source {
+                databaseColumn: ID
+                dataType: number
+                primaryKey: true
+            }
+            exportPrinting {
+                includeInExportPrint: false
+            }
+        )
+
+        column INTERFAZ_A_ID (
+            type: popupLov
+            heading {
+                heading: "Interfaz "
+            }
+            lov {
+                type: sqlQuery
+                sqlQuery: SELECT NOMBRE ||' : '|| ETIQUETA, ID FROM SGT_INTERFACES WHERE EQUIPO_ID = :P66_ID
+                nullDisplayValue: Seleccione Una
+            }
+            layout {
+                sequence: 40
+            }
+            source {
+                databaseColumn: INTERFAZ_A_ID
+                dataType: number
+            }
+            columnFilter {
+                performanceImpactingOperators: [
+                    contains
+                    startsWith
+                    caseInsensitive
+                    regexp
+                ]
+                lovType: useLov
+            }
+        )
+
+        column WAN_ID (
+            type: displayOnly
+            heading {
+                heading: Wan
+            }
+            settings {
+                basedOn: lov
+            }
+            lov {
+                type: sharedComponent
+                lov: @enlaces-wan
+            }
+            layout {
+                sequence: 50
+            }
+            source {
+                databaseColumn: WAN_ID
+                dataType: number
+                queryOnly: true
+            }
+            columnFilter {
+                performanceImpactingOperators: [
+                    contains
+                    startsWith
+                    caseInsensitive
+                    regexp
+                ]
+                lovType: useLov
+            }
+        )
+
+    )
+
+    region historial-equipo (
+        name: Historial Equipo
+        title: Historial
+        type: classicReport
+        source {
+            location: localDatabase
+            type: sqlQuery
+            sqlQuery:
+                ```sql
+                SELECT
+                    AUDIT_ID,
+                    FECHA_HORA,
+                    USUARIO,
+                    TIPO_COMPONENTE                                       AS COMPONENTE,
+                    TIPO_OPERACION                                        AS ACCION,
+                    DETALLE_OLD_VALUE                                     AS OLD_VALUE,
+                    DETALLE_NEW_VALUE                                     AS NEW_VALUE
+                FROM V_AUDIT_EQUIPOS
+                WHERE EQUIPO_ID = TO_CHAR(:P66_ID)
+                    AND TIPO_OPERACION IN ('UPDATE', 'DELETE', 'Actualización', 'Eliminación')
+                ORDER BY FECHA_HORA_FILTRO DESC;
+                ```
+            pageItemsToSubmit: P66_ID
+        }
+        layout {
+            sequence: 80
+            slot: body
+        }
+        appearance {
+            template: @/standard
+            templateOptions: [
+                #DEFAULT#
+                t-Region--noPadding
+                t-Region--removeHeader js-removeLandmark
+                t-Region--noBorder
+                t-Region--scrollBody
+            ]
+        }
+        advanced {
+            regionDisplaySelector: true
+        }
+        componentAppearance {
+            template: @/standard
+            templateOptions: [
+                #DEFAULT#
+                t-Report--altRowsDefault
+                t-Report--rowHighlight
+            ]
+        }
+        pagination {
+            type: nextAndPreviousLinks
+        }
+        messages {
+            whenNoDataFound: No se encontraron registros
+        }
+
+        column ACCION (
+            reportColumnQueryId: 5
+            derivedColumn: N
+            heading {
+                heading: Accion
+            }
+            layout {
+                sequence: 50
+            }
+            sorting {
+                sortable: false
+            }
+        )
+
+        column AUDIT_ID (
+            reportColumnQueryId: 1
+            derivedColumn: N
+            type: hidden
+            layout {
+                sequence: 10
+            }
+        )
+
+        column COMPONENTE (
+            reportColumnQueryId: 4
+            derivedColumn: N
+            heading {
+                heading: Componente
+            }
+            layout {
+                sequence: 40
+            }
+            sorting {
+                sortable: false
+            }
+        )
+
+        column FECHA_HORA (
+            reportColumnQueryId: 2
+            derivedColumn: N
+            heading {
+                heading: Fecha Hora
+            }
+            layout {
+                sequence: 20
+            }
+            sorting {
+                sortable: false
+            }
+        )
+
+        column NEW_VALUE (
+            reportColumnQueryId: 7
+            derivedColumn: N
+            heading {
+                heading: New Value
+            }
+            layout {
+                sequence: 70
+            }
+            sorting {
+                sortable: false
+            }
+        )
+
+        column OLD_VALUE (
+            reportColumnQueryId: 6
+            derivedColumn: N
+            heading {
+                heading: Old Value
+            }
+            layout {
+                sequence: 60
+            }
+            sorting {
+                sortable: false
+            }
+        )
+
+        column USUARIO (
+            reportColumnQueryId: 3
+            derivedColumn: N
+            heading {
+                heading: Usuario
+            }
+            layout {
+                sequence: 30
+            }
+            sorting {
+                sortable: false
+            }
+        )
+
+    )
+
+    region imagen (
+        name: IMAGEN
+        type: cards
+        source {
+            location: localDatabase
+            tableName: SGT_ARCHIVOS
+            whereClause: ENTIDAD = 4 AND PK_ID = :P66_ID
+            pageItemsToSubmit: P66_ID
+        }
+        layout {
+            sequence: 20
+            parentRegion: @detalle-equipo
+            slot: subRegions
+            startNewRow: false
+        }
+        appearance {
+            template: @/cards-container
+            templateOptions: [
+                #DEFAULT#
+                t-CardsRegion--hideHeader js-addHiddenHeadingRoleDesc
+            ]
+        }
+        advanced {
+            htmlDomId: crdImagenes
+        }
+        serverSideCondition {
+            type: rowsReturned
+            sqlQuery:
+                ```sql
+                select * from sgt_archivos where entidad = 4 AND PK_ID = :P66_ID
+                --select 1 from dual
+                ```
+        }
+        card {
+            primaryKeyColumn1: ID
+        }
+        title {
+            column: FILE_NAME
+        }
+        subtitle {
+            column: OBSERVACIONES
+        }
+        media {
+            source: blobColumn
+            blobColumn: FILE_BLOB
+        }
+        blobAttributes {
+            mimeTypeColumn: FILE_MIMETYPE
+            lastUpdatedColumn: ACTUALIZADO_EL
+        }
+        performance {
+            lazyLoading: true
+        }
+    )
+
+    region interfaces (
+        name: INTERFACES
+        title: Interfaces
+        type: interactiveGrid
+        source {
+            location: localDatabase
+            type: sqlQuery
+            sqlQuery:
+                ```sql
+                select id,
+                       NOMBRE,
+                       ETIQUETA,
+                       ESTADO,
+                       TX_EN_DBM,
+                       RX_EN_DBM,
+                       MAC_ADDRESS,
+                       VELOCIDAD_MBPS
+                
+                  from SGT_INTERFACES
+                
+                 where EQUIPO_ID=:P66_ID 
+                -- 2026-06-11: dmf: Para poder editar los niveles se deben mostrar todas las interfaces del equipo
+                -- and id not in (select interfaz_a_id from sgt_equipos_wan where equipo_a_id =:P66_EQUIPO_ID and interfaz_a_id is not null)
+                -- and id not in (select interfaz_a_id from sgt_equipos_servicio where equipo_a_id =:P66_EQUIPO_ID and interfaz_a_id is not null)
+                ```
+            pageItemsToSubmit: P66_ID
+        }
+        layout {
+            sequence: 30
+            slot: body
+        }
+        appearance {
+            template: @/interactive-report
+            templateOptions: [
+                #DEFAULT#
+                t-IRR-region--hideHeader js-addHiddenHeadingRoleDesc
+            ]
+        }
+        advanced {
+            regionDisplaySelector: true
+        }
+        edit {
+            enabled: true
+            allowedOperations: update
+        }
+        editAuthorization {
+            update: @implementador-rights
+        }
+        componentAppearance {
+            selectFirstRow: false
+            fixedRowHeight: false
+        }
+        messages {
+            whenNoDataFound: No hay datos que mostrar.
+        }
+        toolbar {
+            controls: saveButton
+        }
+        enableUsersTo {
+            flashback: false
+            defineChartView: false
+            download: false
+        }
+        advanced {
+            savedReportMappingIdentifier: 52685005722806207
+        }
+
+        savedReport 248559 (
+            visibility: primary
+            view {
+                default: grid
+            }
+            singleRowView {
+                displayedColumns: true
+            }
+
+            displayColumn (
+                column: @NOMBRE
+                layout {
+                    sequence: 1
+                }
+            )
+
+            displayColumn (
+                column: @ETIQUETA
+                layout {
+                    sequence: 2
+                }
+            )
+
+            displayColumn (
+                column: @ESTADO
+                layout {
+                    sequence: 3
+                }
+            )
+
+            displayColumn (
+                column: @TX_EN_DBM
+                layout {
+                    sequence: 4
+                }
+            )
+
+            displayColumn (
+                column: @RX_EN_DBM
+                layout {
+                    sequence: 5
+                }
+            )
+
+            displayColumn (
+                column: @MAC_ADDRESS
+                layout {
+                    sequence: 6
+                }
+            )
+
+            displayColumn (
+                column: @VELOCIDAD_MBPS
+                layout {
+                    sequence: 7
+                }
+            )
+
+            displayColumn (
+                column: @ID
+                layout {
+                    sequence: 8
+                }
+            )
+
+            displayColumn (
+                column: @APEX$ROW_ACTION
+                layout {
+                    sequence: 0
+                }
+            )
+
+        )
+
+        column APEX$ROW_ACTION (
+            type: actionsMenu
+            layout {
+                sequence: 20
+            }
+        )
+
+        column APEX$ROW_SELECTOR (
+            type: rowSelector
+            layout {
+                sequence: 10
+            }
+        )
+
+        column ESTADO (
+            type: selectList
+            heading {
+                heading: Estado
+            }
+            lov {
+                type: sharedComponent
+                lov: @interfaces-estado
+            }
+            layout {
+                sequence: 60
+            }
+            validation {
+                valueRequired: true
+            }
+            source {
+                databaseColumn: ESTADO
+                dataType: varchar2
+            }
+            columnFilter {
+                performanceImpactingOperators: [
+                    contains
+                    startsWith
+                    caseInsensitive
+                    regexp
+                ]
+                lovType: useLov
+            }
+            enableUsersTo {
+                sort: false
+            }
+        )
+
+        column ETIQUETA (
+            type: textField
+            heading {
+                heading: Etiqueta
+            }
+            layout {
+                sequence: 50
+            }
+            validation {
+                maxLength: 1020
+            }
+            source {
+                databaseColumn: ETIQUETA
+                dataType: varchar2
+            }
+            columnFilter {
+                performanceImpactingOperators: [
+                    contains
+                    startsWith
+                    caseInsensitive
+                    regexp
+                ]
+                lovType: none
+            }
+            enableUsersTo {
+                sort: false
+            }
+        )
+
+        column ID (
+            type: hidden
+            layout {
+                sequence: 30
+            }
+            source {
+                databaseColumn: ID
+                dataType: number
+                queryOnly: true
+                primaryKey: true
+            }
+            exportPrinting {
+                includeInExportPrint: false
+            }
+        )
+
+        column MAC_ADDRESS (
+            type: textField
+            heading {
+                heading: Mac Address
+            }
+            layout {
+                sequence: 90
+            }
+            validation {
+                maxLength: 100
+            }
+            source {
+                databaseColumn: MAC_ADDRESS
+                dataType: varchar2
+            }
+            columnFilter {
+                performanceImpactingOperators: [
+                    contains
+                    startsWith
+                    caseInsensitive
+                    regexp
+                ]
+            }
+        )
+
+        column NOMBRE (
+            type: textField
+            heading {
+                heading: Nombre
+            }
+            layout {
+                sequence: 40
+            }
+            validation {
+                valueRequired: true
+                maxLength: 1020
+            }
+            source {
+                databaseColumn: NOMBRE
+                dataType: varchar2
+            }
+            columnFilter {
+                performanceImpactingOperators: [
+                    contains
+                    startsWith
+                    caseInsensitive
+                    regexp
+                ]
+                lovType: none
+            }
+            enableUsersTo {
+                sort: false
+            }
+        )
+
+        column RX_EN_DBM (
+            type: textField
+            heading {
+                heading: Rx En Dbm
+            }
+            layout {
+                sequence: 80
+            }
+            validation {
+                maxLength: 40
+            }
+            source {
+                databaseColumn: RX_EN_DBM
+                dataType: varchar2
+            }
+            columnFilter {
+                performanceImpactingOperators: [
+                    contains
+                    startsWith
+                    caseInsensitive
+                    regexp
+                ]
+            }
+        )
+
+        column TX_EN_DBM (
+            type: textField
+            heading {
+                heading: Tx En Dbm
+            }
+            layout {
+                sequence: 70
+            }
+            validation {
+                maxLength: 40
+            }
+            source {
+                databaseColumn: TX_EN_DBM
+                dataType: varchar2
+            }
+            columnFilter {
+                performanceImpactingOperators: [
+                    contains
+                    startsWith
+                    caseInsensitive
+                    regexp
+                ]
+            }
+        )
+
+        column VELOCIDAD_MBPS (
+            type: numberField
+            heading {
+                heading: Velocidad Mbps
+                alignment: end
+            }
+            layout {
+                sequence: 100
+                columnAlignment: end
+            }
+            source {
+                databaseColumn: VELOCIDAD_MBPS
+                dataType: number
+            }
+            columnFilter {
+                lovType: none
+            }
+        )
+
+    )
+
+    region region-display (
+        name: REGION_DISPLAY
+        type: regionDisplaySelector
+        layout {
+            sequence: 30
+            slot: masterDetail
+        }
+        appearance {
+            template: @/standard
+            templateOptions: [
+                #DEFAULT#
+                t-Region--removeHeader js-removeLandmark
+                t-Region--scrollBody
+            ]
+        }
+    )
+
+    region servicios (
+        name: Servicios
+        type: interactiveGrid
+        source {
+            location: localDatabase
+            tableName: SGT_EQUIPOS_SERVICIO
+            whereClause: EQUIPO_A_ID=:P66_ID
+            pageItemsToSubmit: P66_ID
+        }
+        layout {
+            sequence: 50
+            slot: body
+        }
+        appearance {
+            template: @/interactive-report
+            templateOptions: [
+                #DEFAULT#
+                t-IRR-region--hideHeader js-addHiddenHeadingRoleDesc
+            ]
+        }
+        advanced {
+            regionDisplaySelector: true
+        }
+        serverSideCondition {
+            type: rowsReturned
+            sqlQuery:
+                ```sql
+                select * from 
+                
+                SGT_EQUIPOS_servicio
+                where
+                EQUIPO_A_ID=:P66_ID
+                ```
+        }
+        edit {
+            enabled: true
+            allowedOperations: update
+        }
+        toolbar {
+            controls: saveButton
+        }
+        enableUsersTo {
+            flashback: false
+            defineChartView: false
+            download: false
+        }
+        advanced {
+            savedReportMappingIdentifier: 52967899252805898
+        }
+
+        savedReport 213318 (
+            visibility: primary
+            view {
+                default: grid
+            }
+            singleRowView {
+                displayedColumns: true
+            }
+
+            displayColumn (
+                column: @ID
+                layout {
+                    sequence: 1
+                }
+            )
+
+            displayColumn (
+                column: @SERVICIO_ID
+                layout {
+                    sequence: 2
+                }
+            )
+
+            displayColumn (
+                column: @INTERFAZ_A_ID
+                layout {
+                    sequence: 3
+                }
+            )
+
+            displayColumn (
+                column: @APEX$ROW_ACTION
+                layout {
+                    sequence: 0
+                }
+            )
+
+        )
+
+        column APEX$ROW_ACTION (
+            type: actionsMenu
+            layout {
+                sequence: 20
+            }
+        )
+
+        column APEX$ROW_SELECTOR (
+            type: rowSelector
+            layout {
+                sequence: 10
+            }
+        )
+
+        column ID (
+            type: hidden
+            layout {
+                sequence: 30
+            }
+            source {
+                databaseColumn: ID
+                dataType: number
+                primaryKey: true
+            }
+            exportPrinting {
+                includeInExportPrint: false
+            }
+        )
+
+        column INTERFAZ_A_ID (
+            type: popupLov
+            heading {
+                heading: Interfaz
+            }
+            lov {
+                type: sqlQuery
+                sqlQuery: SELECT NOMBRE ||' : '|| ETIQUETA, ID FROM SGT_INTERFACES WHERE EQUIPO_ID = :P66_ID
+                nullDisplayValue: Seleccione Una
+            }
+            layout {
+                sequence: 70
+            }
+            source {
+                databaseColumn: INTERFAZ_A_ID
+                dataType: number
+            }
+            columnFilter {
+                performanceImpactingOperators: [
+                    contains
+                    startsWith
+                    caseInsensitive
+                    regexp
+                ]
+                lovType: useLov
+            }
+        )
+
+        column SERVICIO_ID (
+            type: displayOnly
+            heading {
+                heading: Servicio
+            }
+            settings {
+                basedOn: lov
+            }
+            lov {
+                type: sharedComponent
+                lov: @servicios-nombre
+            }
+            layout {
+                sequence: 40
+            }
+            source {
+                databaseColumn: SERVICIO_ID
+                dataType: number
+                queryOnly: true
+            }
+            columnFilter {
+                performanceImpactingOperators: [
+                    contains
+                    startsWith
+                    caseInsensitive
+                    regexp
+                ]
+                lovType: useLov
+            }
+        )
+
+    )
+
+    pageItem P66_ACTUALIZADO_EL (
+        type: displayOnly
+        label {
+            label: Actualizado El
+            alignment: left
+        }
+        layout {
+            sequence: 280
+            region: @datos
+            slot: regionBody
+            alignment: left
+            startNewRow: false
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+        }
+        source {
+            formRegion: @datos
+            column: ACTUALIZADO_EL
+            dataType: timestamp
+        }
+    )
+
+    pageItem P66_ACTUALIZADO_POR (
+        type: displayOnly
+        label {
+            label: Actualizado Por
+            alignment: left
+        }
+        layout {
+            sequence: 270
+            region: @datos
+            slot: regionBody
+            alignment: left
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+        }
+        source {
+            formRegion: @datos
+            column: ACTUALIZADO_POR
+            dataType: varchar2
+        }
+    )
+
+    pageItem P66_ALIMENTACION1_ID (
+        type: displayOnly
+        label {
+            label: Alimentacion1 Id
+            alignment: left
+        }
+        layout {
+            sequence: 210
+            region: @datos
+            slot: regionBody
+            alignment: left
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+        }
+        source {
+            formRegion: @datos
+            column: ALIMENTACION1_ID
+            dataType: varchar2
+        }
+    )
+
+    pageItem P66_ALIMENTACION2_ID (
+        type: displayOnly
+        label {
+            label: Alimentacion2 Id
+            alignment: left
+        }
+        layout {
+            sequence: 220
+            region: @datos
+            slot: regionBody
+            alignment: left
+            startNewRow: false
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+        }
+        source {
+            formRegion: @datos
+            column: ALIMENTACION2_ID
+            dataType: varchar2
+        }
+    )
+
+    pageItem P66_ALTURA_U (
+        type: displayOnly
+        label {
+            label: Altura U
+            alignment: left
+        }
+        layout {
+            sequence: 50
+            region: @datos
+            slot: regionBody
+            alignment: left
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+        }
+        source {
+            formRegion: @datos
+            column: ALTURA_U
+            dataType: number
+        }
+    )
+
+    pageItem P66_CREADO_EL (
+        type: displayOnly
+        label {
+            label: Creado El
+            alignment: left
+        }
+        layout {
+            sequence: 260
+            region: @datos
+            slot: regionBody
+            alignment: left
+            startNewRow: false
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+        }
+        source {
+            formRegion: @datos
+            column: CREADO_EL
+            dataType: timestamp
+        }
+    )
+
+    pageItem P66_CREADO_POR (
+        type: displayOnly
+        label {
+            label: Creado Por
+            alignment: left
+        }
+        layout {
+            sequence: 250
+            region: @datos
+            slot: regionBody
+            alignment: left
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+        }
+        source {
+            formRegion: @datos
+            column: CREADO_POR
+            dataType: varchar2
+        }
+    )
+
+    pageItem P66_ESTADO (
+        type: displayOnly
+        label {
+            label: Estado
+            alignment: left
+        }
+        layout {
+            sequence: 140
+            region: @datos
+            slot: regionBody
+            alignment: left
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+        }
+        source {
+            formRegion: @datos
+            column: ESTADO
+            dataType: varchar2
+        }
+    )
+
+    pageItem P66_FECHA_IMPLE (
+        type: displayOnly
+        label {
+            label: Fecha Imple
+            alignment: left
+        }
+        layout {
+            sequence: 240
+            region: @datos
+            slot: regionBody
+            alignment: left
+            startNewRow: false
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+        }
+        source {
+            formRegion: @datos
+            column: FECHA_IMPLE
+            dataType: date
+        }
+    )
+
+    pageItem P66_ID (
+        type: hidden
+        layout {
+            sequence: 10
+            region: @datos
+            slot: regionBody
+        }
+        source {
+            formRegion: @datos
+            column: ID
+            dataType: number
+            queryOnly: true
+            primaryKey: true
+        }
+        sessionState {
+            storage: session
+        }
+        security {
+            sessionStateProtection: checksumRequiredSessionLevel
+        }
+    )
+
+    pageItem P66_IP_GESTION (
+        type: displayOnly
+        label {
+            label: Ip Gestion
+            alignment: left
+        }
+        layout {
+            sequence: 150
+            region: @datos
+            slot: regionBody
+            alignment: left
+            startNewRow: false
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+        }
+        source {
+            formRegion: @datos
+            column: IP_GESTION
+            dataType: varchar2
+        }
+    )
+
+    pageItem P66_MARCA (
+        type: displayOnly
+        label {
+            label: Marca
+            alignment: left
+        }
+        layout {
+            sequence: 110
+            region: @datos
+            slot: regionBody
+            alignment: left
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+        }
+        source {
+            formRegion: @datos
+            column: MARCA
+            dataType: varchar2
+        }
+    )
+
+    pageItem P66_MODELO (
+        type: displayOnly
+        label {
+            label: Modelo
+            alignment: left
+        }
+        layout {
+            sequence: 120
+            region: @datos
+            slot: regionBody
+            alignment: left
+            startNewRow: false
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+        }
+        source {
+            formRegion: @datos
+            column: MODELO
+            dataType: varchar2
+        }
+    )
+
+    pageItem P66_NI_ANDE (
+        type: displayOnly
+        label {
+            label: Ni Ande
+            alignment: left
+        }
+        layout {
+            sequence: 160
+            region: @datos
+            slot: regionBody
+            alignment: left
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+        }
+        source {
+            formRegion: @datos
+            column: NI_ANDE
+            dataType: varchar2
+        }
+    )
+
+    pageItem P66_NOMBRE (
+        type: displayOnly
+        label {
+            label: Nombre
+            alignment: left
+        }
+        layout {
+            sequence: 40
+            region: @datos
+            slot: regionBody
+            alignment: left
+            startNewRow: false
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+        }
+        source {
+            formRegion: @datos
+            column: NOMBRE
+            dataType: varchar2
+        }
+    )
+
+    pageItem P66_ORDER_BY (
+        type: selectList
+        label {
+            label: Order By
+            alignment: left
+        }
+        lov {
+            type: staticValues
+            staticValues: STATIC2:Fecha;CREADO_EL,Comentarios;Comentarios,Usuario;CREADO_POR
+            displayExtraValues: false
+            displayNullValue: false
+        }
+        layout {
+            sequence: 10
+            region: @comentarios
+            slot: regionBody
+            alignment: left
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+            height: 1
+        }
+        validation {
+            valueRequired: true
+        }
+        advanced {
+            warnOnUnsavedChanges: ignore
+        }
+        default {
+            type: static
+            staticValue: CREADO_EL
+        }
+    )
+
+    pageItem P66_POSICION (
+        type: displayOnly
+        label {
+            label: Posicion
+            alignment: left
+        }
+        layout {
+            sequence: 70
+            region: @datos
+            slot: regionBody
+            alignment: left
+            startNewRow: false
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+        }
+        source {
+            formRegion: @datos
+            column: POSICION
+            dataType: varchar2
+        }
+    )
+
+    pageItem P66_PROYECTO_ID (
+        type: displayOnly
+        label {
+            label: Proyecto Id
+            alignment: left
+        }
+        layout {
+            sequence: 230
+            region: @datos
+            slot: regionBody
+            alignment: left
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+        }
+        source {
+            formRegion: @datos
+            column: PROYECTO_ID
+            dataType: varchar2
+        }
+    )
+
+    pageItem P66_RACK_ID (
+        type: displayOnly
+        label {
+            label: Rack Id
+            alignment: left
+        }
+        settings {
+            basedOn: lov
+        }
+        lov {
+            type: sharedComponent
+            lov: @racks-nombre-compuesto
+        }
+        layout {
+            sequence: 30
+            region: @datos
+            slot: regionBody
+            alignment: left
+            startNewRow: false
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+        }
+        source {
+            formRegion: @datos
+            column: RACK_ID
+            dataType: number
+        }
+    )
+
+    pageItem P66_SERIAL_NUMBER (
+        type: displayOnly
+        label {
+            label: Serial Number
+            alignment: left
+        }
+        layout {
+            sequence: 170
+            region: @datos
+            slot: regionBody
+            alignment: left
+            startNewRow: false
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+        }
+        source {
+            formRegion: @datos
+            column: SERIAL_NUMBER
+            dataType: varchar2
+        }
+    )
+
+    pageItem P66_SITIO_ID (
+        type: displayOnly
+        label {
+            label: Sitio Id
+            alignment: left
+        }
+        layout {
+            sequence: 20
+            region: @datos
+            slot: regionBody
+            alignment: left
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+        }
+        source {
+            formRegion: @datos
+            column: SITIO_ID
+            dataType: number
+        }
+        config {
+            buildOption: @commented-out
+        }
+    )
+
+    pageItem P66_TIPO_EQUIPO_ID (
+        type: displayOnly
+        label {
+            label: Tipo Equipo Id
+            alignment: left
+        }
+        settings {
+            basedOn: lov
+        }
+        lov {
+            type: sharedComponent
+            lov: @tipo-equipos-nombre
+        }
+        layout {
+            sequence: 90
+            region: @datos
+            slot: regionBody
+            alignment: left
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+        }
+        source {
+            formRegion: @datos
+            column: TIPO_EQUIPO_ID
+            dataType: number
+        }
+    )
+
+    pageItem P66_TIPO_RED (
+        type: displayOnly
+        label {
+            label: Tipo Red
+            alignment: left
+        }
+        lov {
+            type: sharedComponent
+            lov: @tipo-red
+        }
+        layout {
+            sequence: 130
+            region: @datos
+            slot: regionBody
+            alignment: left
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+        }
+        source {
+            formRegion: @datos
+            column: TIPO_RED
+            dataType: varchar2
+        }
+    )
+
+    pageItem P66_U (
+        type: displayOnly
+        label {
+            label: U
+            alignment: left
+        }
+        layout {
+            sequence: 60
+            region: @datos
+            slot: regionBody
+            alignment: left
+            startNewRow: false
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+        }
+        source {
+            formRegion: @datos
+            column: U
+            dataType: number
+        }
+    )
+
+    pageItem P66_UNIDAD_ENCARGADA (
+        type: displayOnly
+        label {
+            label: Unidad Encargada
+            alignment: left
+        }
+        layout {
+            sequence: 80
+            region: @datos
+            slot: regionBody
+            alignment: left
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+        }
+        source {
+            formRegion: @datos
+            column: UNIDAD_ENCARGADA
+            dataType: varchar2
+        }
+    )
+
+    pageItem P66_VERSION_HARDWARE (
+        type: displayOnly
+        label {
+            label: Version Hardware
+            alignment: left
+        }
+        layout {
+            sequence: 180
+            region: @datos
+            slot: regionBody
+            alignment: left
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+        }
+        source {
+            formRegion: @datos
+            column: VERSION_HARDWARE
+            dataType: varchar2
+        }
+    )
+
+    pageItem P66_VERSION_PATCH (
+        type: displayOnly
+        label {
+            label: Version Patch
+            alignment: left
+        }
+        layout {
+            sequence: 200
+            region: @datos
+            slot: regionBody
+            alignment: left
+            startNewRow: false
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+        }
+        source {
+            formRegion: @datos
+            column: VERSION_PATCH
+            dataType: varchar2
+        }
+    )
+
+    pageItem P66_VERSION_SOFTWARE (
+        type: displayOnly
+        label {
+            label: Version Software
+            alignment: left
+        }
+        layout {
+            sequence: 190
+            region: @datos
+            slot: regionBody
+            alignment: left
+            startNewRow: false
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+        }
+        source {
+            formRegion: @datos
+            column: VERSION_SOFTWARE
+            dataType: varchar2
+        }
+    )
+
+    dynamicAction close-comentarios (
+        name: CLOSE_COMENTARIOS
+        execution {
+            sequence: 20
+        }
+        when {
+            event: apexafterclosedialog
+            selectionType: jQuerySelector
+            jquerySelector: #rptComentarios, #lstAcciones
+        }
+
+        action native-refresh (
+            action: refresh
+            affectedElements {
+                selectionType: region
+                region: @comentarios
+            }
+            execution {
+                sequence: 10
+                fireOnInit: false
+            }
+        )
+
+    )
+
+    dynamicAction close-editar (
+        name: CLOSE_EDITAR
+        execution {
+            sequence: 40
+        }
+        when {
+            event: apexafterclosedialog
+            selectionType: jQuerySelector
+            jquerySelector: #rptEquipo, #lstAcciones
+        }
+
+        action native-refresh (
+            action: refresh
+            affectedElements {
+                selectionType: region
+                region: @detalle-equipo
+            }
+            execution {
+                sequence: 10
+                fireOnInit: false
+            }
+        )
+
+    )
+
+    dynamicAction close-imagenes (
+        name: CLOSE_IMAGENES
+        execution {
+            sequence: 30
+        }
+        when {
+            event: apexafterclosecanceldialog
+            selectionType: jQuerySelector
+            jquerySelector: #crdImagenes, #lstAcciones
+        }
+
+        action native-refresh (
+            action: refresh
+            affectedElements {
+                selectionType: region
+                region: @imagen
+            }
+            execution {
+                sequence: 10
+                fireOnInit: false
+            }
+        )
+
+    )
+
+    dynamicAction refrescarcarousel (
+        name: RefrescarCarousel
+        execution {
+            sequence: 10
+        }
+        when {
+            event: apexafterrefresh
+            selectionType: region
+            region: @imagen
+        }
+
+        action native-javascript-code (
+            action: executeJsCode
+            settings {
+                jsCode: console.log("Evento");
+            }
+            execution {
+                sequence: 10
+                fireOnInit: false
+            }
+        )
+
+    )
+
+    process enlaces-wan-save-interactive-grid-data (
+        name: Enlaces WAN - Save Interactive Grid Data
+        type: interactiveGridAutoRowProcessing
+        editableRegion: @enlaces-wan
+        execution {
+            sequence: 20
+        }
+        advanced {
+            executionMappingIdentifier: 28217467397067792
+        }
+    )
+
+    process initialize-form-detalles-equipos (
+        name: Initialize form Detalles Equipos
+        type: formInitialization
+        formRegion: @datos
+        execution {
+            sequence: 10
+            point: beforeHeader
+        }
+        advanced {
+            executionMappingIdentifier: 26134041035035214
+        }
+    )
+
+    process interfaces-save-interactive-grid-data (
+        name: INTERFACES - Save Interactive Grid Data
+        type: interactiveGridAutoRowProcessing
+        editableRegion: @interfaces
+        execution {
+            sequence: 40
+        }
+        advanced {
+            executionMappingIdentifier: 28218081864070724
+        }
+    )
+
+    process servicios-save-interactive-grid-data (
+        name: Servicios - Save Interactive Grid Data
+        type: interactiveGridAutoRowProcessing
+        editableRegion: @servicios
+        execution {
+            sequence: 30
+        }
+        advanced {
+            executionMappingIdentifier: 28217767356069249
+        }
+    )
+
+)
+

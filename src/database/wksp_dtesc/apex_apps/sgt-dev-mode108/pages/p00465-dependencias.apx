@@ -1,0 +1,1129 @@
+page 465 (
+    name: Dependencias equipos
+    alias: DEPENDENCIAS
+    title: Dependencias equipos
+    appearance {
+        pageMode: modalDialog
+        dialogTemplate: @/modal-dialog
+        templateOptions: #DEFAULT#
+    }
+    navigation {
+        cursorFocus: doNotFocusCursor
+    }
+    security {
+        formAutoComplete: false
+    }
+
+    region enlaces-fo (
+        name: Enlaces FO
+        type: classicReport
+        source {
+            location: localDatabase
+            tableName: SGT_ENLACES_FO
+            whereClause: equipo_id_a = :P465_EQUIPO_ID or equipo_id_b = :P465_EQUIPO_ID
+        }
+        layout {
+            sequence: 60
+            parentRegion: @selector
+            slot: subRegions
+        }
+        appearance {
+            template: @/standard
+            templateOptions: [
+                #DEFAULT#
+                t-Region--hideHeader js-addHiddenHeadingRoleDesc
+                t-Region--scrollBody
+            ]
+        }
+        advanced {
+            regionDisplaySelector: true
+        }
+        serverSideCondition {
+            type: rowsReturned
+            sqlQuery:
+                ```sql
+                Select id from sgt_enlaces_fo
+                where
+                equipo_id_a = :P465_EQUIPO_ID or equipo_id_b = :P465_EQUIPO_ID
+                ```
+        }
+        componentAppearance {
+            template: @/standard
+            templateOptions: [
+                #DEFAULT#
+                t-Report--altRowsDefault
+                t-Report--rowHighlight
+            ]
+        }
+        pagination {
+            type: nextAndPreviousLinks
+        }
+
+        column ABS_LONGITUD (
+            reportColumnQueryId: 9
+            derivedColumn: N
+            type: hidden
+            layout {
+                sequence: 90
+            }
+        )
+
+        column ACTUALIZADO_EL (
+            reportColumnQueryId: 23
+            derivedColumn: N
+            type: hidden
+            layout {
+                sequence: 240
+            }
+        )
+
+        column ACTUALIZADO_POR (
+            reportColumnQueryId: 22
+            derivedColumn: N
+            type: hidden
+            layout {
+                sequence: 230
+            }
+        )
+
+        column CANTIDAD_DE_PELOS (
+            reportColumnQueryId: 10
+            derivedColumn: N
+            heading {
+                heading: Cantidad de Pelos
+                alignment: center
+            }
+            layout {
+                sequence: 100
+                columnAlignment: end
+            }
+        )
+
+        column CERTIFICACIÓN (
+            reportColumnQueryId: 7
+            derivedColumn: N
+            heading {
+                heading: Certificación
+                alignment: center
+            }
+            layout {
+                sequence: 70
+                columnAlignment: end
+            }
+        )
+
+        column COMENTARIOS (
+            reportColumnQueryId: 16
+            derivedColumn: N
+            type: hidden
+            layout {
+                sequence: 170
+            }
+        )
+
+        column CONECTOR (
+            reportColumnQueryId: 14
+            derivedColumn: N
+            type: hidden
+            layout {
+                sequence: 150
+            }
+        )
+
+        column CREADO_EL (
+            reportColumnQueryId: 21
+            derivedColumn: N
+            type: hidden
+            layout {
+                sequence: 220
+            }
+        )
+
+        column CREADO_POR (
+            reportColumnQueryId: 20
+            derivedColumn: N
+            type: hidden
+            layout {
+                sequence: 210
+            }
+        )
+
+        column EQUIPO_ID_A (
+            reportColumnQueryId: 4
+            derivedColumn: N
+            type: hidden
+            layout {
+                sequence: 40
+            }
+        )
+
+        column EQUIPO_ID_B (
+            reportColumnQueryId: 6
+            derivedColumn: N
+            type: hidden
+            layout {
+                sequence: 60
+            }
+        )
+
+        column ESTADO (
+            reportColumnQueryId: 15
+            derivedColumn: N
+            heading {
+                heading: Estado
+                alignment: center
+            }
+            layout {
+                sequence: 160
+            }
+        )
+
+        column FECHA_IMPLEMENTACIÓN (
+            reportColumnQueryId: 18
+            derivedColumn: N
+            type: hidden
+            layout {
+                sequence: 190
+            }
+        )
+
+        column ID (
+            reportColumnQueryId: 1
+            derivedColumn: N
+            type: hidden
+            layout {
+                sequence: 10
+            }
+        )
+
+        column LT (
+            reportColumnQueryId: 13
+            derivedColumn: N
+            heading {
+                heading: LT
+                alignment: center
+            }
+            layout {
+                sequence: 140
+            }
+        )
+
+        column NOMBRE (
+            reportColumnQueryId: 2
+            derivedColumn: N
+            heading {
+                heading: Nombre
+                alignment: center
+            }
+            layout {
+                sequence: 20
+            }
+        )
+
+        column PROYECTO_DE_IMPLEMENTACIÓN (
+            reportColumnQueryId: 17
+            derivedColumn: N
+            type: hidden
+            layout {
+                sequence: 180
+            }
+        )
+
+        column PUERTOS_LADO_A (
+            reportColumnQueryId: 26
+            derivedColumn: N
+            type: hidden
+            layout {
+                sequence: 270
+            }
+        )
+
+        column PUERTOS_LADO_B (
+            reportColumnQueryId: 27
+            derivedColumn: N
+            type: hidden
+            layout {
+                sequence: 280
+            }
+        )
+
+        column SITIO_ID_A (
+            reportColumnQueryId: 3
+            derivedColumn: N
+            type: hidden
+            layout {
+                sequence: 30
+            }
+        )
+
+        column SITIO_ID_B (
+            reportColumnQueryId: 5
+            derivedColumn: N
+            type: hidden
+            layout {
+                sequence: 50
+            }
+        )
+
+        column TIPO (
+            reportColumnQueryId: 12
+            derivedColumn: N
+            heading {
+                heading: Tipo
+                alignment: center
+            }
+            layout {
+                sequence: 120
+            }
+        )
+
+        column TIPO_CABLE (
+            reportColumnQueryId: 24
+            derivedColumn: N
+            heading {
+                heading: Tipo Cable
+                alignment: center
+            }
+            layout {
+                sequence: 130
+            }
+        )
+
+        column TIPO_DE_FO (
+            reportColumnQueryId: 11
+            derivedColumn: N
+            type: hidden
+            layout {
+                sequence: 110
+            }
+        )
+
+        column TIPO_TENDIDO (
+            reportColumnQueryId: 25
+            derivedColumn: N
+            type: hidden
+            layout {
+                sequence: 260
+            }
+        )
+
+        column UNIDAD_ENCARGADA_ACTUAL (
+            reportColumnQueryId: 19
+            derivedColumn: N
+            type: hidden
+            layout {
+                sequence: 200
+            }
+        )
+
+        column UNIDAD_MEDIDA (
+            reportColumnQueryId: 8
+            derivedColumn: N
+            type: hidden
+            layout {
+                sequence: 80
+            }
+        )
+
+    )
+
+    region enlaces-wan (
+        name: Enlaces WAN
+        type: interactiveGrid
+        source {
+            location: localDatabase
+            tableName: SGT_EQUIPOS_WAN
+            whereClause: EQUIPO_A_ID=:P465_EQUIPO_ID
+        }
+        layout {
+            sequence: 40
+            parentRegion: @selector
+            slot: subRegions
+        }
+        appearance {
+            template: @/interactive-report
+            templateOptions: [
+                #DEFAULT#
+                t-IRR-region--hideHeader js-addHiddenHeadingRoleDesc
+            ]
+        }
+        advanced {
+            regionDisplaySelector: true
+        }
+        serverSideCondition {
+            type: rowsReturned
+            sqlQuery:
+                ```sql
+                select * from 
+                
+                SGT_EQUIPOS_WAN
+                where
+                EQUIPO_A_ID=:P465_EQUIPO_ID
+                ```
+        }
+        edit {
+            enabled: true
+            allowedOperations: update
+        }
+        toolbar {
+            controls: saveButton
+        }
+        enableUsersTo {
+            flashback: false
+            defineChartView: false
+            download: false
+        }
+        advanced {
+            savedReportMappingIdentifier: 21308401643884303
+        }
+
+        savedReport 213149 (
+            visibility: primary
+            view {
+                default: grid
+            }
+            singleRowView {
+                displayedColumns: true
+            }
+
+            displayColumn (
+                column: @ID
+                layout {
+                    sequence: 3
+                }
+            )
+
+            displayColumn (
+                column: @WAN_ID
+                layout {
+                    sequence: 4
+                }
+            )
+
+            displayColumn (
+                column: @INTERFAZ_A_ID
+                layout {
+                    sequence: 5
+                }
+            )
+
+            displayColumn (
+                column: @APEX$ROW_ACTION
+                layout {
+                    sequence: 0
+                }
+            )
+
+        )
+
+        column APEX$ROW_ACTION (
+            type: actionsMenu
+            layout {
+                sequence: 20
+            }
+        )
+
+        column APEX$ROW_SELECTOR (
+            type: rowSelector
+            layout {
+                sequence: 10
+            }
+        )
+
+        column ID (
+            type: hidden
+            layout {
+                sequence: 30
+            }
+            source {
+                databaseColumn: ID
+                dataType: number
+                primaryKey: true
+            }
+            exportPrinting {
+                includeInExportPrint: false
+            }
+        )
+
+        column INTERFAZ_A_ID (
+            type: popupLov
+            heading {
+                heading: "Interfaz "
+            }
+            lov {
+                type: sqlQuery
+                sqlQuery: SELECT NOMBRE ||' : '|| ETIQUETA, ID FROM SGT_INTERFACES WHERE EQUIPO_ID = :P465_EQUIPO_ID
+                nullDisplayValue: Seleccione Una
+            }
+            layout {
+                sequence: 40
+            }
+            source {
+                databaseColumn: INTERFAZ_A_ID
+                dataType: number
+            }
+            columnFilter {
+                performanceImpactingOperators: [
+                    contains
+                    startsWith
+                    caseInsensitive
+                    regexp
+                ]
+                lovType: useLov
+            }
+        )
+
+        column WAN_ID (
+            type: displayOnly
+            heading {
+                heading: Wan
+            }
+            settings {
+                basedOn: lov
+            }
+            lov {
+                type: sharedComponent
+                lov: @enlaces-wan
+            }
+            layout {
+                sequence: 50
+            }
+            source {
+                databaseColumn: WAN_ID
+                dataType: number
+                queryOnly: true
+            }
+            columnFilter {
+                performanceImpactingOperators: [
+                    contains
+                    startsWith
+                    caseInsensitive
+                    regexp
+                ]
+                lovType: useLov
+            }
+        )
+
+    )
+
+    region interfaces (
+        name: INTERFACES
+        title: Interfaces
+        type: interactiveGrid
+        source {
+            location: localDatabase
+            type: sqlQuery
+            sqlQuery:
+                ```sql
+                select id,
+                       NOMBRE,
+                       ETIQUETA,
+                       ESTADO,
+                       TX_EN_DBM,
+                       RX_EN_DBM,
+                       MAC_ADDRESS,
+                       VELOCIDAD_MBPS
+                
+                  from SGT_INTERFACES
+                
+                 where EQUIPO_ID=:P465_EQUIPO_ID 
+                -- 2026-06-11: dmf: Para poder editar los niveles se deben mostrar todas las interfaces del equipo
+                -- and id not in (select interfaz_a_id from sgt_equipos_wan where equipo_a_id =:P465_EQUIPO_ID and interfaz_a_id is not null)
+                -- and id not in (select interfaz_a_id from sgt_equipos_servicio where equipo_a_id =:P465_EQUIPO_ID and interfaz_a_id is not null)
+                ```
+            pageItemsToSubmit: P465_EQUIPO_ID
+        }
+        layout {
+            sequence: 30
+            parentRegion: @selector
+            slot: subRegions
+        }
+        appearance {
+            template: @/interactive-report
+            templateOptions: [
+                #DEFAULT#
+                t-IRR-region--hideHeader js-addHiddenHeadingRoleDesc
+            ]
+        }
+        advanced {
+            regionDisplaySelector: true
+        }
+        edit {
+            enabled: true
+            allowedOperations: update
+        }
+        editAuthorization {
+            update: @implementador-rights
+        }
+        componentAppearance {
+            selectFirstRow: false
+            fixedRowHeight: false
+        }
+        messages {
+            whenNoDataFound: No hay datos que mostrar.
+        }
+        toolbar {
+            controls: saveButton
+        }
+        enableUsersTo {
+            flashback: false
+            defineChartView: false
+            download: false
+        }
+        advanced {
+            savedReportMappingIdentifier: 24828085078840805
+        }
+
+        savedReport 248559 (
+            visibility: primary
+            view {
+                default: grid
+            }
+            singleRowView {
+                displayedColumns: true
+            }
+
+            displayColumn (
+                column: @NOMBRE
+                layout {
+                    sequence: 1
+                }
+            )
+
+            displayColumn (
+                column: @ETIQUETA
+                layout {
+                    sequence: 2
+                }
+            )
+
+            displayColumn (
+                column: @ESTADO
+                layout {
+                    sequence: 3
+                }
+            )
+
+            displayColumn (
+                column: @TX_EN_DBM
+                layout {
+                    sequence: 4
+                }
+            )
+
+            displayColumn (
+                column: @RX_EN_DBM
+                layout {
+                    sequence: 5
+                }
+            )
+
+            displayColumn (
+                column: @MAC_ADDRESS
+                layout {
+                    sequence: 6
+                }
+            )
+
+            displayColumn (
+                column: @VELOCIDAD_MBPS
+                layout {
+                    sequence: 7
+                }
+            )
+
+            displayColumn (
+                column: @ID
+                layout {
+                    sequence: 8
+                }
+            )
+
+            displayColumn (
+                column: @APEX$ROW_ACTION
+                layout {
+                    sequence: 0
+                }
+            )
+
+        )
+
+        column APEX$ROW_ACTION (
+            type: actionsMenu
+            layout {
+                sequence: 20
+            }
+        )
+
+        column APEX$ROW_SELECTOR (
+            type: rowSelector
+            layout {
+                sequence: 10
+            }
+        )
+
+        column ESTADO (
+            type: selectList
+            heading {
+                heading: Estado
+            }
+            lov {
+                type: sharedComponent
+                lov: @interfaces-estado
+            }
+            layout {
+                sequence: 60
+            }
+            validation {
+                valueRequired: true
+            }
+            source {
+                databaseColumn: ESTADO
+                dataType: varchar2
+            }
+            columnFilter {
+                performanceImpactingOperators: [
+                    contains
+                    startsWith
+                    caseInsensitive
+                    regexp
+                ]
+                lovType: useLov
+            }
+            enableUsersTo {
+                sort: false
+            }
+        )
+
+        column ETIQUETA (
+            type: textField
+            heading {
+                heading: Etiqueta
+            }
+            layout {
+                sequence: 50
+            }
+            validation {
+                maxLength: 1020
+            }
+            source {
+                databaseColumn: ETIQUETA
+                dataType: varchar2
+            }
+            columnFilter {
+                performanceImpactingOperators: [
+                    contains
+                    startsWith
+                    caseInsensitive
+                    regexp
+                ]
+                lovType: none
+            }
+            enableUsersTo {
+                sort: false
+            }
+        )
+
+        column ID (
+            type: hidden
+            layout {
+                sequence: 30
+            }
+            source {
+                databaseColumn: ID
+                dataType: number
+                queryOnly: true
+                primaryKey: true
+            }
+            exportPrinting {
+                includeInExportPrint: false
+            }
+        )
+
+        column MAC_ADDRESS (
+            type: textField
+            heading {
+                heading: Mac Address
+            }
+            layout {
+                sequence: 90
+            }
+            validation {
+                maxLength: 100
+            }
+            source {
+                databaseColumn: MAC_ADDRESS
+                dataType: varchar2
+            }
+            columnFilter {
+                performanceImpactingOperators: [
+                    contains
+                    startsWith
+                    caseInsensitive
+                    regexp
+                ]
+            }
+        )
+
+        column NOMBRE (
+            type: textField
+            heading {
+                heading: Nombre
+            }
+            layout {
+                sequence: 40
+            }
+            validation {
+                valueRequired: true
+                maxLength: 1020
+            }
+            source {
+                databaseColumn: NOMBRE
+                dataType: varchar2
+            }
+            columnFilter {
+                performanceImpactingOperators: [
+                    contains
+                    startsWith
+                    caseInsensitive
+                    regexp
+                ]
+                lovType: none
+            }
+            enableUsersTo {
+                sort: false
+            }
+        )
+
+        column RX_EN_DBM (
+            type: textField
+            heading {
+                heading: Rx En Dbm
+            }
+            layout {
+                sequence: 80
+            }
+            validation {
+                maxLength: 40
+            }
+            source {
+                databaseColumn: RX_EN_DBM
+                dataType: varchar2
+            }
+            columnFilter {
+                performanceImpactingOperators: [
+                    contains
+                    startsWith
+                    caseInsensitive
+                    regexp
+                ]
+            }
+        )
+
+        column TX_EN_DBM (
+            type: textField
+            heading {
+                heading: Tx En Dbm
+            }
+            layout {
+                sequence: 70
+            }
+            validation {
+                maxLength: 40
+            }
+            source {
+                databaseColumn: TX_EN_DBM
+                dataType: varchar2
+            }
+            columnFilter {
+                performanceImpactingOperators: [
+                    contains
+                    startsWith
+                    caseInsensitive
+                    regexp
+                ]
+            }
+        )
+
+        column VELOCIDAD_MBPS (
+            type: numberField
+            heading {
+                heading: Velocidad Mbps
+                alignment: end
+            }
+            layout {
+                sequence: 100
+                columnAlignment: end
+            }
+            source {
+                databaseColumn: VELOCIDAD_MBPS
+                dataType: number
+            }
+            columnFilter {
+                lovType: none
+            }
+        )
+
+    )
+
+    region selector (
+        name: Selector
+        type: regionDisplaySelector
+        layout {
+            sequence: 30
+            slot: contentBody
+        }
+        appearance {
+            template: @/standard
+            templateOptions: [
+                #DEFAULT#
+                t-Region--removeHeader js-removeLandmark
+                t-Region--scrollBody
+            ]
+        }
+        settings {
+            includeShowAll: false
+        }
+    )
+
+    region servicios (
+        name: Servicios
+        type: interactiveGrid
+        source {
+            location: localDatabase
+            tableName: SGT_EQUIPOS_SERVICIO
+            whereClause: EQUIPO_A_ID=:P465_EQUIPO_ID
+        }
+        layout {
+            sequence: 50
+            parentRegion: @selector
+            slot: subRegions
+        }
+        appearance {
+            template: @/interactive-report
+            templateOptions: [
+                #DEFAULT#
+                t-IRR-region--hideHeader js-addHiddenHeadingRoleDesc
+            ]
+        }
+        advanced {
+            regionDisplaySelector: true
+        }
+        serverSideCondition {
+            type: rowsReturned
+            sqlQuery:
+                ```sql
+                select * from 
+                
+                SGT_EQUIPOS_servicio
+                where
+                EQUIPO_A_ID=:P465_EQUIPO_ID
+                ```
+        }
+        edit {
+            enabled: true
+            allowedOperations: update
+        }
+        toolbar {
+            controls: saveButton
+        }
+        enableUsersTo {
+            flashback: false
+            defineChartView: false
+            download: false
+        }
+        advanced {
+            savedReportMappingIdentifier: 21310353665884322
+        }
+
+        savedReport 213318 (
+            visibility: primary
+            view {
+                default: grid
+            }
+            singleRowView {
+                displayedColumns: true
+            }
+
+            displayColumn (
+                column: @ID
+                layout {
+                    sequence: 1
+                }
+            )
+
+            displayColumn (
+                column: @SERVICIO_ID
+                layout {
+                    sequence: 2
+                }
+            )
+
+            displayColumn (
+                column: @INTERFAZ_A_ID
+                layout {
+                    sequence: 3
+                }
+            )
+
+            displayColumn (
+                column: @APEX$ROW_ACTION
+                layout {
+                    sequence: 0
+                }
+            )
+
+        )
+
+        column APEX$ROW_ACTION (
+            type: actionsMenu
+            layout {
+                sequence: 20
+            }
+        )
+
+        column APEX$ROW_SELECTOR (
+            type: rowSelector
+            layout {
+                sequence: 10
+            }
+        )
+
+        column ID (
+            type: hidden
+            layout {
+                sequence: 30
+            }
+            source {
+                databaseColumn: ID
+                dataType: number
+                primaryKey: true
+            }
+            exportPrinting {
+                includeInExportPrint: false
+            }
+        )
+
+        column INTERFAZ_A_ID (
+            type: popupLov
+            heading {
+                heading: Interfaz
+            }
+            lov {
+                type: sqlQuery
+                sqlQuery: SELECT NOMBRE ||' : '|| ETIQUETA, ID FROM SGT_INTERFACES WHERE EQUIPO_ID = :P465_EQUIPO_ID
+                nullDisplayValue: Seleccione Una
+            }
+            layout {
+                sequence: 70
+            }
+            source {
+                databaseColumn: INTERFAZ_A_ID
+                dataType: number
+            }
+            columnFilter {
+                performanceImpactingOperators: [
+                    contains
+                    startsWith
+                    caseInsensitive
+                    regexp
+                ]
+                lovType: useLov
+            }
+        )
+
+        column SERVICIO_ID (
+            type: displayOnly
+            heading {
+                heading: Servicio
+            }
+            settings {
+                basedOn: lov
+            }
+            lov {
+                type: sharedComponent
+                lov: @servicios-nombre
+            }
+            layout {
+                sequence: 40
+            }
+            source {
+                databaseColumn: SERVICIO_ID
+                dataType: number
+                queryOnly: true
+            }
+            columnFilter {
+                performanceImpactingOperators: [
+                    contains
+                    startsWith
+                    caseInsensitive
+                    regexp
+                ]
+                lovType: useLov
+            }
+        )
+
+    )
+
+    pageItem P465_EQUIPO_ID (
+        type: displayOnly
+        label {
+            label: Equipo (Full name):
+            alignment: left
+        }
+        settings {
+            basedOn: lov
+        }
+        lov {
+            type: sharedComponent
+            lov: @equipos-nombre-compuesto
+        }
+        layout {
+            sequence: 10
+            slot: contentBody
+            alignment: left
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+        }
+    )
+
+    process enlaces-wan-save-interactive-grid-data (
+        name: Enlaces WAN - Save Interactive Grid Data
+        type: interactiveGridAutoRowProcessing
+        editableRegion: @enlaces-wan
+        execution {
+            sequence: 10
+        }
+        advanced {
+            executionMappingIdentifier: 21310281176884321
+        }
+    )
+
+    process interfaces-save-interactive-grid-data (
+        name: INTERFACES - Save Interactive Grid Data
+        type: interactiveGridAutoRowProcessing
+        editableRegion: @interfaces
+        execution {
+            sequence: 30
+        }
+        advanced {
+            executionMappingIdentifier: 24829134921840816
+        }
+    )
+
+    process servicios-save-interactive-grid-data (
+        name: Servicios - Save Interactive Grid Data
+        type: interactiveGridAutoRowProcessing
+        editableRegion: @servicios
+        execution {
+            sequence: 20
+        }
+        advanced {
+            executionMappingIdentifier: 21311905018884338
+        }
+    )
+
+)
+

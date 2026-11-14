@@ -1,0 +1,1139 @@
+page 13 (
+    name: SGT_LST_EQUIPOS
+    alias: SGT-LST-EQUIPOS
+    title: Lista de equipos
+    appearance {
+        pageTemplate: @/standard
+        templateOptions: #DEFAULT#
+    }
+    navigation {
+        cursorFocus: doNotFocusCursor
+    }
+    security {
+        pageAccessProtection: argumentsMustHaveChecksum
+        formAutoComplete: false
+    }
+
+    region breadcrumb (
+        name: Breadcrumb
+        type: breadcrumb
+        source {
+            breadcrumb: @breadcrumb
+        }
+        layout {
+            sequence: 10
+            slot: breadcrumbBar
+        }
+        appearance {
+            template: @/title-bar
+            templateOptions: [
+                #DEFAULT#
+                t-BreadcrumbRegion--useBreadcrumbTitle
+            ]
+        }
+        componentAppearance {
+            breadcrumbTemplate: @/breadcrumb
+            templateOptions: #DEFAULT#
+        }
+    )
+
+    region sgt-lst-equipos (
+        name: SGT_LST_EQUIPOS
+        type: interactiveReport
+        source {
+            location: localDatabase
+            type: sqlQuery
+            sqlQuery:
+                ```sql
+                select e.ID,
+                
+                       --2026-06-11: dmf: agregar campos faltantes para el IR
+                       /*
+                       --E.SITIO_ID,
+                       z.id ZONA_ID, 
+                       s.id SITIO_ID, 
+                       s.nombre SITIO, 
+                       s.siglas SITIOS_SIGLAS,
+                       sa.id SALA_ID, 
+                       sa.nombre SALA, 
+                       sa.siglas SALA_SIGLAS,
+                       ra.nombre RACK,
+                       E.OBSERVACIONES,
+                        --'<li><a class="btn-acciones" href="#" data-items="P470_ENTIDAD,P470_PK_ID" data-values="4,' || e.ID ||'">Imágenes</a></li>' || 
+                        --'<li><a href='||APEX_UTIL.PREPARE_URL('f?p=&APP_ID.:465:&APP_SESSION.::::P465_EQUIPO_ID:'|| e.ID )||'>Dependencias</a></li>' || 
+                        --'<li><a href='||APEX_UTIL.PREPARE_URL('f?p=&APP_ID.:7:&APP_SESSION.::::P7_ID:'|| e.ID )||'>Historial Audit.</a></li>' || 
+                        -- '<li><a href='||APEX_UTIL.PREPARE_URL('f?p=&APP_ID.:14:&APP_SESSION.::::P14_ID:'|| e.ID )||'>Auditoria</a></li>' ||   
+                
+                       */ 
+                
+                       z.nombre ZONA, 
+                       DEPTO.NOMBRE DEPARTAMENTO,
+                       ciudad.nombre CIUDAD,
+                
+                       '<ul class="ul-acciones">' ||
+                        '<li><a href='||APEX_PAGE.GET_URL( p_page => 66, p_items => 'P66_ID', p_values => e.ID )||'>Editar</a></li>' || 
+                        '<li><a href='||APEX_PAGE.GET_URL(p_page => 470, p_items => 'P470_ENTIDAD,P470_PK_ID', p_values => '4,' || e.ID , p_clear_cache => 470) ||'>Imágenes</a></li>' || 
+                        '<li><a href='||APEX_PAGE.GET_URL(p_page => 465, p_items => 'P465_EQUIPO_ID' ,p_values => e.ID )||'>Dependencias</a></li>' || 
+                        '<li><a href='||APEX_PAGE.GET_URL(p_page => 7, p_items => 'P7_ID' ,p_values => e.ID )||'>Historial Audit.</a></li>' || 
+                       '</ul>'
+                       as ACCIONES,
+                       E.UNIDAD_ENCARGADA,
+                       E.RACK_ID RACK_NOMBRE,
+                       E.RACK_ID,
+                       E.U,
+                       E.TIPO_RED,
+                       E.NOMBRE,
+                       E.ID as FULL_NAME,
+                       E.TIPO_EQUIPO_ID,
+                       te.grupo_equipo as SUB_TIPO, 
+                       E.MARCA,
+                       E.MODELO,
+                       E.ESTADO,
+                       E.NI_ANDE,
+                       E.SERIAL_NUMBER,
+                       E.VERSION_HARDWARE,
+                       E.VERSION_SOFTWARE,
+                       E.VERSION_PATCH,
+                       E.IP_GESTION,
+                       E.ALIMENTACION1_ID,
+                       E.ALIMENTACION2_ID,
+                       E.PROYECTO_ID,
+                       E.FECHA_IMPLE,
+                       E.ALTURA_U,
+                       E.POSICION,
+                       nvl(C.COMENTARIO,'Ver') AS COMENTARIOS,
+                       E.CREADO_POR,
+                       E.CREADO_EL,
+                       E.ACTUALIZADO_POR,
+                       E.ACTUALIZADO_EL
+                  from SGT_EQUIPOS e
+                  
+                  left JOIN sgt_racks  ra     on ra.id = e.rack_id
+                  left JOIN SGT_SALAS  sa     on sa.id = ra.sala_id
+                  left join sgt_sitios s      on s.id = sa.sitio_id
+                  left join sgt_zonas  z      on z.id = s.zona_id
+                
+                  left join sgt_ciudad ciudad on ciudad.id = s.ciudad_id
+                  left join SGT_DEPTO  depto  on depto.id = ciudad.depto_id  
+                  
+                  JOIN SGT_TIPO_EQUIPOS te on te.id = e.tipo_equipo_id
+                
+                
+                --Agregar comentarios
+                LEFT JOIN (
+                    SELECT PK_ID, 
+                           COMENTARIO, 
+                           ROW_NUMBER() OVER (PARTITION BY PK_ID ORDER BY CREADO_EL DESC) AS rn
+                    FROM SGT_COMENTARIOS
+                    WHERE ENTIDAD = 4
+                ) C ON C.PK_ID = E.ID AND C.rn = 1
+                
+                /*OUTER APPLY (
+                    SELECT COMENTARIO
+                    FROM SGT_COMENTARIOS C
+                    WHERE C.ENTIDAD = 4
+                      AND C.PK_ID = E.ID
+                    ORDER BY C.CREADO_EL DESC
+                    FETCH FIRST 1 ROW ONLY
+                ) C*/  
+                 -- order by e.actualizado_el DESC
+                ```
+        }
+        layout {
+            sequence: 10
+            slot: body
+        }
+        appearance {
+            template: @/interactive-report
+            templateOptions: #DEFAULT#
+        }
+        headerAndFooter {
+            footerText: Datos obtenidos en: #TIMING# seg
+        }
+        pagination {
+            type: rowRangesXToYOfZ
+            displayPosition: topRight
+        }
+        performance {
+            maxRowsToProcess: 1000000
+        }
+        advanced {
+            savedReportMappingIdentifier: 87976622166233604112
+        }
+
+        column ACCIONES (
+            type: plainText
+            heading {
+                heading: Acciones
+                alignment: center
+            }
+            layout {
+                sequence: 310
+            }
+            source {
+                dataType: STRING
+            }
+            advanced {
+                endUserAlias: AF
+            }
+            enableUsersTo {
+                hide: false
+                sort: false
+                filter: false
+                highlight: false
+                controlBreak: false
+                aggregate: false
+                compute: false
+                chart: false
+                groupBy: false
+                pivot: false
+            }
+            security {
+                escapeSpecialChars: false
+            }
+        )
+
+        column ACTUALIZADO_EL (
+            type: plainText
+            heading {
+                heading: Actualizado El
+                alignment: center
+            }
+            layout {
+                sequence: 290
+                columnAlignment: center
+            }
+            source {
+                dataType: DATE
+            }
+            advanced {
+                endUserAlias: AC
+            }
+        )
+
+        column ACTUALIZADO_POR (
+            type: plainText
+            heading {
+                heading: Actualizado Por
+                alignment: center
+            }
+            layout {
+                sequence: 280
+                columnAlignment: center
+            }
+            source {
+                dataType: STRING
+            }
+            advanced {
+                endUserAlias: AB
+            }
+        )
+
+        column ALIMENTACION1_ID (
+            type: plainText
+            heading {
+                heading: Alimentación 1
+                alignment: center
+            }
+            layout {
+                sequence: 190
+                columnAlignment: center
+            }
+            source {
+                dataType: STRING
+            }
+            advanced {
+                endUserAlias: S
+            }
+        )
+
+        column ALIMENTACION2_ID (
+            type: plainText
+            heading {
+                heading: Alimentación 2
+                alignment: center
+            }
+            layout {
+                sequence: 200
+                columnAlignment: center
+            }
+            source {
+                dataType: STRING
+            }
+            advanced {
+                endUserAlias: T
+            }
+        )
+
+        column ALTURA_U (
+            type: plainText
+            heading {
+                heading: Altura U
+                alignment: center
+            }
+            layout {
+                sequence: 230
+                columnAlignment: center
+            }
+            source {
+                dataType: NUMBER
+            }
+            advanced {
+                endUserAlias: W
+            }
+        )
+
+        column CIUDAD (
+            type: plainText
+            heading {
+                heading: Ciudad
+                alignment: center
+            }
+            layout {
+                sequence: 430
+                columnAlignment: center
+            }
+            source {
+                dataType: STRING
+            }
+            advanced {
+                endUserAlias: AT
+            }
+        )
+
+        column COMENTARIOS (
+            type: link
+            heading {
+                heading: Comentarios
+                alignment: center
+            }
+            layout {
+                sequence: 330
+                columnAlignment: center
+            }
+            link {
+                target: {
+                    page: 32
+                    items: {
+                        P32_ENTIDAD: 4
+                        P32_PK_ID: #ID#
+                    }
+                }
+                linkText: #COMENTARIOS#
+            }
+            source {
+                dataType: STRING
+            }
+            advanced {
+                endUserAlias: AJ
+            }
+        )
+
+        column CREADO_EL (
+            type: plainText
+            heading {
+                heading: Creado El
+                alignment: center
+            }
+            layout {
+                sequence: 270
+                columnAlignment: center
+            }
+            source {
+                dataType: DATE
+            }
+            advanced {
+                endUserAlias: AA
+            }
+        )
+
+        column CREADO_POR (
+            type: plainText
+            heading {
+                heading: Creado Por
+                alignment: center
+            }
+            layout {
+                sequence: 260
+                columnAlignment: center
+            }
+            source {
+                dataType: STRING
+            }
+            advanced {
+                endUserAlias: Z
+            }
+        )
+
+        column DEPARTAMENTO (
+            type: plainText
+            heading {
+                heading: Departamento
+                alignment: center
+            }
+            layout {
+                sequence: 420
+                columnAlignment: center
+            }
+            source {
+                dataType: STRING
+            }
+            advanced {
+                endUserAlias: AS
+            }
+        )
+
+        column ESTADO (
+            type: plainText
+            heading {
+                heading: Estado
+                alignment: center
+            }
+            layout {
+                sequence: 110
+                columnAlignment: center
+            }
+            source {
+                dataType: STRING
+            }
+            advanced {
+                endUserAlias: K
+            }
+        )
+
+        column FECHA_IMPLE (
+            type: plainText
+            heading {
+                heading: Fecha de Implementación
+                alignment: center
+            }
+            layout {
+                sequence: 220
+                columnAlignment: center
+            }
+            source {
+                dataType: DATE
+            }
+            advanced {
+                endUserAlias: V
+            }
+        )
+
+        column FULL_NAME (
+            type: plainTextBasedOnLov
+            heading {
+                heading: Full Name
+                alignment: center
+            }
+            lov {
+                lov: @equipos-nombre-compuesto
+            }
+            layout {
+                sequence: 300
+                columnAlignment: center
+            }
+            source {
+                dataType: NUMBER
+            }
+            advanced {
+                endUserAlias: AD
+            }
+        )
+
+        column ID (
+            type: hidden
+            heading {
+                heading: Id
+            }
+            layout {
+                sequence: 10
+            }
+            source {
+                primaryKey: true
+                dataType: NUMBER
+            }
+            advanced {
+                endUserAlias: A
+            }
+        )
+
+        column IP_GESTION (
+            type: plainText
+            heading {
+                heading: IP Gestión
+                alignment: center
+            }
+            layout {
+                sequence: 180
+                columnAlignment: center
+            }
+            source {
+                dataType: STRING
+            }
+            advanced {
+                endUserAlias: R
+            }
+        )
+
+        column MARCA (
+            type: plainText
+            heading {
+                heading: Marca
+                alignment: center
+            }
+            layout {
+                sequence: 90
+                columnAlignment: center
+            }
+            source {
+                dataType: STRING
+            }
+            advanced {
+                endUserAlias: I
+            }
+        )
+
+        column MODELO (
+            type: plainText
+            heading {
+                heading: Modelo
+                alignment: center
+            }
+            layout {
+                sequence: 100
+                columnAlignment: center
+            }
+            source {
+                dataType: STRING
+            }
+            advanced {
+                endUserAlias: J
+            }
+        )
+
+        column NI_ANDE (
+            type: plainText
+            heading {
+                heading: NI ANDE
+                alignment: center
+            }
+            layout {
+                sequence: 130
+                columnAlignment: center
+            }
+            source {
+                dataType: STRING
+            }
+            advanced {
+                endUserAlias: M
+            }
+        )
+
+        column NOMBRE (
+            type: plainText
+            heading {
+                heading: Nombre
+                alignment: center
+            }
+            layout {
+                sequence: 70
+                columnAlignment: center
+            }
+            source {
+                dataType: STRING
+            }
+            advanced {
+                endUserAlias: F
+            }
+        )
+
+        column POSICION (
+            type: plainText
+            heading {
+                heading: Posición
+                alignment: center
+            }
+            layout {
+                sequence: 240
+                columnAlignment: center
+            }
+            source {
+                dataType: STRING
+            }
+            advanced {
+                endUserAlias: X
+            }
+        )
+
+        column PROYECTO_ID (
+            type: plainText
+            heading {
+                heading: Proyecto de Implementación
+                alignment: center
+            }
+            layout {
+                sequence: 210
+            }
+            source {
+                dataType: STRING
+            }
+            advanced {
+                endUserAlias: U
+            }
+        )
+
+        column RACK_ID (
+            type: hidden
+            heading {
+                heading: Rack
+            }
+            layout {
+                sequence: 40
+            }
+            source {
+                dataType: NUMBER
+            }
+            advanced {
+                endUserAlias: C
+            }
+        )
+
+        column RACK_NOMBRE (
+            type: plainTextBasedOnLov
+            heading {
+                heading: Rack
+                alignment: center
+            }
+            lov {
+                lov: @racks-nombre-compuesto
+            }
+            layout {
+                sequence: 440
+                columnAlignment: center
+            }
+            link {
+                target: {
+                    page: 37
+                    items: {
+                        P37_RACK_ID: #RACK_ID#
+                        P37_RACK_NOMBRE: #RACK_NOMBRE#
+                    }
+                    clearCache: 37
+                }
+                linkText: #RACK_NOMBRE#
+            }
+            source {
+                dataType: NUMBER
+            }
+            advanced {
+                endUserAlias: AU
+            }
+        )
+
+        column SERIAL_NUMBER (
+            type: plainText
+            heading {
+                heading: Serial Number
+                alignment: center
+            }
+            layout {
+                sequence: 140
+                columnAlignment: center
+            }
+            source {
+                dataType: STRING
+            }
+            advanced {
+                endUserAlias: N
+            }
+        )
+
+        column SUB_TIPO (
+            type: plainText
+            heading {
+                heading: Sub Tipo
+                alignment: center
+            }
+            layout {
+                sequence: 320
+                columnAlignment: center
+            }
+            source {
+                dataType: STRING
+            }
+            advanced {
+                endUserAlias: AG
+            }
+        )
+
+        column TIPO_EQUIPO_ID (
+            type: plainTextBasedOnLov
+            heading {
+                heading: Tipo de Equipo
+                alignment: center
+            }
+            lov {
+                lov: @tipo-equipos-nombre
+            }
+            layout {
+                sequence: 80
+                columnAlignment: center
+            }
+            source {
+                dataType: NUMBER
+            }
+            columnFilter {
+                type: defaultBasedOnColumnType
+            }
+            advanced {
+                endUserAlias: G
+            }
+        )
+
+        column TIPO_RED (
+            type: plainTextBasedOnLov
+            heading {
+                heading: Tipo de Red
+                alignment: center
+            }
+            lov {
+                lov: @tipo-red
+            }
+            layout {
+                sequence: 60
+                columnAlignment: center
+            }
+            source {
+                dataType: STRING
+            }
+            columnFilter {
+                type: defaultBasedOnColumnType
+            }
+            advanced {
+                endUserAlias: E
+            }
+        )
+
+        column U (
+            type: plainText
+            heading {
+                heading: U de inicio
+                alignment: center
+            }
+            layout {
+                sequence: 50
+                columnAlignment: center
+            }
+            source {
+                dataType: NUMBER
+            }
+            advanced {
+                endUserAlias: D
+            }
+        )
+
+        column UNIDAD_ENCARGADA (
+            type: plainText
+            heading {
+                heading: Unidad Encargada
+                alignment: center
+            }
+            layout {
+                sequence: 30
+                columnAlignment: center
+            }
+            source {
+                dataType: STRING
+            }
+            advanced {
+                endUserAlias: B
+            }
+        )
+
+        column VERSION_HARDWARE (
+            type: plainText
+            heading {
+                heading: Hardware Version
+                alignment: center
+            }
+            layout {
+                sequence: 150
+                columnAlignment: center
+            }
+            source {
+                dataType: STRING
+            }
+            advanced {
+                endUserAlias: O
+            }
+        )
+
+        column VERSION_PATCH (
+            type: plainText
+            heading {
+                heading: Patch Version
+                alignment: center
+            }
+            layout {
+                sequence: 170
+                columnAlignment: center
+            }
+            source {
+                dataType: STRING
+            }
+            advanced {
+                endUserAlias: Q
+            }
+        )
+
+        column VERSION_SOFTWARE (
+            type: plainText
+            heading {
+                heading: Software Version
+                alignment: center
+            }
+            layout {
+                sequence: 160
+                columnAlignment: center
+            }
+            source {
+                dataType: STRING
+            }
+            advanced {
+                endUserAlias: P
+            }
+        )
+
+        column ZONA (
+            type: plainText
+            heading {
+                heading: Zona
+                alignment: center
+            }
+            layout {
+                sequence: 350
+                columnAlignment: center
+            }
+            source {
+                dataType: STRING
+            }
+            advanced {
+                endUserAlias: AL
+            }
+        )
+
+        page {
+            size: a4
+            units: millimeters
+            width: 297
+            height: 210
+            borderWidth: 0.5
+            borderColor: #666666
+        }
+
+        savedReport 879894393 (
+            visibility: primaryDefault
+            view {
+                rowsPerPage: 50
+            }
+
+            displayColumn ACCIONES (
+                sequence: 1
+            )
+
+            displayColumn ACTUALIZADO_EL (
+                sequence: 11
+            )
+
+            displayColumn CIUDAD (
+                sequence: 3
+            )
+
+            displayColumn COMENTARIOS (
+                sequence: 5
+            )
+
+            displayColumn DEPARTAMENTO (
+                sequence: 4
+            )
+
+            displayColumn MARCA (
+                sequence: 10
+            )
+
+            displayColumn NOMBRE (
+                sequence: 6
+            )
+
+            displayColumn TIPO_EQUIPO_ID (
+                sequence: 7
+            )
+
+            displayColumn TIPO_RED (
+                sequence: 8
+            )
+
+            displayColumn UNIDAD_ENCARGADA (
+                sequence: 9
+            )
+
+            displayColumn ZONA (
+                sequence: 2
+            )
+
+            sort (
+                column: ACTUALIZADO_EL
+                sort {
+                    direction: desc
+                    sequence: 1
+                }
+            )
+
+        )
+
+    )
+
+    button create (
+        buttonName: CREATE
+        label: &APP_TEXT$BTN_CREAR!RAW.
+        layout {
+            sequence: 20
+            region: @sgt-lst-equipos
+            slot: rightOfInteractiveReportSearchBar
+        }
+        appearance {
+            buttonTemplate: @/text
+            templateOptions: #DEFAULT#
+        }
+        behavior {
+            action: redirectThisApp
+            target: {
+                page: 14
+                items: {
+                    P14_TITULO: Agregar equipo
+                }
+            }
+            warnOnUnsavedChanges: doNotCheck
+        }
+        security {
+            authorizationScheme: @implementador-rights
+        }
+    )
+
+    button grilla (
+        buttonName: GRILLA
+        label: &APP_TEXT$BTN_GRILLA_EDITABLE!RAW.
+        layout {
+            sequence: 10
+            region: @sgt-lst-equipos
+            slot: rightOfInteractiveReportSearchBar
+        }
+        appearance {
+            buttonTemplate: @/text
+            templateOptions: #DEFAULT#
+        }
+        behavior {
+            action: redirectThisApp
+            target: {
+                page: 44
+            }
+            warnOnUnsavedChanges: doNotCheck
+        }
+        security {
+            authorizationScheme: @implementador-rights
+        }
+    )
+
+    button importar (
+        buttonName: IMPORTAR
+        label: &APP_TEXT$BTN_IMPORTAR_XLS!RAW.
+        layout {
+            sequence: 30
+            region: @sgt-lst-equipos
+            slot: rightOfInteractiveReportSearchBar
+        }
+        appearance {
+            buttonTemplate: @/text
+            hot: true
+            templateOptions: #DEFAULT#
+        }
+        behavior {
+            action: redirectThisApp
+            target: {
+                page: 6
+            }
+            warnOnUnsavedChanges: doNotCheck
+        }
+        security {
+            authorizationScheme: @implementador-rights
+        }
+    )
+
+    button new (
+        buttonName: New
+        label: Racks
+        layout {
+            sequence: 50
+            region: @sgt-lst-equipos
+            slot: rightOfInteractiveReportSearchBar
+        }
+        appearance {
+            buttonTemplate: @/text
+            templateOptions: #DEFAULT#
+        }
+        behavior {
+            action: redirectThisApp
+            target: {
+                page: 37
+            }
+            warnOnUnsavedChanges: doNotCheck
+        }
+        config {
+            buildOption: @commented-out
+        }
+    )
+
+    dynamicAction click-acciones (
+        name: CLICK_ACCIONES
+        execution {
+            sequence: 20
+            eventScope: dynamic
+            staticContainer: .a-IRR-table
+        }
+        when {
+            event: click
+            selectionType: jQuerySelector
+            jquerySelector: .btn-acciones
+        }
+
+        action get-url (
+            name: GET_URL
+            action: executeServerSideCode
+            settings {
+                plsqlCode:
+                    ```plsql
+                    DECLARE
+                    
+                    R_URL varchar2(4000);
+                    BEGIN
+                    
+                    SELECT APEX_PAGE.GET_URL (
+                                p_page   => 1,
+                                p_items  => :P13_ITEMS,
+                                p_values => :P13_VALUES ) into R_URL         
+                         FROM DUAL;
+                        
+                     :P13_RESULT := R_URL;
+                    
+                    
+                    END;
+                    ```
+            }
+            execution {
+                sequence: 40
+                fireOnInit: false
+            }
+        )
+
+        action native-javascript-code (
+            action: executeJsCode
+            settings {
+                jsCode: console.log(this.triggeringElement.dataset)
+            }
+            execution {
+                sequence: 10
+                fireOnInit: false
+            }
+        )
+
+        action set-items (
+            name: SET_ITEMS
+            action: setValue
+            settings {
+                type: jsExpression
+                jsExpression: this.triggeringElement.dataset.items
+            }
+            affectedElements {
+                selectionType: items
+                items: P13_ITEMS
+            }
+            execution {
+                sequence: 20
+            }
+        )
+
+        action set-values (
+            name: SET_VALUES
+            action: setValue
+            settings {
+                type: jsExpression
+                jsExpression: this.triggeringElement.dataset.values
+            }
+            affectedElements {
+                selectionType: items
+                items: P13_VALUES
+            }
+            execution {
+                sequence: 30
+            }
+        )
+
+    )
+
+    dynamicAction edit-report-dialog-closed (
+        name: Edit Report - Dialog Closed
+        execution {
+            sequence: 10
+        }
+        when {
+            event: apexafterclosedialog
+            selectionType: region
+            region: @sgt-lst-equipos
+        }
+
+        action native-refresh (
+            action: refresh
+            affectedElements {
+                selectionType: region
+                region: @sgt-lst-equipos
+            }
+            execution {
+                sequence: 10
+                fireOnInit: false
+            }
+        )
+
+    )
+
+    process new (
+        name: New
+        type: executeCode
+        source {
+            plsqlCode:
+                ```plsql
+                DECLARE
+                
+                R_URL varchar2(4000);
+                BEGIN
+                
+                SELECT APEX_PAGE.GET_URL (
+                            p_page   => 1,
+                            p_items  => :P13_ITEMS,
+                            p_values => :P13_VALUES ) into R_URL         
+                     FROM DUAL;
+                    
+                
+                END;
+                ```
+        }
+        execution {
+            sequence: 10
+            point: ajaxCallback
+        }
+        advanced {
+            executionMappingIdentifier: 23436758616083246
+        }
+    )
+
+)
+

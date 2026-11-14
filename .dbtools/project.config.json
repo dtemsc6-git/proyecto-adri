@@ -8,7 +8,7 @@
   "schemas" : [ "WKSP_DTESC" ],
   "lastReleaseVersion" : "",
   "apex" : {
-    "apexlang" : false
+    "apexlang" : true
   },
   "dml" : false,
   "export" : {

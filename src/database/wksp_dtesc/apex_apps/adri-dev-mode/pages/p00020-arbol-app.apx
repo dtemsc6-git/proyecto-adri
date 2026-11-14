@@ -1,0 +1,291 @@
+page 20 (
+    name: Arbol App
+    alias: ARBOL-APP
+    title: Árbol App
+    appearance {
+        pageTemplate: @/standard
+        templateOptions: #DEFAULT#
+    }
+    navigation {
+        cursorFocus: doNotFocusCursor
+    }
+    javaScript {
+        functionAndGlobalVariableDeclaration:
+            ```javascript-browser
+            (function ($) {
+            
+                var currentNode 
+                const menuItems = [
+                    {
+                        type: "action",
+                        label: "Nuevo",
+                        action: function () {
+                            apex.message.showPageSuccess("Nuevo");
+                        }
+                    },
+                    {
+                        type: "action",
+                        label: "Mudar",
+                        icon: "fa fa-maps-marker",
+                        action: function () {
+                            apex.message.showPageSuccess("Mudar");
+                        }
+                    },
+                    {
+                        type: "action",
+                        label: "Editar",
+                        action: function () {
+            
+                           
+                            console.log(currentNode);
+                            apex.event.trigger(
+                                document,
+                                "tree-edit",
+                                {
+                                    nodeId: 12
+                                }
+                            );
+                            apex.message.showPageSuccess("Editar");
+                        }
+                    },
+                    {
+                        type: "action",
+                        label: "Eliminar",
+                        action: function () {
+                            apex.message.confirm("¿Eliminar nodo?");
+                        }
+                    }
+                ];
+            
+                $("#ARBOL_APP")
+                    .on("contextmenu", ".a-TreeView-content", function (e) {
+                        
+            
+                        const node$ = $(this).closest("li");
+                        console.log("jQuery Arbol:", $("#ARBOL_APP"))
+                        console.log("Widget Arbol:",$("#ARBOL_APP").treeView("instance"))
+                        //currentNode =  $("#ARBOL_APP").treeView("instance").getNode(node$)
+                        
+                        e.preventDefault();
+            
+                        $("#treeMenu").menu({
+                            items: menuItems
+                        }).menu("open", e.pageX, e.pageY);
+            
+            
+                    });
+            
+            })(apex.jQuery);
+            ```
+    }
+    security {
+        pageAccessProtection: argumentsMustHaveChecksum
+        formAutoComplete: false
+    }
+
+    region vista-árbol (
+        name: Vista árbol
+        type: tree
+        source {
+            location: localDatabase
+            type: sqlQuery
+            sqlQuery:
+                ```sql
+                with data as (
+                /*
+                select 'Z' as link_type, to_char(parent_id) as PARENT_ID, to_char(sgt_zonas.id) as ID , NOMBRE AS name, null as sub_id from sgt_zonas 
+                union all
+                select 'S' as link_type, to_char(zona_id) as PARENT_ID, to_char(b.zona_id) ||'-'||to_char(b.id) as ID,  nombre as name, b.id as sub_id from sgt_sitios b
+                union all
+                select ('SC') as link_type, to_char(c.zona_id) || '-' || to_char(sitio_id) as PARENT_ID, to_char(zona_id) ||'-'||to_char(c.sitio_id) ||'-'||to_char(c.id) as ID, c.nombre as name, c.id as sub_id from sgt_salas c
+                union all
+                select ('R') as link_type,to_char(zona_id)||'-'||to_char(sitio_id)||'-'||to_char(sala_id) as PARENT_ID, to_char(zona_id) || '-' || to_char(sitio_id) || '-'||to_char(sala_id)||'-'||to_char(d.id) as ID, d.nombre as name, d.id as sub_id from sgt_racks d  
+                */
+                select 'Z' as link_type, to_char(parent_id) as PARENT_ID, to_char(sgt_zonas.id) as ID , NOMBRE AS name, id as sub_id , null AS icon from sgt_zonas 
+                union all
+                select 'S' as link_type, to_char(zona_id) as PARENT_ID, 'S-'||to_char(b.id) as ID,  nombre as name, b.id as sub_id , 'fa fa-map-marker' AS icon from sgt_sitios b
+                union all
+                select ('SC') as link_type, 'S-'||to_char(sitio_id) as PARENT_ID, 'SC-'||to_char(c.id) as ID, c.siglas as name, c.id as sub_id, 'fa fa-city' AS icon from sgt_salas c
+                union all
+                select ('R') as link_type,'SC-'||to_char(sala_id) as PARENT_ID, 'R-'||to_char(d.id) as ID, d.nombre as name, d.id as sub_id , 'fa fa fa-badge-list' AS icon from sgt_racks d  
+                union all 
+                select ('E') as link_type,  'R-'||to_char(rack_id) as parent_id , 'E-'||to_char(e.id) as ID, e.nombre as name, e.id as sub_id, 'fa fa-hardware' AS icon from sgt_equipos e
+                /*
+                union all
+                select ('E') as link_type,
+                to_char(zona_id)||'-'||to_char(sitio_id)||'-'||to_char(sala_id)||'-'||to_char(rack_id) as PARENT_ID, 
+                to_char(zona_id)||'-'||to_char(sitio_id)||'-'||to_char(sala_id)||'-'||to_char(rack_id)||'-'||to_char(E.ID) as ID,
+                E.NOMBRE AS name,
+                e.id as sub_id
+                from sgt_equipos E  
+                */
+                )
+                select case when connect_by_isleaf = 1 then 0
+                            when level = 1             then 1
+                            else                           -1
+                       end as status, 
+                       level,
+                       name as title, 
+                       icon, 
+                       "ID" as value, 
+                       null as tooltip, 
+                       case link_type
+                          when 'Z' then
+                          APEX_PAGE.GET_URL( p_page => 3, p_items => 'P3_ID', p_values => sub_id )
+                          when 'S' then 
+                          APEX_PAGE.GET_URL( p_page => 26, p_items => 'P26_ID', p_values => sub_id )  
+                          when 'SC' then   
+                          APEX_PAGE.GET_URL( p_page => 5, p_items => 'P5_ID', p_values => sub_id )
+                          when 'R'  then  
+                          APEX_PAGE.GET_URL( p_page => 12, p_items => 'P12_ID', p_values => sub_id )
+                          when 'E' then   
+                          APEX_PAGE.GET_URL( p_page => 66, p_items => 'P66_ID', p_values => sub_id )
+                       end  as link 
+                from data
+                start with "PARENT_ID" is null
+                connect by prior "ID" = "PARENT_ID"
+                order siblings by name
+                ```
+        }
+        layout {
+            sequence: 20
+            slot: body
+        }
+        appearance {
+            template: @/standard
+            templateOptions: [
+                #DEFAULT#
+                t-Region--scrollBody
+            ]
+        }
+        advanced {
+            htmlDomId: ARBOL_APP
+        }
+        headerAndFooter {
+            footerText: <div id="treeMenu"></div>
+        }
+        settings {
+            nodeLabelColumn: TITLE
+            nodeValueColumn: VALUE
+            hierarchy: notComputed
+            nodeStatusColumn: STATUS
+            hierarchyLevelColumn: LEVEL
+            activateNodeLinkWith: doubleClick
+            linkColumn: LINK
+            iconCssClassColumn: ICON
+            defaultIconCssClass: icon-tree-folder
+            iconTypeCssClass: a-Icon
+        }
+    )
+
+    button contract-all (
+        buttonName: CONTRACT_ALL
+        label: Collapse All
+        layout {
+            sequence: 10
+            region: @vista-árbol
+            slot: create
+        }
+        appearance {
+            buttonTemplate: @/text
+            templateOptions: #DEFAULT#
+        }
+        behavior {
+            action: definedByDynamicAction
+        }
+    )
+
+    button expand-all (
+        buttonName: EXPAND_ALL
+        label: Expand All
+        layout {
+            sequence: 10
+            region: @vista-árbol
+            slot: create
+        }
+        appearance {
+            buttonTemplate: @/text
+            templateOptions: #DEFAULT#
+        }
+        behavior {
+            action: definedByDynamicAction
+        }
+    )
+
+    dynamicAction contract-all (
+        name: CONTRACT_ALL
+        execution {
+            sequence: 10
+        }
+        when {
+            event: click
+            selectionType: button
+            button: @contract-all
+        }
+
+        action native-tree-collapse (
+            action: collapseTree
+            affectedElements {
+                selectionType: region
+                region: @vista-árbol
+            }
+            execution {
+                sequence: 10
+                fireOnInit: false
+            }
+        )
+
+    )
+
+    dynamicAction edit (
+        name: EDIT
+        execution {
+            sequence: 20
+        }
+        when {
+            event: custom
+            customEvent: tree-edit
+            selectionType: region
+            region: @vista-árbol
+        }
+
+        action native-javascript-code (
+            action: executeJsCode
+            settings {
+                jsCode: console.log("Edit tree: ")
+            }
+            execution {
+                sequence: 10
+                fireOnInit: false
+            }
+        )
+
+    )
+
+    dynamicAction expand-all (
+        name: EXPAND_ALL
+        execution {
+            sequence: 10
+        }
+        when {
+            event: click
+            selectionType: button
+            button: @expand-all
+        }
+
+        action native-tree-expand (
+            action: expandTree
+            affectedElements {
+                selectionType: region
+                region: @vista-árbol
+            }
+            execution {
+                sequence: 10
+                fireOnInit: false
+            }
+        )
+
+    )
+
+)
+

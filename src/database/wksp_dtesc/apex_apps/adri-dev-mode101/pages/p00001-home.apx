@@ -1,0 +1,906 @@
+page 1 (
+    name: Home
+    alias: HOME
+    title: Sistema de Gestión TI
+    appearance {
+        pageTemplate: @/standard
+        templateOptions: #DEFAULT#
+    }
+    navigation {
+        cursorFocus: doNotFocusCursor
+        warnOnUnsavedChanges: false
+    }
+    security {
+        pageAccessProtection: argumentsMustHaveChecksum
+        formAutoComplete: false
+    }
+
+    region reportes (
+        name: Reportes
+        title: Reportes
+        type: interactiveReport
+        source {
+            location: localDatabase
+            type: sqlQuery
+            sqlQuery:
+                ```sql
+                SELECT 
+                    ss.siglas Sitio,
+                    s.siglas AS Sala,
+                    COUNT(DISTINCT r.id) AS total_racks,
+                    COUNT(e.id) AS total_equipos
+                    
+                    --,COUNT(CASE WHEN e.sub_tipo_equipo = 'activo' THEN 1 END) AS total_activos,
+                    --COUNT(CASE WHEN e.sub_tipo_equipo = 'pasivo' THEN 1 END) AS total_pasivos,
+                    --COUNT(CASE WHEN e.sub_tipo_equipo = 'energía'  THEN 1 END) AS total_energia
+                FROM 
+                    sgt_sitios ss 
+                left join    
+                    sgt_salas s on s.sitio_id =ss.id
+                LEFT JOIN 
+                    sgt_racks r ON r.sala_id = s.id
+                LEFT JOIN 
+                    sgt_equipos e ON e.rack_id = r.id
+                GROUP BY 
+                    ss.siglas, s.siglas
+                HAVING 
+                    COUNT(DISTINCT r.id) > 0
+                order by SITIO
+                ```
+        }
+        layout {
+            sequence: 30
+            parentRegion: @tabs
+            slot: subRegions
+        }
+        appearance {
+            template: @/interactive-report
+            templateOptions: [
+                #DEFAULT#
+                t-IRR-region--hideHeader js-addHiddenHeadingRoleDesc
+            ]
+        }
+        advanced {
+            regionDisplaySelector: true
+        }
+        headerAndFooter {
+            headerText: Reporte de totales por Sitio/Sala/Rack
+        }
+        security {
+            authorizationScheme: @jefatura-rights
+        }
+        config {
+            buildOption: @commented-out
+        }
+        pagination {
+            type: rowRangesXToY
+        }
+        performance {
+            maxRowsToProcess: 1000000
+        }
+        searchBar {
+            reportsSelectList: false
+        }
+        actionsMenu {
+            controlBreak: false
+            highlight: false
+            compute: false
+            aggregate: false
+            chart: false
+            pivot: false
+            flashback: false
+            saveReport: false
+        }
+        advanced {
+            savedReportMappingIdentifier: 45026643190979173741
+        }
+
+        column SALA (
+            type: plainText
+            heading {
+                heading: Sala
+            }
+            layout {
+                sequence: 20
+            }
+            source {
+                dataType: STRING
+            }
+            advanced {
+                endUserAlias: B
+            }
+        )
+
+        column SITIO (
+            type: plainText
+            heading {
+                heading: Sitio
+            }
+            layout {
+                sequence: 10
+            }
+            source {
+                dataType: STRING
+            }
+            advanced {
+                endUserAlias: A
+            }
+        )
+
+        column TOTAL_EQUIPOS (
+            type: plainText
+            heading {
+                heading: Total Equipos
+                alignment: end
+            }
+            layout {
+                sequence: 40
+                columnAlignment: end
+            }
+            source {
+                dataType: NUMBER
+            }
+            advanced {
+                endUserAlias: D
+            }
+        )
+
+        column TOTAL_RACKS (
+            type: plainText
+            heading {
+                heading: Total Racks
+                alignment: end
+            }
+            layout {
+                sequence: 30
+                columnAlignment: end
+            }
+            source {
+                dataType: NUMBER
+            }
+            advanced {
+                endUserAlias: C
+            }
+        )
+
+        page {
+            size: a4
+            units: millimeters
+            width: 297
+            height: 210
+            borderWidth: 0.5
+            borderColor: #666666
+        }
+        pageHeader {
+            pageHeaderText: Reportes
+        }
+
+        savedReport 478947618 (
+            visibility: primaryDefault
+            view {
+                rowsPerPage: 50
+            }
+
+            displayColumn SALA (
+                sequence: 2
+            )
+
+            displayColumn SITIO (
+                sequence: 1
+            )
+
+            displayColumn TOTAL_EQUIPOS (
+                sequence: 4
+            )
+
+            displayColumn TOTAL_RACKS (
+                sequence: 3
+            )
+
+        )
+
+    )
+
+    region resumen (
+        name: Resumen
+        type: cards
+        source {
+            location: localDatabase
+            type: sqlQuery
+            sqlQuery:
+                ```sql
+                SELECT 
+                    1 as ORDEN,
+                    'Total Sitios' as CARD_TITLE,
+                    COUNT(s.id) || ' Sitios'as CARD_VALUE,
+                    'Locales de ANDE' as CARD_SUBTITLE,
+                    'fa fa-university' as CARD_ICON,
+                    'is-success' as CARD_COLOR,
+                    APEX_UTIL.PREPARE_URL('f?p='|| :APP_ID || ':25:' || :APP_SESSION ) as HREF
+                FROM sgt_sitios s
+                
+                UNION ALL
+                
+                SELECT 
+                    2 as ORDEN,
+                    'Total Salas' as CARD_TITLE,
+                    COUNT(ss.id) || ' Salas' as CARD_VALUE,
+                    'Salas de comunicación ANDE' as CARD_SUBTITLE,
+                    'fa fa-map-marker' as CARD_ICON,
+                    'is-success' as CARD_COLOR,
+                     APEX_UTIL.PREPARE_URL('f?p='|| :APP_ID || ':4:' || :APP_SESSION)  as HREF
+                FROM sgt_salas ss
+                UNION ALL
+                
+                SELECT 
+                    3 as ORDEN,
+                    'Total Racks' as CARD_TITLE,
+                    COUNT(r.id) || ' Racks' as CARD_VALUE,
+                    'Racks de ANDE' as CARD_SUBTITLE,
+                    'fa fa-server' as CARD_ICON,
+                    'is-success' as CARD_COLOR,
+                    APEX_UTIL.PREPARE_URL('f?p='|| :APP_ID || ':11:' || :APP_SESSION ) as HREF
+                FROM sgt_racks r
+                
+                UNION ALL
+                
+                SELECT 
+                    4 as ORDEN,
+                    'Total Equipos' as CARD_TITLE,
+                    COUNT(e.id) ||' Equipos' as CARD_VALUE,
+                    'Activos / Pasivos / Otros' as CARD_SUBTITLE,
+                    'fa fa-microchip' as CARD_ICON,
+                    'is-success' as CARD_COLOR,
+                    APEX_UTIL.PREPARE_URL('f?p='|| :APP_ID || ':13:' || :APP_SESSION ) as HREF
+                FROM sgt_equipos e
+                
+                UNION ALL
+                
+                SELECT 
+                    5 as ORDEN,
+                    'Total Interfaces' as CARD_TITLE,
+                    COUNT(i.id) ||' Interfaces' as CARD_VALUE,
+                    'Interfaces / Puertos' as CARD_SUBTITLE,
+                    'fa fa-plug' as CARD_ICON,
+                    'is-success' as CARD_COLOR,
+                    APEX_UTIL.PREPARE_URL('f?p='|| :APP_ID || ':8:' || :APP_SESSION)  as HREF
+                FROM sgt_interfaces i
+                
+                UNION ALL
+                
+                
+                SELECT 
+                    6 as ORDEN,
+                    'Total Servicios' as CARD_TITLE,
+                    COUNT(srv.id) || ' Servicios' as CARD_VALUE,
+                    'Servicios de Comunicaciones' as CARD_SUBTITLE,
+                    'fa fa-sitemap-horizontal' as CARD_ICON,
+                    'is-success' as CARD_COLOR,
+                    APEX_UTIL.PREPARE_URL('f?p='|| :APP_ID || ':17:' || :APP_SESSION ) as HREF
+                FROM sgt_servicios srv
+                
+                union
+                
+                SELECT 
+                    7 as ORDEN,
+                    'Total Enlaces de Fibra Óptica' as CARD_TITLE,
+                    COUNT(fo.id) ||' Enlaces FO' as CARD_VALUE,
+                     
+                    'Enlaces FO: ' || TO_CHAR(SUM (fo.abs_longitud)/1000,
+                         'fm999G999G999D00') || ' km' as CARD_SUBTITLE,
+                    'fa fa-sitemap-horizontal' as CARD_ICON,
+                    'is-success' as CARD_COLOR,
+                    APEX_UTIL.PREPARE_URL('f?p='|| :APP_ID || ':36:' || :APP_SESSION ) as HREF
+                FROM sgt_enlaces_fo fo
+                
+                union 
+                
+                SELECT 
+                    8 as ORDEN,
+                    'Total Enlaces WAN' as CARD_TITLE,
+                    COUNT(wan.id) || ' Enlaces WAN' as CARD_VALUE,
+                    'Enlaces WAN' as CARD_SUBTITLE,
+                    'fa fa-sitemap-horizontal' as CARD_ICON,
+                    'is-success' as CARD_COLOR,
+                    APEX_UTIL.PREPARE_URL('f?p='|| :APP_ID || ':10:' || :APP_SESSION ) as HREF
+                FROM sgt_enlaces_wan wan
+                
+                ORDER BY ORDEN ASC
+                
+                ;
+                ```
+        }
+        layout {
+            sequence: 20
+            parentRegion: @tabs
+            slot: subRegions
+        }
+        appearance {
+            template: @/cards-container
+            templateOptions: [
+                #DEFAULT#
+                t-CardsRegion--hideHeader js-addHiddenHeadingRoleDesc
+            ]
+        }
+        advanced {
+            regionDisplaySelector: true
+        }
+        security {
+            authorizationScheme: @jefatura-rights
+        }
+        title {
+            advancedFormatting: true
+            htmlExpression: <h3 class="a-CardView-title "><a href="&HREF.">&CARD_TITLE.</a></h3>
+        }
+        subtitle {
+            column: CARD_SUBTITLE
+        }
+        body {
+            column: CARD_VALUE
+        }
+        iconAndBadge {
+            iconSource: iconClassColumn
+            iconColumn: CARD_ICON
+        }
+    )
+
+    region sgt-demo (
+        name: sgt-demo
+        title: ADRI - Administrador de Redes Integradas de la ANDE
+        type: staticContent
+        layout {
+            sequence: 10
+            slot: breadcrumbBar
+        }
+        appearance {
+            template: @/hero
+            templateOptions: #DEFAULT#
+        }
+        image {
+            fileUrl: #APP_FILES#icons/app-icon-512.png
+        }
+    )
+
+    region tabs (
+        name: tabs
+        title: Informes
+        type: regionDisplaySelector
+        layout {
+            sequence: 30
+            slot: body
+        }
+        appearance {
+            template: @/standard
+            templateOptions: [
+                #DEFAULT#
+                t-Region--scrollBody
+            ]
+        }
+        settings {
+            includeShowAll: false
+        }
+    )
+
+    region total-equipos (
+        name: Total_equipos
+        title: Total equipos por rack
+        type: chart
+        layout {
+            sequence: 30
+            parentRegion: @totales
+            slot: subRegions
+            column: 1
+            columnSpan: 6
+        }
+        appearance {
+            template: @/standard
+            templateOptions: [
+                #DEFAULT#
+                t-Region--scrollBody
+            ]
+        }
+        chartLayout {
+            height: 400
+        }
+        legend {
+            show: false
+        }
+
+        series total-equipos-por-rack (
+            name: Total equipos por rack
+            execution {
+                sequence: 10
+            }
+            source {
+                type: sqlQuery
+                sqlQuery:
+                    ```sql
+                    select te.nombre titulo, count(e.tipo_equipo_id) valor from sgt_equipos e left join sgt_tipo_equipos te
+                    on e.tipo_equipo_id = te.id
+                    WHERE e.rack_id =:P1_FILTRO_RACK
+                    
+                    group by (e.tipo_equipo_id, te.nombre)
+                    
+                    order by valor desc
+                    ```
+                pageItemsToSubmit: P1_FILTRO_RACK
+            }
+            columnMapping {
+                label: TITULO
+                value: VALOR
+            }
+        )
+
+        axis x (
+            name: x
+            title: Tipo de equipo
+            minorTicks {
+                show: false
+            }
+        )
+
+        axis y (
+            name: y
+            title: Cantidad
+            value {
+                format: decimal
+                decimalPlaces: 0
+                formatScaling: none
+            }
+            minorTicks {
+                show: false
+            }
+        )
+
+    )
+
+    region total-equipos-por-red (
+        name: Total equipos por red
+        title: Total equipos por tipo de red
+        type: chart
+        layout {
+            sequence: 10
+            parentRegion: @totales
+            slot: subRegions
+            startNewRow: false
+        }
+        appearance {
+            template: @/standard
+            templateOptions: [
+                #DEFAULT#
+                t-Region--scrollBody
+            ]
+        }
+        chartLayout {
+            height: 400
+        }
+        legend {
+            show: false
+        }
+
+        series total-tipo-equipos-por-tipo-red (
+            name: Total Tipo Equipos por tipo Red
+            execution {
+                sequence: 10
+            }
+            source {
+                type: sqlQuery
+                sqlQuery:
+                    ```sql
+                    SELECT te.nombre, COUNT(e.id) as valores 
+                    FROM sgt_equipos e 
+                    LEFT JOIN sgt_tipo_equipos te ON e.tipo_equipo_id = te.id
+                    where e.tipo_red = :TIPO_RED
+                    GROUP BY te.nombre, te.id;
+                    ```
+                pageItemsToSubmit: TIPO_RED
+            }
+            columnMapping {
+                label: NOMBRE
+                value: VALORES
+            }
+        )
+
+        axis x (
+            name: x
+            title: Tipo de equipo
+            minorTicks {
+                show: false
+            }
+        )
+
+        axis y (
+            name: y
+            title: Cantidad
+            value {
+                format: decimal
+                decimalPlaces: 0
+                formatScaling: none
+            }
+            minorTicks {
+                show: false
+            }
+        )
+
+    )
+
+    region total-equipos-por-sitio (
+        name: Total equipos por sitio
+        title: Total equipos por sitio
+        type: chart
+        layout {
+            sequence: 20
+            parentRegion: @totales
+            slot: subRegions
+            startNewRow: false
+        }
+        appearance {
+            template: @/standard
+            templateOptions: [
+                #DEFAULT#
+                t-Region--scrollBody
+            ]
+        }
+        chartLayout {
+            height: 400
+        }
+        legend {
+            show: false
+        }
+
+        series total-equipos-por-sitio (
+            name: Total equipos por sitio
+            execution {
+                sequence: 10
+            }
+            source {
+                type: sqlQuery
+                sqlQuery:
+                    ```sql
+                    select te.nombre nombres, count(e.tipo_equipo_id) valores from
+                    sgt_equipos e left join sgt_tipo_equipos te on e.tipo_equipo_id = te.id
+                    left join sgt_racks r on e.rack_id = r.id
+                    LEFT JOIN sgt_salas sa ON r.sala_id = sa.id
+                    
+                    where sa.sitio_id = :FILTRO_TE_SITIO
+                    
+                    group by (e.tipo_equipo_id,te.nombre)
+                    order by valores desc
+                    ```
+                pageItemsToSubmit: FILTRO_TE_SITIO
+            }
+            columnMapping {
+                label: NOMBRES
+                value: VALORES
+            }
+        )
+
+        axis x (
+            name: x
+            title: Tipo de equipo
+            minorTicks {
+                show: false
+            }
+        )
+
+        axis y (
+            name: y
+            title: Cantidad
+            value {
+                format: decimal
+                decimalPlaces: 0
+                formatScaling: none
+            }
+            minorTicks {
+                show: false
+            }
+        )
+
+    )
+
+    region total-locales (
+        name: Total_locales
+        title: Total locales por zona
+        type: chart
+        layout {
+            sequence: 40
+            parentRegion: @totales
+            slot: subRegions
+            startNewRow: false
+        }
+        appearance {
+            template: @/standard
+            templateOptions: [
+                #DEFAULT#
+                t-Region--scrollBody
+            ]
+        }
+        title {
+            title: Locales
+        }
+        chartLayout {
+            height: 400
+        }
+        legend {
+            show: false
+        }
+
+        series total-sitios-por-zona (
+            name: Total sitios por zona
+            execution {
+                sequence: 10
+            }
+            source {
+                type: sqlQuery
+                sqlQuery:
+                    ```sql
+                    select tipo_de_sitio Titulo, count(tipo_de_sitio) total from sgt_sitios
+                    where sgt_sitios.zona_id =:P1_FILTRO_ZONA
+                    group by tipo_de_sitio
+                    order by total desc
+                    ```
+                pageItemsToSubmit: P1_FILTRO_ZONA
+            }
+            columnMapping {
+                label: TITULO
+                value: TOTAL
+            }
+        )
+
+        axis x (
+            name: x
+            title: Tipo de local
+            minorTicks {
+                show: false
+            }
+        )
+
+        axis y (
+            name: y
+            title: Cantidad
+            value {
+                format: decimal
+                decimalPlaces: 0
+                formatScaling: none
+            }
+            minorTicks {
+                show: false
+            }
+        )
+
+    )
+
+    region totales (
+        name: Totales
+        type: staticContent
+        layout {
+            sequence: 40
+            parentRegion: @tabs
+            slot: subRegions
+        }
+        appearance {
+            template: @/cards-container
+            templateOptions: [
+                #DEFAULT#
+                t-CardsRegion--hideHeader js-addHiddenHeadingRoleDesc
+            ]
+        }
+        advanced {
+            regionDisplaySelector: true
+        }
+        security {
+            authorizationScheme: @jefatura-rights
+        }
+    )
+
+    pageItem FILTRO_TE_SITIO (
+        type: popupLov
+        label {
+            label: Filtro Sitio
+            alignment: left
+        }
+        lov {
+            type: sharedComponent
+            lov: @sgt-sitios-siglas
+        }
+        layout {
+            sequence: 10
+            region: @total-equipos-por-sitio
+            slot: sortOrder
+            alignment: left
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+            width: 30
+        }
+    )
+
+    pageItem P1_FILTRO_RACK (
+        type: popupLov
+        label {
+            label: Filtro Rack
+            alignment: left
+        }
+        lov {
+            type: sharedComponent
+            lov: @racks-nombres
+        }
+        layout {
+            sequence: 10
+            region: @total-equipos
+            slot: sortOrder
+            alignment: left
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+            width: 30
+        }
+    )
+
+    pageItem P1_FILTRO_ZONA (
+        type: popupLov
+        label {
+            label: Filtro Zona
+            alignment: left
+        }
+        lov {
+            type: sharedComponent
+            lov: @lov-sgt-zonas
+        }
+        layout {
+            sequence: 10
+            region: @total-locales
+            slot: sortOrder
+            alignment: left
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+            width: 30
+        }
+    )
+
+    pageItem TIPO_RED (
+        type: popupLov
+        label {
+            label: Tipo de Red
+            alignment: left
+        }
+        lov {
+            type: sharedComponent
+            lov: @tipo-red
+        }
+        layout {
+            sequence: 10
+            region: @total-equipos-por-red
+            slot: sortOrder
+            alignment: left
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+            width: 30
+        }
+    )
+
+    dynamicAction actualizargrafico (
+        name: ActualizarGrafico
+        execution {
+            sequence: 30
+        }
+        when {
+            selectionType: items
+            items: FILTRO_TE_SITIO
+        }
+
+        action native-refresh (
+            action: refresh
+            affectedElements {
+                selectionType: region
+                region: @total-equipos-por-sitio
+            }
+            execution {
+                sequence: 10
+                fireOnInit: false
+            }
+        )
+
+    )
+
+    dynamicAction actualizarlocales (
+        name: ActualizarLocales
+        execution {
+            sequence: 20
+        }
+        when {
+            selectionType: items
+            items: P1_FILTRO_ZONA
+        }
+
+        action native-refresh (
+            action: refresh
+            affectedElements {
+                selectionType: region
+                region: @total-locales
+            }
+            execution {
+                sequence: 10
+                fireOnInit: false
+            }
+        )
+
+    )
+
+    dynamicAction actualizartipored (
+        name: ActualizarTipoRed
+        execution {
+            sequence: 40
+        }
+        when {
+            selectionType: items
+            items: TIPO_RED
+        }
+
+        action native-refresh (
+            action: refresh
+            affectedElements {
+                selectionType: region
+                region: @total-equipos-por-red
+            }
+            execution {
+                sequence: 10
+                fireOnInit: false
+            }
+        )
+
+    )
+
+    dynamicAction actualizartotalequipos (
+        name: ActualizarTotalEquipos
+        execution {
+            sequence: 10
+        }
+        when {
+            selectionType: items
+            items: P1_FILTRO_RACK
+        }
+
+        action native-refresh (
+            action: refresh
+            affectedElements {
+                selectionType: region
+                region: @total-equipos
+            }
+            execution {
+                sequence: 10
+                fireOnInit: false
+            }
+        )
+
+    )
+
+    process new (
+        name: New
+        type: executeCode
+        source {
+            plsqlCode:
+                ```plsql
+                SELECT
+                    
+                    CURRENT_TIMESTAMP INTO :APP_TZ
+                FROM dual;
+                ```
+        }
+        execution {
+            sequence: 10
+            point: afterRegions
+        }
+        advanced {
+            executionMappingIdentifier: 16000741983665723
+        }
+    )
+
+)
+

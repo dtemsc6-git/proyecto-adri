@@ -1,0 +1,15 @@
+developerComment (
+    pages: 14
+    comments: Voy a implementar funciones para nombrar los equipos, he cambiado la disposición de los input y creado de tabs, una con los campos obligatorios y otra con los opcionales, al hacer click en el tipo de equipo a crear seteara el grupo de equipo y creara el nombre del equipo con el siguiente formato: nombre_rack-siglas_tipo_equipo_numero_orden Ej: Rack B1, tipo de Equipo Mux Ethernet, el primero en el rack nombre = B1_MXE_01
+)
+
+developerComment (
+    pages: 13
+    comments:
+        ```
+        Voy a implementar funciones para nombrar los equipos, he cambiado la disposición de los input y creado de tabs, una con los campos obligatorios y otra con los opcionales, al hacer click en el tipo de equipo a crear seteara el grupo de equipo y creara el nombre del equipo con el siguiente formato: nombre_rack-siglas_tipo_equipo_numero_orden
+        Ej: Rack B1, tipo de Equipo Mux Ethernet, el primero en el rack
+        nombre = B1_MXE_01
+        ```
+)
+

@@ -1,0 +1,764 @@
+page 46 (
+    name: Auditoría General del Sistema
+    alias: AUDITORÍA-GENERAL
+    title: Auditoría General del Sistema
+    appearance {
+        pageTemplate: @/standard
+        templateOptions: #DEFAULT#
+    }
+    navigation {
+        cursorFocus: doNotFocusCursor
+    }
+    security {
+        pageAccessProtection: argumentsMustHaveChecksum
+        formAutoComplete: false
+    }
+
+    region auditoría-general-del-sistema (
+        name: Auditoría General del Sistema
+        type: interactiveReport
+        source {
+            location: localDatabase
+            type: sqlQuery
+            sqlQuery:
+                ```sql
+                SELECT 
+                    AUDIT_ID,
+                    USUARIO,
+                    TIPO_OPERACION,
+                    FECHA,
+                    HORA,
+                    MODULO as SISTEMA,
+                    TABLA as ORIGEN,
+                    -- ID_REGISTRO eliminado
+                    
+                    -- NUEVAS COLUMNAS PRINCIPALES
+                    CAMPOS_MODIFICADOS as CANT_CAMPOS,
+                    CAMPOS_LISTA as CAMPOS,
+                    DETALLE_OLD_VALUE as VALORES_ANTERIORES,
+                    DETALLE_NEW_VALUE as VALORES_ACTUALES,
+                    
+                    -- Información de contexto
+                    TIPO_CAMBIO,
+                    NIVEL_CRITICIDAD,
+                    TURNO,
+                    PERIODO,
+                    INDICADOR_VISUAL as ESTADO,
+                    IP_ADDRESS,
+                    
+                    -- Para análisis y filtros
+                    CASE 
+                        WHEN CAMPOS_MODIFICADOS = 1 THEN '1 campo'
+                        WHEN CAMPOS_MODIFICADOS <= 2 THEN CAMPOS_MODIFICADOS || ' campos'
+                        WHEN CAMPOS_MODIFICADOS <= 5 THEN CAMPOS_MODIFICADOS || ' campos 🟡'
+                        ELSE CAMPOS_MODIFICADOS || ' campos 🔴'
+                    END as RESUMEN_CAMBIOS,
+                   
+                    CASE 
+                        WHEN CAMPOS_MODIFICADOS > 3 THEN 
+                            '<a href="javascript:ver_detalle_completo(' || AUDIT_ID || ')">Ver detalle completo</a>'
+                        ELSE ''
+                    END as ACCION_DETALLE
+                
+                FROM V_AUDIT_CONSOLIDADO
+                WHERE 1=1
+                    -- Filtros existentes
+                    AND (:P46_FECHA_DESDE IS NULL OR 
+                         LENGTH(TRIM(:P46_FECHA_DESDE)) = 0 OR
+                         TRUNC(FECHA_HORA_FILTRO) >= TO_DATE(:P46_FECHA_DESDE, 'DD/MM/YYYY'))
+                    
+                    AND (:P46_FECHA_HASTA IS NULL OR 
+                         LENGTH(TRIM(:P46_FECHA_HASTA)) = 0 OR
+                         TRUNC(FECHA_HORA_FILTRO) <= TO_DATE(:P46_FECHA_HASTA, 'DD/MM/YYYY'))
+                    
+                    AND (:P46_USUARIO IS NULL OR 
+                         :P46_USUARIO = '%' OR 
+                         TRIM(:P46_USUARIO) = '' OR
+                         UPPER(TRIM(USUARIO)) = UPPER(TRIM(:P46_USUARIO)))
+                    
+                    AND (:P46_TIPO_OPERACION IS NULL OR 
+                         :P46_TIPO_OPERACION = '%' OR 
+                         TIPO_OPERACION = :P46_TIPO_OPERACION)
+                    
+                    AND (:P46_MODULO IS NULL OR 
+                         :P46_MODULO = '%' OR 
+                         MODULO = :P46_MODULO)
+                    
+                    -- NUEVO FILTRO: Cantidad mínima de campos
+                    AND (:P46_MIN_CAMPOS IS NULL OR 
+                         :P46_MIN_CAMPOS = 0 OR
+                         CAMPOS_MODIFICADOS >= :P46_MIN_CAMPOS)
+                    
+                ORDER BY FECHA_HORA_FILTRO DESC;
+                ```
+            pageItemsToSubmit: [
+                P46_FECHA_DESDE
+                P46_FECHA_HASTA
+                P46_USUARIO
+                P46_TIPO_OPERACION
+            ]
+        }
+        layout {
+            sequence: 40
+            slot: body
+        }
+        appearance {
+            template: @/interactive-report
+            templateOptions: [
+                #DEFAULT#
+                t-IRR-region--hideHeader js-addHiddenHeadingRoleDesc
+            ]
+        }
+        pagination {
+            type: rowRangesXToY
+        }
+        messages {
+            whenNoDataFound: No data found.
+            whenMoreDataFound: The maximum row count for this report is #MAX_ROW_COUNT# rows.  Please apply a filter to reduce the number of records in your query.
+        }
+        advanced {
+            savedReportMappingIdentifier: 59777351057680233353
+        }
+
+        column ACCION_DETALLE (
+            type: link
+            heading {
+                heading: Accion Detalle
+            }
+            layout {
+                sequence: 240
+            }
+            link {
+                target: {
+                    page: 101
+                    items: {
+                        P101_AUDIT_ID: #AUDIT_ID#
+                        P101_USUARIO: #USUARIO#
+                        P101_OPERACION: #TIPO_OPERACION#
+                        P101_FECHA_HORA: #FECHA#
+                        P101_TABLA: #ORIGEN#
+                    }
+                }
+                linkText: VER DETALLES
+            }
+            source {
+                dataType: STRING
+            }
+            advanced {
+                endUserAlias: AJ
+            }
+        )
+
+        column AUDIT_ID (
+            type: plainText
+            heading {
+                heading: Audit Id
+                alignment: end
+            }
+            layout {
+                sequence: 160
+                columnAlignment: end
+            }
+            source {
+                dataType: NUMBER
+            }
+            advanced {
+                endUserAlias: AB
+            }
+        )
+
+        column CAMPOS (
+            type: plainText
+            heading {
+                heading: Campos
+            }
+            layout {
+                sequence: 180
+            }
+            source {
+                dataType: STRING
+            }
+            advanced {
+                endUserAlias: AD
+            }
+        )
+
+        column CANT_CAMPOS (
+            type: plainText
+            heading {
+                heading: Cant Campos
+                alignment: end
+            }
+            layout {
+                sequence: 170
+                columnAlignment: end
+            }
+            source {
+                dataType: NUMBER
+            }
+            advanced {
+                endUserAlias: AC
+            }
+        )
+
+        column ESTADO (
+            type: plainText
+            heading {
+                heading: Estado
+            }
+            layout {
+                sequence: 220
+            }
+            source {
+                dataType: STRING
+            }
+            advanced {
+                endUserAlias: AH
+            }
+        )
+
+        column FECHA (
+            type: plainText
+            heading {
+                heading: Fecha
+            }
+            layout {
+                sequence: 30
+            }
+            source {
+                dataType: STRING
+            }
+            advanced {
+                endUserAlias: D
+            }
+        )
+
+        column HORA (
+            type: plainText
+            heading {
+                heading: Hora
+            }
+            layout {
+                sequence: 40
+            }
+            source {
+                dataType: STRING
+            }
+            advanced {
+                endUserAlias: E
+            }
+        )
+
+        column IP_ADDRESS (
+            type: plainText
+            heading {
+                heading: Ip Address
+            }
+            layout {
+                sequence: 110
+            }
+            source {
+                dataType: STRING
+            }
+            columnFilter {
+                type: none
+            }
+            advanced {
+                endUserAlias: O
+            }
+        )
+
+        column NIVEL_CRITICIDAD (
+            type: plainText
+            heading {
+                heading: Nivel Criticidad
+            }
+            layout {
+                sequence: 140
+            }
+            source {
+                dataType: STRING
+            }
+            advanced {
+                endUserAlias: Y
+            }
+        )
+
+        column ORIGEN (
+            type: plainText
+            heading {
+                heading: Origen
+            }
+            layout {
+                sequence: 20
+            }
+            source {
+                primaryKey: true
+                dataType: STRING
+            }
+            columnFilter {
+                type: none
+            }
+            advanced {
+                endUserAlias: W
+            }
+        )
+
+        column PERIODO (
+            type: plainText
+            heading {
+                heading: Periodo
+            }
+            layout {
+                sequence: 150
+            }
+            source {
+                dataType: STRING
+            }
+            advanced {
+                endUserAlias: Z
+            }
+        )
+
+        column RESUMEN_CAMBIOS (
+            type: plainText
+            heading {
+                heading: Resumen Cambios
+            }
+            layout {
+                sequence: 230
+            }
+            source {
+                dataType: STRING
+            }
+            advanced {
+                endUserAlias: AI
+            }
+        )
+
+        column SISTEMA (
+            type: plainText
+            heading {
+                heading: Sistema
+            }
+            layout {
+                sequence: 10
+            }
+            source {
+                primaryKey: true
+                dataType: STRING
+            }
+            columnFilter {
+                type: none
+            }
+            advanced {
+                endUserAlias: V
+            }
+        )
+
+        column TIPO_CAMBIO (
+            type: plainText
+            heading {
+                heading: Tipo Cambio
+            }
+            layout {
+                sequence: 210
+            }
+            source {
+                dataType: STRING
+            }
+            advanced {
+                endUserAlias: AG
+            }
+        )
+
+        column TIPO_OPERACION (
+            type: plainText
+            heading {
+                heading: Tipo Operacion
+            }
+            layout {
+                sequence: 60
+            }
+            source {
+                dataType: STRING
+            }
+            advanced {
+                endUserAlias: C
+            }
+        )
+
+        column TURNO (
+            type: plainText
+            heading {
+                heading: Turno
+            }
+            layout {
+                sequence: 130
+            }
+            source {
+                dataType: STRING
+            }
+            advanced {
+                endUserAlias: X
+            }
+        )
+
+        column USUARIO (
+            type: plainText
+            heading {
+                heading: Usuario
+            }
+            layout {
+                sequence: 50
+            }
+            source {
+                dataType: STRING
+            }
+            advanced {
+                endUserAlias: B
+            }
+        )
+
+        column VALORES_ACTUALES (
+            type: plainText
+            heading {
+                heading: Valores Actuales
+            }
+            layout {
+                sequence: 200
+            }
+            source {
+                dataType: STRING
+            }
+            advanced {
+                endUserAlias: AF
+            }
+        )
+
+        column VALORES_ANTERIORES (
+            type: plainText
+            heading {
+                heading: Valores Anteriores
+            }
+            layout {
+                sequence: 190
+            }
+            source {
+                dataType: STRING
+            }
+            advanced {
+                endUserAlias: AE
+            }
+        )
+
+        page {
+            borderWidth: 0.5
+            borderColor: #666666
+        }
+        pageHeader {
+            pageHeaderText: Auditoría de Sitios
+        }
+
+        savedReport 597868001 (
+            visibility: primaryDefault
+            view {
+                rowsPerPage: 50
+            }
+
+            displayColumn ACCION_DETALLE (
+                sequence: 13
+            )
+
+            displayColumn CANT_CAMPOS (
+                sequence: 9
+            )
+
+            displayColumn ESTADO (
+                sequence: 10
+            )
+
+            displayColumn FECHA (
+                sequence: 1
+            )
+
+            displayColumn HORA (
+                sequence: 2
+            )
+
+            displayColumn NIVEL_CRITICIDAD (
+                sequence: 6
+            )
+
+            displayColumn ORIGEN (
+                sequence: 3
+            )
+
+            displayColumn PERIODO (
+                sequence: 7
+            )
+
+            displayColumn TIPO_OPERACION (
+                sequence: 5
+            )
+
+            displayColumn TURNO (
+                sequence: 8
+            )
+
+            displayColumn USUARIO (
+                sequence: 4
+            )
+
+            displayColumn VALORES_ACTUALES (
+                sequence: 12
+            )
+
+            displayColumn VALORES_ANTERIORES (
+                sequence: 11
+            )
+
+        )
+
+    )
+
+    region breadcrumb (
+        name: Breadcrumb
+        type: breadcrumb
+        source {
+            breadcrumb: @breadcrumb
+        }
+        layout {
+            sequence: 10
+            slot: breadcrumbBar
+        }
+        appearance {
+            template: @/title-bar
+            templateOptions: [
+                #DEFAULT#
+                t-BreadcrumbRegion--useBreadcrumbTitle
+            ]
+        }
+        componentAppearance {
+            breadcrumbTemplate: @/breadcrumb
+            templateOptions: #DEFAULT#
+        }
+    )
+
+    region filtros (
+        name: Filtros
+        title: Filtros de búsquedas
+        type: staticContent
+        layout {
+            sequence: 10
+            slot: body
+        }
+        appearance {
+            template: @/standard
+            templateOptions: [
+                #DEFAULT#
+                t-Region--scrollBody
+            ]
+        }
+    )
+
+    pageItem P46_FECHA_DESDE (
+        type: datePicker
+        label {
+            label: Fecha Desde
+            alignment: left
+        }
+        layout {
+            sequence: 10
+            region: @filtros
+            slot: regionBody
+            alignment: left
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+            formatMask: DD-MM-YYYY
+            width: 30
+        }
+    )
+
+    pageItem P46_FECHA_HASTA (
+        type: datePicker
+        label {
+            label: Fecha Hasta
+            alignment: left
+        }
+        layout {
+            sequence: 20
+            region: @filtros
+            slot: regionBody
+            alignment: left
+            startNewRow: false
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+            formatMask: DD-MM-YYYY
+            width: 30
+        }
+    )
+
+    pageItem P46_MIN_CAMPOS (
+        type: textField
+        label {
+            label: Cantidad mínima de campos
+            alignment: left
+        }
+        layout {
+            sequence: 80
+            region: @filtros
+            slot: regionBody
+            alignment: left
+            startNewRow: false
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+            width: 30
+        }
+        default {
+            type: static
+            staticValue: 0
+        }
+        help {
+            helpText:
+                ```html
+                Filtra transacciones que modificaron al menos esta cantidad de campos. 
+                Por ejemplo, si ingresas "3", solo verás cambios que afectaron 3 o más campos.
+                Deja vacío o en "0" para ver todos los registros.
+                ```
+        }
+    )
+
+    pageItem P46_MODULO (
+        type: selectList
+        label {
+            label: Módulo del Sistema
+            alignment: left
+        }
+        lov {
+            type: sqlQuery
+            sqlQuery:
+                ```sql
+                SELECT DISTINCT 
+                    MODULO as display_value,
+                    MODULO as return_value
+                FROM V_AUDIT_GENERAL
+                WHERE MODULO IS NOT NULL
+                ORDER BY 1
+                ```
+            nullDisplayValue: TODOS
+            nullReturnValue: %
+        }
+        layout {
+            sequence: 70
+            region: @filtros
+            slot: regionBody
+            alignment: left
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+            height: 1
+        }
+    )
+
+    pageItem P46_TIPO_OPERACION (
+        type: selectList
+        label {
+            label: Tipo de Operacion
+            alignment: left
+        }
+        lov {
+            type: sqlQuery
+            sqlQuery:
+                ```sql
+                SELECT DISTINCT
+                    CASE TIPO_OPERACION
+                        WHEN 'INSERT' THEN 'Inserción'
+                        WHEN 'UPDATE' THEN 'Modificación'  
+                        WHEN 'DELETE' THEN 'Eliminación'
+                        WHEN 'Creación' THEN 'Creación'
+                        WHEN 'Modificación' THEN 'Modificación'
+                        WHEN 'Eliminación' THEN 'Eliminación'
+                        ELSE TIPO_OPERACION
+                    END as display_value,
+                    TIPO_OPERACION as return_value
+                FROM V_AUDIT_GENERAL
+                WHERE TIPO_OPERACION IS NOT NULL
+                ```
+            nullDisplayValue: TODOS
+            nullReturnValue: %
+        }
+        layout {
+            sequence: 50
+            region: @filtros
+            slot: regionBody
+            alignment: left
+            startNewRow: false
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+            height: 1
+        }
+    )
+
+    pageItem P46_USUARIO (
+        type: selectList
+        label {
+            label: Usuario
+            alignment: left
+        }
+        lov {
+            type: sqlQuery
+            sqlQuery:
+                ```sql
+                SELECT DISTINCT 
+                    USUARIO as display_value,
+                    USUARIO as return_value
+                FROM V_AUDIT_GENERAL
+                WHERE USUARIO IS NOT NULL
+                ORDER BY 1
+                ```
+            nullDisplayValue: TODOS
+            nullReturnValue: %
+        }
+        layout {
+            sequence: 40
+            region: @filtros
+            slot: regionBody
+            alignment: left
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+            height: 1
+        }
+    )
+
+    button buscar (
+        buttonName: BUSCAR
+        label: Buscar
+        layout {
+            sequence: 90
+            region: @filtros
+            slot: regionBody
+        }
+        appearance {
+            buttonTemplate: @/text
+            hot: true
+            templateOptions: #DEFAULT#
+        }
+        behavior {
+            warnOnUnsavedChanges: doNotCheck
+        }
+    )
+
+)
+

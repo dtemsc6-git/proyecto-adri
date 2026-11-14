@@ -1,0 +1,931 @@
+page 200 (
+    name: Dashboard de Cumplimiento
+    alias: DASHBOARD-DE-CUMPLIMIENTO
+    title: Dashboard de Cumplimiento
+    appearance {
+        pageTemplate: @/standard
+        templateOptions: #DEFAULT#
+    }
+    navigation {
+        cursorFocus: doNotFocusCursor
+    }
+    css {
+        inline:
+            ```css
+            .dashboard-page {
+                background-color: #f8f9fc;
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                min-height: 100vh;
+            }
+            
+            .dashboard-card {
+                border-radius: 10px;
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+                transition: transform 0.3s ease, box-shadow 0.3s ease;
+                margin-bottom: 20px;
+                background: white;
+            }
+            
+            .dashboard-card:hover {
+                transform: translateY(-3px);
+                box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+            }
+            
+            /* Estilos para Cards de métricas */
+            .metric-card {
+                text-align: center;
+                padding: 25px;
+                border-left: 4px solid #3498db;
+            }
+            
+            .metric-card.is-danger {
+                border-left-color: #e74c3c;
+                background: linear-gradient(135deg, #fff5f5 0%, #fed7d7 100%);
+            }
+            
+            .metric-card.is-warning {
+                border-left-color: #f39c12;
+                background: linear-gradient(135deg, #fffbf0 0%, #feebcb 100%);
+            }
+            
+            .metric-card.is-success {
+                border-left-color: #27ae60;
+                background: linear-gradient(135deg, #f0fff4 0%, #c6f6d5 100%);
+            }
+            
+            .metric-card.is-info {
+                border-left-color: #3498db;
+                background: linear-gradient(135deg, #ebf8ff 0%, #bee3f8 100%);
+            }
+            
+            .metric-value {
+                font-size: 2.8rem;
+                font-weight: 700;
+                color: #2c3e50;
+                margin: 15px 0;
+                text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+            }
+            
+            .metric-subtitle {
+                color: #7f8c8d;
+                font-size: 0.95rem;
+                font-weight: 500;
+            }
+            
+            /* Estilos para gráficos */
+            .chart-container {
+                background: white;
+                border-radius: 10px;
+                padding: 25px;
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+                margin-bottom: 20px;
+            }
+            
+            .chart-title {
+                font-size: 1.4rem;
+                font-weight: 600;
+                color: #2c3e50;
+                margin-bottom: 20px;
+                text-align: center;
+                border-bottom: 2px solid #ecf0f1;
+                padding-bottom: 10px;
+            }
+            
+            /* Estilos para tabla */
+            .audit-table {
+                background: white;
+                border-radius: 10px;
+                overflow: hidden;
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            }
+            
+            .table-header {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+                padding: 15px 20px;
+                font-size: 1.2rem;
+                font-weight: 600;
+            }
+            
+            /* Filtros */
+            .filter-container {
+                background: white;
+                border-radius: 10px;
+                padding: 20px;
+                margin-bottom: 20px;
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+                border-left: 4px solid #3498db;
+            }
+            
+            .filter-title {
+                font-size: 1.1rem;
+                font-weight: 600;
+                color: #2c3e50;
+                margin-bottom: 15px;
+            }
+            
+            /* Botones */
+            .btn-refresh {
+                background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+                color: white;
+                border: none;
+                padding: 12px 24px;
+                border-radius: 6px;
+                cursor: pointer;
+                font-size: 1rem;
+                font-weight: 500;
+                transition: all 0.3s ease;
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            }
+            
+            .btn-refresh:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+            }
+            
+            /* Header del dashboard */
+            .dashboard-header {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+                padding: 30px;
+                border-radius: 10px;
+                margin-bottom: 30px;
+                text-align: center;
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            }
+            
+            .dashboard-title {
+                font-size: 2.2rem;
+                font-weight: 300;
+                margin-bottom: 10px;
+                text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+            }
+            
+            .dashboard-subtitle {
+                font-size: 1.1rem;
+                opacity: 0.9;
+                font-weight: 400;
+            }
+            
+            /* Responsive Design */
+            @media (max-width: 768px) {
+                .metric-value {
+                    font-size: 2rem;
+                }
+                
+                .dashboard-card {
+                    margin-bottom: 15px;
+                    padding: 15px;
+                }
+                
+                .chart-container {
+                    padding: 15px;
+                }
+                
+                .dashboard-title {
+                    font-size: 1.8rem;
+                }
+            }
+            
+            @media (max-width: 480px) {
+                .metric-value {
+                    font-size: 1.6rem;
+                }
+                
+                .dashboard-header {
+                    padding: 20px;
+                }
+                
+                .filter-container {
+                    padding: 15px;
+                }
+            }
+            
+            /* Animaciones */
+            @keyframes fadeInUp {
+                from {
+                    opacity: 0;
+                    transform: translateY(20px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+            
+            .dashboard-card {
+                animation: fadeInUp 0.6s ease-out;
+            }
+            
+            /* Optimización para gráficos compactos */
+            .chart-container-small {
+                padding: 15px !important;
+                margin-bottom: 15px !important;
+            }
+            
+            .chart-container-small .a-Region-body {
+                padding: 10px !important;
+            }
+            
+            /* Ajustar altura específica para pie chart */
+            .apex-chart-pie {
+                max-height: 250px !important;
+            }
+            
+            /* Mejorar spacing entre regiones */
+            .t-Region {
+                margin-bottom: 15px;
+            }
+            
+            
+            ```
+    }
+    security {
+        pageAccessProtection: argumentsMustHaveChecksum
+        formAutoComplete: false
+    }
+
+    region actividad-por-horario (
+        name: Actividad por Horario
+        type: chart
+        source {
+            location: localDatabase
+            type: sqlQuery
+            sqlQuery:
+                ```sql
+                SELECT 
+                    'Laboral (8-18)' as LABEL,
+                    SUM(CAMBIOS_HORARIO_LABORAL) as LABORAL,
+                    'Extendido (19-23)' as LABEL2,
+                    SUM(CAMBIOS_HORARIO_EXTENDIDO) as EXTENDIDO,
+                    'Nocturno (0-7)' as LABEL3,
+                    SUM(CAMBIOS_HORARIO_NOCTURNO) as NOCTURNO,
+                    'Fines de Semana' as LABEL4,
+                    SUM(CAMBIOS_FINES_SEMANA) as FINSEMANA
+                FROM V_AUDIT_CUMPLIMIENTO
+                
+                ```
+        }
+        layout {
+            sequence: 80
+            slot: body
+            startNewRow: false
+        }
+        appearance {
+            template: @/standard
+            templateOptions: [
+                #DEFAULT#
+                t-Region--scrollBody
+            ]
+        }
+        security {
+            escapeSpecialChars: false
+        }
+        chartLayout {
+            height: 400
+        }
+        legend {
+            show: false
+        }
+
+        series fines-de-semana (
+            name: Fines de Semana
+            execution {
+                sequence: 40
+            }
+            source {
+                location: regionSource
+            }
+            columnMapping {
+                label: LABEL4
+                value: FINSEMANA
+            }
+        )
+
+        series horario-extendido (
+            name: Horario Extendido
+            execution {
+                sequence: 20
+            }
+            source {
+                location: regionSource
+            }
+            columnMapping {
+                label: LABEL2
+                value: EXTENDIDO
+            }
+        )
+
+        series horario-laboral (
+            name: Horario Laboral
+            execution {
+                sequence: 10
+            }
+            source {
+                location: regionSource
+            }
+            columnMapping {
+                label: LABEL
+                value: LABORAL
+            }
+        )
+
+        series horario-nocturno (
+            name: Horario Nocturno
+            execution {
+                sequence: 30
+            }
+            source {
+                location: regionSource
+            }
+            columnMapping {
+                label: LABEL3
+                value: NOCTURNO
+            }
+        )
+
+        axis x (
+            name: x
+            minorTicks {
+                show: false
+            }
+        )
+
+        axis y (
+            name: y
+            value {
+                format: decimal
+                decimalPlaces: 0
+                formatScaling: none
+            }
+            minorTicks {
+                show: false
+            }
+        )
+
+    )
+
+    region breadcrumb (
+        name: Breadcrumb
+        type: breadcrumb
+        source {
+            breadcrumb: @breadcrumb
+        }
+        layout {
+            sequence: 10
+            slot: breadcrumbBar
+        }
+        appearance {
+            template: @/title-bar
+            templateOptions: [
+                #DEFAULT#
+                t-BreadcrumbRegion--useBreadcrumbTitle
+            ]
+        }
+        componentAppearance {
+            breadcrumbTemplate: @/breadcrumb
+            templateOptions: #DEFAULT#
+        }
+    )
+
+    region cards-riesgos (
+        name: Cards_riesgos
+        type: cards
+        source {
+            location: localDatabase
+            type: sqlQuery
+            sqlQuery:
+                ```sql
+                SELECT 
+                    'ALTO RIESGO' as CARD_TITLE,
+                    TO_CHAR(NVL(COUNT(CASE WHEN NIVEL_RIESGO = 'ALTO_RIESGO' THEN 1 END), 0), '999,999') as CARD_VALUE,
+                    'Cambios críticos en tablas principales' as CARD_SUBTITLE,
+                    'fa fa-exclamation-circle' as CARD_ICON,
+                    'is-danger' as CARD_COLOR
+                FROM V_AUDIT_CUMPLIMIENTO 
+                
+                
+                UNION ALL
+                
+                SELECT 
+                    'VIOLACIONES' as CARD_TITLE,
+                    TO_CHAR(NVL(COUNT(CASE WHEN ESTADO_CUMPLIMIENTO = 'VIOLACION_POLITICA' THEN 1 END), 0), '999,999') as CARD_VALUE,
+                    'Requieren atención inmediata' as CARD_SUBTITLE,
+                    'fa fa-times-circle' as CARD_ICON,
+                    'is-danger' as CARD_COLOR
+                FROM V_AUDIT_CUMPLIMIENTO 
+                
+                UNION ALL
+                
+                SELECT 
+                    'REVISIONES' as CARD_TITLE,
+                    TO_CHAR(NVL(COUNT(CASE WHEN ESTADO_CUMPLIMIENTO = 'REVISION_REQUERIDA' THEN 1 END), 0), '999,999') as CARD_VALUE,
+                    'Cambios que requieren supervisión' as CARD_SUBTITLE,
+                    'fa fa-exclamation-triangle' as CARD_ICON,
+                    'is-warning' as CARD_COLOR
+                FROM V_AUDIT_CUMPLIMIENTO 
+                
+                UNION ALL
+                
+                SELECT 
+                    'HORARIO NOCTURNO' as CARD_TITLE,
+                    TO_CHAR(NVL(SUM(CAMBIOS_HORARIO_NOCTURNO), 0), '999,999') as CARD_VALUE,
+                    'Cambios entre 00:00-07:59' as CARD_SUBTITLE,
+                    'fa fa-moon' as CARD_ICON,
+                    'is-info' as CARD_COLOR
+                FROM V_AUDIT_CUMPLIMIENTO
+                
+                ```
+        }
+        layout {
+            sequence: 50
+            slot: body
+        }
+        appearance {
+            template: @/cards-container
+            templateOptions: [
+                #DEFAULT#
+                t-CardsRegion--hideHeader js-addHiddenHeadingRoleDesc
+            ]
+        }
+        title {
+            column: CARD_TITLE
+        }
+        subtitle {
+            column: CARD_SUBTITLE
+        }
+        body {
+            column: CARD_VALUE
+        }
+        iconAndBadge {
+            iconSource: iconClassColumn
+            iconColumn: CARD_ICON
+        }
+    )
+
+    region distribución-por-nivel-de-riesgo (
+        name: Distribución por Nivel de Riesgo
+        type: chart
+        source {
+            location: localDatabase
+            type: sqlQuery
+            sqlQuery:
+                ```sql
+                SELECT 
+                    CASE 
+                        WHEN NIVEL_RIESGO = 'ALTO_RIESGO' THEN 'Alto Riesgo'
+                        WHEN NIVEL_RIESGO = 'MEDIO_RIESGO' THEN 'Riesgo Medio'
+                        WHEN NIVEL_RIESGO = 'BAJO_RIESGO' THEN 'Bajo Riesgo'
+                        ELSE NIVEL_RIESGO
+                    END as LABEL,
+                    COUNT(*) as VALUE
+                FROM V_AUDIT_CUMPLIMIENTO
+                
+                GROUP BY NIVEL_RIESGO
+                ORDER BY 
+                    CASE 
+                        WHEN NIVEL_RIESGO = 'ALTO_RIESGO' THEN 1
+                        WHEN NIVEL_RIESGO = 'MEDIO_RIESGO' THEN 2
+                        ELSE 3
+                    END
+                ```
+        }
+        layout {
+            sequence: 70
+            slot: body
+            startNewRow: false
+        }
+        appearance {
+            template: @/standard
+            templateOptions: [
+                #DEFAULT#
+                t-Region--scrollBody
+            ]
+        }
+        security {
+            escapeSpecialChars: false
+        }
+        legend {
+            show: false
+        }
+
+        series nivel-de-riesgo (
+            name: Nivel de Riesgo
+            execution {
+                sequence: 10
+            }
+            source {
+                location: regionSource
+            }
+            columnMapping {
+                label: LABEL
+                value: VALUE
+            }
+            performance {
+                maxRowsToProcess: 20
+            }
+        )
+
+        axis x (
+            name: x
+            majorTicks {
+                show: auto
+            }
+        )
+
+        axis y (
+            name: y
+            majorTicks {
+                show: auto
+            }
+        )
+
+    )
+
+    region estado-de-cumplimiento-donut (
+        name: Estado de Cumplimiento donut
+        title: Estado de Cumplimiento
+        type: chart
+        source {
+            location: localDatabase
+            type: sqlQuery
+            sqlQuery:
+                ```sql
+                SELECT 
+                    CASE 
+                        WHEN ESTADO_CUMPLIMIENTO = 'VIOLACION_POLITICA' THEN 'Violación de Política'
+                        WHEN ESTADO_CUMPLIMIENTO = 'REVISION_REQUERIDA' THEN 'Revisión Requerida'
+                        WHEN ESTADO_CUMPLIMIENTO = 'CUMPLE_POLITICAS' THEN 'Cumple Políticas'
+                        ELSE ESTADO_CUMPLIMIENTO
+                    END as LABEL,
+                    COUNT(*) as VALUE
+                FROM V_AUDIT_CUMPLIMIENTO
+                GROUP BY ESTADO_CUMPLIMIENTO
+                ORDER BY 
+                    CASE 
+                        WHEN ESTADO_CUMPLIMIENTO = 'VIOLACION_POLITICA' THEN 1
+                        WHEN ESTADO_CUMPLIMIENTO = 'REVISION_REQUERIDA' THEN 2
+                        ELSE 3
+                    END
+                ```
+        }
+        layout {
+            sequence: 60
+            slot: body
+        }
+        appearance {
+            template: @/standard
+            templateOptions: [
+                #DEFAULT#
+                t-Region--scrollBody
+            ]
+        }
+        chart {
+            type: donut
+        }
+        chartLayout {
+            height: 400
+        }
+        value {
+            format: decimal
+            decimalPlaces: 0
+            formatScaling: none
+        }
+        componentAdvanced {
+            initJavaScriptFunction:
+                ```javascript-browser
+                function (options) {
+                    options.dataFilter = function(data){
+                        data.series[0].color = "red";
+                        data.series[1].color = "orange";
+                        data.series[2].color = "green";
+                        return data;
+                    };
+                    return options;
+                
+                }
+                ```
+        }
+
+        series new (
+            name: New
+            execution {
+                sequence: 10
+            }
+            source {
+                location: regionSource
+            }
+            columnMapping {
+                label: LABEL
+                value: VALUE
+            }
+            label {
+                show: true
+                displayAs: percentageValue
+            }
+        )
+
+    )
+
+    region violaciones-de-politicas (
+        name: violaciones de politicas
+        title: Violaciones de Políticas
+        type: interactiveReport
+        source {
+            location: localDatabase
+            type: sqlQuery
+            sqlQuery:
+                ```sql
+                SELECT 
+                    TABLA,
+                    CAMPO,
+                    TOTAL_DELETES as "Eliminaciones",
+                    USUARIOS_INVOLUCRADOS as "Usuarios",
+                    REGISTROS_AFECTADOS as "Registros",
+                    PRIMER_CAMBIO as "Primer Cambio",
+                    ULTIMO_CAMBIO as "Último Cambio",
+                    CAMBIOS_HORARIO_NOCTURNO as "Cambios Nocturnos",
+                    CAMBIOS_FINES_SEMANA as "Cambios Fin Semana",
+                    NIVEL_RIESGO as "Nivel Riesgo",
+                    ESTADO_CUMPLIMIENTO as "Estado"
+                FROM V_AUDIT_CUMPLIMIENTO
+                WHERE ESTADO_CUMPLIMIENTO = 'VIOLACION_POLITICA'
+                
+                ORDER BY TOTAL_DELETES DESC
+                ```
+        }
+        layout {
+            sequence: 90
+            slot: body
+        }
+        appearance {
+            template: @/interactive-report
+            templateOptions: [
+                #DEFAULT#
+                t-IRR-region--hideHeader js-addHiddenHeadingRoleDesc
+            ]
+        }
+        pagination {
+            type: rowRangesXToY
+        }
+        performance {
+            maxRowsToProcess: 1000000
+        }
+        advanced {
+            savedReportMappingIdentifier: 64079997382008489812
+        }
+
+        column CAMPO (
+            type: plainText
+            heading {
+                heading: Campo
+            }
+            layout {
+                sequence: 20
+            }
+            source {
+                dataType: STRING
+            }
+            advanced {
+                endUserAlias: B
+            }
+        )
+
+        column "Cambios Fin Semana" (
+            type: plainText
+            heading {
+                heading: Cambios Fin Semana
+                alignment: end
+            }
+            layout {
+                sequence: 90
+                columnAlignment: end
+            }
+            source {
+                dataType: NUMBER
+            }
+            advanced {
+                endUserAlias: I
+            }
+        )
+
+        column "Cambios Nocturnos" (
+            type: plainText
+            heading {
+                heading: Cambios Nocturnos
+                alignment: end
+            }
+            layout {
+                sequence: 80
+                columnAlignment: end
+            }
+            source {
+                dataType: NUMBER
+            }
+            advanced {
+                endUserAlias: H
+            }
+        )
+
+        column Eliminaciones (
+            type: plainText
+            heading {
+                heading: Eliminaciones
+                alignment: end
+            }
+            layout {
+                sequence: 30
+                columnAlignment: end
+            }
+            source {
+                dataType: NUMBER
+            }
+            advanced {
+                endUserAlias: C
+            }
+        )
+
+        column Estado (
+            type: plainText
+            heading {
+                heading: Estado
+            }
+            layout {
+                sequence: 110
+            }
+            source {
+                dataType: STRING
+            }
+            advanced {
+                endUserAlias: K
+            }
+        )
+
+        column "Nivel Riesgo" (
+            type: plainText
+            heading {
+                heading: Nivel Riesgo
+            }
+            layout {
+                sequence: 100
+            }
+            source {
+                dataType: STRING
+            }
+            advanced {
+                endUserAlias: J
+            }
+        )
+
+        column "Primer Cambio" (
+            type: plainText
+            heading {
+                heading: Primer Cambio
+            }
+            layout {
+                sequence: 60
+            }
+            source {
+                dataType: STRING
+            }
+            advanced {
+                endUserAlias: F
+            }
+        )
+
+        column Registros (
+            type: plainText
+            heading {
+                heading: Registros
+                alignment: end
+            }
+            layout {
+                sequence: 50
+                columnAlignment: end
+            }
+            source {
+                dataType: NUMBER
+            }
+            advanced {
+                endUserAlias: E
+            }
+        )
+
+        column TABLA (
+            type: plainText
+            heading {
+                heading: Tabla
+            }
+            layout {
+                sequence: 10
+            }
+            source {
+                dataType: STRING
+            }
+            advanced {
+                endUserAlias: A
+            }
+        )
+
+        column Usuarios (
+            type: plainText
+            heading {
+                heading: Usuarios
+                alignment: end
+            }
+            layout {
+                sequence: 40
+                columnAlignment: end
+            }
+            source {
+                dataType: NUMBER
+            }
+            advanced {
+                endUserAlias: D
+            }
+        )
+
+        column "Último Cambio" (
+            type: plainText
+            heading {
+                heading: Último Cambio
+            }
+            layout {
+                sequence: 70
+            }
+            source {
+                dataType: STRING
+            }
+            advanced {
+                endUserAlias: G
+            }
+        )
+
+        page {
+            size: a4
+            units: millimeters
+            width: 297
+            height: 210
+            borderWidth: 0.5
+            borderColor: #666666
+        }
+        pageHeader {
+            pageHeaderText: Violaciones de Políticas
+        }
+
+        savedReport 640898956 (
+            visibility: primaryDefault
+            view {
+                rowsPerPage: 50
+            }
+
+            displayColumn CAMPO (
+                sequence: 2
+            )
+
+            displayColumn "Cambios Fin Semana" (
+                sequence: 9
+            )
+
+            displayColumn "Cambios Nocturnos" (
+                sequence: 8
+            )
+
+            displayColumn "Eliminaciones" (
+                sequence: 3
+            )
+
+            displayColumn "Estado" (
+                sequence: 11
+            )
+
+            displayColumn "Nivel Riesgo" (
+                sequence: 10
+            )
+
+            displayColumn "Primer Cambio" (
+                sequence: 6
+            )
+
+            displayColumn "Registros" (
+                sequence: 5
+            )
+
+            displayColumn TABLA (
+                sequence: 1
+            )
+
+            displayColumn "Usuarios" (
+                sequence: 4
+            )
+
+            displayColumn "Último Cambio" (
+                sequence: 7
+            )
+
+        )
+
+    )
+
+)
+

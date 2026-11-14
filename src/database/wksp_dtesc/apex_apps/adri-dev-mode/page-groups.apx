@@ -1,0 +1,50 @@
+pageGroup administration (
+    name: Administration
+)
+
+pageGroup archivos (
+    name: Archivos
+    description {
+        description:
+            ```
+            Agrupar por funcionalidad
+            
+            ```
+    }
+)
+
+pageGroup implementadores (
+    name: Implementadores
+    description {
+        description: Grupo de paginas para los implementadores
+    }
+)
+
+pageGroup jefaturas (
+    name: Jefaturas
+    description {
+        description: Grupo de paginas accesibles solo para las Jefaturas
+    }
+)
+
+pageGroup técnicos (
+    name: Técnicos
+    description {
+        description: Grupo de paginas para accesos de los técnicos
+    }
+)
+
+pageGroup wzrd-servicios (
+    name: WZRD_SERVICIOS
+    description {
+        description: Pagina para agrupar los servicios
+    }
+)
+
+pageGroup wzrd-wan (
+    name: WZRD_WAN
+    description {
+        description: Paginas del Wizard WAN
+    }
+)
+

@@ -1,0 +1,427 @@
+page 420 (
+    name: TEST_MAP_WAN
+    alias: TEST-MAP-WAN
+    title: Mapa Wan
+    appearance {
+        pageTemplate: @/standard
+        templateOptions: #DEFAULT#
+    }
+    navigation {
+        cursorFocus: doNotFocusCursor
+        warnOnUnsavedChanges: false
+    }
+    security {
+        pageAccessProtection: argumentsMustHaveChecksum
+        formAutoComplete: false
+    }
+
+    region filtro-mapa (
+        name: FILTRO_MAPA
+        title: Filtrar
+        type: facetedSearch
+        source {
+            filteredRegion: @test-map-wan
+        }
+        layout {
+            sequence: 10
+            slot: body
+        }
+        appearance {
+            template: @/standard
+            templateOptions: [
+                #DEFAULT#
+                t-Region--scrollBody
+            ]
+        }
+        config {
+            buildOption: @commented-out
+        }
+        settings {
+            compactNosThreshold: 10000
+            displayChartForTopNValues: 10
+        }
+
+        facet P420_SEARCH (
+            type: search
+            label {
+                label: Search
+            }
+            layout {
+                sequence: 10
+            }
+        )
+
+        facet P420_TIPO_SITIO (
+            type: checkboxGroup
+            label {
+                label: TIPO_SITIO
+            }
+            lov {
+                type: distinctValues
+            }
+            layout {
+                sequence: 60
+            }
+            listEntries {
+                maxDisplayedEntries: 7
+            }
+            source {
+                databaseColumn: TIPO_SITIO
+            }
+        )
+
+        facet P420_ZONA (
+            type: radioGroup
+            label {
+                label: ZONA
+            }
+            lov {
+                type: distinctValues
+            }
+            layout {
+                sequence: 40
+            }
+            listEntries {
+                zeroCountEntries: disable
+                sortByTopCounts: false
+                maxDisplayedEntries: 7
+            }
+            source {
+                databaseColumn: ZONA
+            }
+        )
+
+    )
+
+    region test-map-wan (
+        name: TEST_MAP_WAN
+        title: Mapas WAN
+        type: map
+        source {
+            location: localDatabase
+            tableName: V_SITIOS_GPS
+            whereClause:
+                ```sql
+                id in 
+                (select DISTINCT sitio_id from V_SITIOS_EQUIPOS VSE 
+                JOIN SGT_EQUIPOS_WAN SEW ON VSE.EQUIPO_ID = SEW.EQUIPO_A_ID
+                where SEW.WAN_ID = :P420_WAN
+                )
+                ```
+            pageItemsToSubmit: P420_WAN
+        }
+        layout {
+            sequence: 30
+            slot: body
+        }
+        appearance {
+            template: @/blank-with-attributes-no-grid
+            templateOptions: #DEFAULT#
+        }
+        advanced {
+            htmlDomId: TEST_MAP_WAN
+        }
+        controls {
+            options: [
+                mousewheelZoom
+                rectangleZoom
+                scaleBar
+                getBrowserLocation
+                distanceTool
+            ]
+        }
+        attributes {
+            messagesPosition: below
+        }
+
+        layer sitios (
+            name: SITIOS
+            label {
+                label: SITIOS
+            }
+            layout {
+                sequence: 20
+            }
+            source {
+                location: regionSource
+            }
+            columnMapping {
+                geometryColumnDataType: longitudeLatitude
+                longitudeColumn: LON
+                latitudeColumn: LAT
+                primaryKeyColumn: ID
+            }
+            tooltip {
+                column: SIGLAS
+            }
+            infoWindow {
+                titleColumn: SIGLAS
+            }
+            messages {
+                whenNoDataFound: No data
+                whenMoreDataFound: More data
+            }
+        )
+
+        layer trazado (
+            name: Trazado
+            layerType: lines
+            layout {
+                sequence: 10
+            }
+            source {
+                type: sqlQuery
+                sqlQuery: select 'TRAZADO' TRAZADO, CREAR_RUTA_WAN(:P420_WAN) FROM DUAL;
+                pageItemsToSubmit: P420_WAN
+            }
+            columnMapping {
+                geometryColumn: CREAR_RUTA_WAN(:P420_WAN)
+            }
+        )
+
+    )
+
+    pageItem P420_WAN (
+        type: popupLov
+        label {
+            label: Wan
+            alignment: left
+        }
+        lov {
+            type: sharedComponent
+            lov: @enlaces-wan-filtrado-en-uso
+        }
+        layout {
+            sequence: 20
+            slot: body
+            alignment: left
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+            width: 30
+        }
+    )
+
+    dynamicAction mover-maps (
+        name: MOVER_MAPS
+        execution {
+            sequence: 40
+        }
+        when {
+            event: apexafterrefresh
+            selectionType: region
+            region: @test-map-wan
+        }
+
+        action mover-maps (
+            name: MOVER_MAPS
+            action: executeJsCode
+            settings {
+                jsCode:
+                    ```javascript-browser
+                    var map = apex.region("TEST_MAP_WAN").call("getMapObject");
+                    console.log("Maps");
+                    console.log(map);
+                    console.log("Layers");
+                    
+                    console.log(map.getStyle().layers);
+                    // Esperar un pequeño tiempo para asegurar que las capas estén renderizadas
+                    setTimeout(function () {
+                        console.log("Dentro de setTimeout Llamando a flyto");
+                        
+                        console.log(map.getStyle().layers);
+                        var bounds = map.getBounds();
+                        console.log(bounds);  
+                    
+                         map.fitBounds(bounds, {
+                                maxZoom: 15,
+                                duration: 1000
+                            });  
+                    
+                    }, 300);
+                    ```
+            }
+            execution {
+                sequence: 10
+                fireOnInit: false
+            }
+            config {
+                buildOption: @commented-out
+            }
+        )
+
+    )
+
+    dynamicAction refrescar (
+        name: Refrescar
+        execution {
+            sequence: 30
+        }
+        when {
+            selectionType: items
+            items: P420_WAN
+        }
+
+        action native-refresh (
+            action: refresh
+            affectedElements {
+                selectionType: region
+                region: @test-map-wan
+            }
+            execution {
+                sequence: 10
+                fireOnInit: false
+            }
+        )
+
+    )
+
+    dynamicAction setearlistener (
+        name: SetearListener
+        execution {
+            sequence: 20
+        }
+        when {
+            selectionType: items
+            items: P420_WAN
+        }
+
+        action native-javascript-code (
+            action: executeJsCode
+            settings {
+                jsCode:
+                    ```javascript-browser
+                    /*
+                    var mapRegion = apex.region("TEST_MAP_WAN"); // Static ID de tu mapa
+                    console.log(mapRegion);
+                    
+                    
+                    mapRegion.widget().one("spatialmapchanged", function(){
+                        // Obtener capa con las geometrías cargadas
+                        var layerGroup = mapRegion.getLayer("features");
+                        if (layerGroup && layerGroup.getLayers().length > 0) {
+                            // Ajustar la vista a los puntos cargados
+                            mapRegion.getMap().fitBounds(layerGroup.getBounds());
+                        }
+                    });
+                    */
+                    
+                    
+                    apex.server.process(
+                        'GET_ONE_LNG_LAT', { pageItems: '#P420_WAN' },
+                        {
+                            success: function (apiData) {
+                                console.log(apiData.data);
+                                if (apiData.data) {
+                                    apex.region("TEST_MAP_WAN").call("getMapObject").flyTo({
+                                        center: [apiData.data[0].LON, apiData.data[0].LAT],
+                                        screenSpeed: 0.8
+                                    });
+                                }
+                            }
+                        }
+                    );
+                    
+                    /*var region = apex.region("TEST_MAP_WAN");
+                    console.log(region);
+                    
+                    region.widget().one("spatialmapchanged", function () {
+                        var map = region.getMap();
+                        var bounds = null;
+                        console.log("spatialmapchanged");
+                        map.eachLayer(function (layer) {
+                            try {
+                                // 🟢 CAPA DE PUNTOS (marcadores)
+                                if (layer.getLatLng) {
+                                    var ll = layer.getLatLng();
+                                    if (!bounds) bounds = L.latLngBounds(ll, ll);
+                                    else bounds.extend(ll);
+                                }
+                    
+                                // 🔵 CAPA DE RUTAS (líneas o polígonos)
+                                else if (layer.getLatLngs) {
+                                    var addLatLngs = function (arr) {
+                                        arr.forEach(function (item) {
+                                            if (Array.isArray(item)) {
+                                                addLatLngs(item);
+                                            } else {
+                                                if (!bounds) bounds = L.latLngBounds(item, item);
+                                                else bounds.extend(item);
+                                            }
+                                        });
+                                    };
+                                    addLatLngs(layer.getLatLngs());
+                                }
+                    
+                                // 🟣 GeoJSON (por si APEX devuelve datos como feature collection)
+                                else if (layer.feature && layer.feature.geometry) {
+                                    var coords = layer.feature.geometry.coordinates;
+                                    var addCoords = function (c) {
+                                        if (Array.isArray(c[0])) c.forEach(addCoords);
+                                        else {
+                                            var ll = L.latLng(c[1], c[0]);
+                                            if (!bounds) bounds = L.latLngBounds(ll, ll);
+                                            else bounds.extend(ll);
+                                        }
+                                    };
+                                    addCoords(coords);
+                                }
+                            } catch (e) {
+                                console.error("Error procesando capa:", e);
+                            }
+                        });
+                    
+                        // Ajustar cámara si hay datos válidos
+                        if (bounds && bounds.isValid()) {
+                            map.fitBounds(bounds, { padding: [20, 20] }); // padding para no pegarse a los bordes
+                        } else {
+                            console.log("⚠️ No se encontraron coordenadas para centrar el mapa.");
+                        }
+                    });
+                    */
+                    ```
+            }
+            execution {
+                sequence: 10
+                fireOnInit: false
+            }
+        )
+
+    )
+
+    process get-one-lng-lat (
+        name: GET_ONE_LNG_LAT
+        type: executeCode
+        source {
+            plsqlCode:
+                ```plsql
+                --OBTIENE UNA LNG Y LAT PARA MOVER EL MAPA
+                declare
+                l_cursor SYS_REFCURSOR;
+                BEGIN
+                
+                    open l_cursor for
+                    SELECT LON, LAT FROM V_SITIOS_GPS V
+                    join v_sitios_equipos se  on   V.ID = se.SITIO_ID
+                    join sgt_equipos_wan wan on se.equipo_id = wan.equipo_a_id
+                    WHERE wan.WAN_ID = :P420_WAN;
+                
+                    -- DEBO RETORNAR EL PRIMER ELEMENTO NOMAS 
+                    APEX_JSON.OPEN_OBJECT;
+                    APEX_JSON.WRITE('data', l_cursor); -- Convierte el cursor a JSON array
+                    APEX_JSON.CLOSE_OBJECT;
+                END;
+                ```
+        }
+        execution {
+            sequence: 10
+            point: ajaxCallback
+        }
+        advanced {
+            executionMappingIdentifier: 88034740753693770450
+        }
+    )
+
+)
+

@@ -1,0 +1,291 @@
+page 405 (
+    name: Seleccionar Equipos
+    alias: SELECCIONAR-EQUIPOS
+    title: Seleccionar Equipos
+    pageGroup: @wzrd-wan
+    appearance {
+        pageTemplate: @/standard
+        templateOptions: #DEFAULT#
+    }
+    navigation {
+        cursorFocus: doNotFocusCursor
+    }
+    javaScript {
+        functionAndGlobalVariableDeclaration:
+            ```javascript-browser
+            function filtrarShuttle() {
+            var filtro = $("#P405_FILTRAR_EQUIPOS").val();
+                var filtroLower = filtro.toLowerCase();
+                var opciones = document.querySelectorAll("#P405_EQUIPOS_LEFT option");
+            
+                opciones.forEach(function (opt) {
+                    if (opt.text.toLowerCase().includes(filtroLower)) {
+                        opt.style.display = "";   // mostrar
+                    } else {
+                        opt.style.display = "none"; // ocultar
+                    }
+                });
+            }
+            ```
+    }
+    security {
+        pageAccessProtection: argumentsMustHaveChecksum
+        formAutoComplete: false
+    }
+
+    region step (
+        name: Step 3
+        type: staticContent
+        layout {
+            sequence: 10
+            parentRegion: @wizard-progress
+            slot: wizardSubRegions
+        }
+        appearance {
+            template: @/standard
+            templateOptions: [
+                #DEFAULT#
+                t-Region--removeHeader js-removeLandmark
+                t-Region--scrollBody
+            ]
+        }
+    )
+
+    region wizard-progress (
+        name: Wizard Progress
+        type: list
+        source {
+            list: @wzrd-conexiones-wan
+        }
+        layout {
+            sequence: 20
+            slot: breadcrumbBar
+        }
+        appearance {
+            template: @/wizard-container
+            templateOptions: [
+                #DEFAULT#
+                t-Wizard--hideStepsXSmall
+            ]
+        }
+        componentAppearance {
+            listTemplate: @/wizard-progress
+            templateOptions: [
+                #DEFAULT#
+                t-WizardSteps--displayLabels
+            ]
+        }
+    )
+
+    pageItem P405_EQUIPOS (
+        type: shuttle
+        label {
+            label: Equipos
+            alignment: left
+        }
+        lov {
+            type: sqlQuery
+            sqlQuery:
+                ```sql
+                SELECT e.nombre  display_value,
+                    e.id return_value
+                FROM sgt_equipos e
+                inner join sgt_sitios s on e.sitio_id = s.id  
+                WHERE s.id IN (
+                    SELECT column_value FROM apex_string.split_numbers(:P402_SITIOS, ',')
+                )
+                ```
+        }
+        multipleValues {
+            separator: ,
+        }
+        layout {
+            sequence: 20
+            region: @step
+            slot: regionBody
+            alignment: left
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+            height: 5
+        }
+        source {
+            type: sqlQueryMultipleValues
+            sqlQuery:
+                ```sql
+                SELECT EQUIPO_ID FROM SGT_EQUIPOS_WAN wan
+                where wan.WAN_ID = :P401_ID
+                order by seq
+                ```
+        }
+    )
+
+    pageItem P405_FILTRAR_EQUIPOS (
+        type: textField
+        label {
+            label: Filtrar Equipos
+            alignment: left
+        }
+        layout {
+            sequence: 10
+            region: @step
+            slot: regionBody
+            alignment: left
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+            width: 30
+        }
+    )
+
+    button close (
+        buttonName: CLOSE
+        label: Cancel
+        layout {
+            sequence: 20
+            region: @wizard-progress
+            slot: close
+        }
+        appearance {
+            buttonTemplate: @/text
+            templateOptions: #DEFAULT#
+        }
+        behavior {
+            action: redirectThisApp
+            target: {
+                page: 34
+                clearCache: 405
+            }
+            warnOnUnsavedChanges: doNotCheck
+        }
+    )
+
+    button next (
+        buttonName: NEXT
+        label: Next
+        layout {
+            sequence: 20
+            region: @wizard-progress
+            slot: next
+        }
+        appearance {
+            buttonTemplate: @/text-with-icon
+            hot: true
+            templateOptions: t-Button--iconRight
+            icon: fa-chevron-right
+        }
+        behavior {
+            warnOnUnsavedChanges: doNotCheck
+        }
+    )
+
+    button previous (
+        buttonName: PREVIOUS
+        label: <
+        layout {
+            sequence: 20
+            region: @wizard-progress
+            slot: previous
+        }
+        appearance {
+            buttonTemplate: @/icon
+            templateOptions: #DEFAULT#
+            icon: fa-chevron-left
+        }
+        behavior {
+            warnOnUnsavedChanges: doNotCheck
+        }
+    )
+
+    dynamicAction filtrar (
+        name: FILTRAR
+        execution {
+            sequence: 20
+        }
+        when {
+            selectionType: items
+            items: P405_FILTRAR_EQUIPOS
+        }
+
+        action filtrar (
+            name: FILTRAR
+            action: executeJsCode
+            settings {
+                jsCode: filtrarShuttle();
+            }
+            execution {
+                sequence: 10
+                fireOnInit: false
+            }
+        )
+
+    )
+
+    dynamicAction no-submmit (
+        name: NO_SUBMMIT
+        execution {
+            sequence: 10
+        }
+        when {
+            event: keypress
+            selectionType: items
+            items: P405_FILTRAR_EQUIPOS
+        }
+
+        action no-submit (
+            name: NO_SUBMIT
+            action: executeJsCode
+            settings {
+                jsCode:
+                    ```javascript-browser
+                    if (event.key === "Enter") {
+                        filtrarShuttle();
+                        event.preventDefault();
+                        return false;
+                    }
+                    ```
+            }
+            execution {
+                sequence: 10
+                fireOnInit: false
+            }
+        )
+
+    )
+
+    branch (
+        name: Go To Page 403
+        execution {
+            sequence: 10
+            point: processing
+        }
+        behavior {
+            target: {
+                page: 403
+            }
+        }
+        serverSideCondition {
+            whenButtonPressed: @next
+        }
+    )
+
+    branch (
+        name: Go To Page 402
+        execution {
+            sequence: 20
+            point: processing
+        }
+        behavior {
+            target: {
+                page: 402
+            }
+        }
+        serverSideCondition {
+            whenButtonPressed: @previous
+        }
+    )
+
+)
+

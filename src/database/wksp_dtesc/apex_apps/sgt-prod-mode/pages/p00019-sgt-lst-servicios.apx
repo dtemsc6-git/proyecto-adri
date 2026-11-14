@@ -1,0 +1,343 @@
+page 19 (
+    name: SGT_LST_SERVICIOS
+    alias: SGT-LST-SERVICIOS
+    title: Servicios
+    appearance {
+        pageTemplate: @/standard
+        templateOptions: #DEFAULT#
+    }
+    navigation {
+        cursorFocus: doNotFocusCursor
+    }
+    security {
+        pageAccessProtection: argumentsMustHaveChecksum
+        formAutoComplete: false
+    }
+
+    region breadcrumb (
+        name: Breadcrumb
+        type: breadcrumb
+        source {
+            breadcrumb: @breadcrumb
+        }
+        layout {
+            sequence: 10
+            slot: breadcrumbBar
+        }
+        appearance {
+            template: @/title-bar
+            templateOptions: [
+                #DEFAULT#
+                t-BreadcrumbRegion--useBreadcrumbTitle
+            ]
+        }
+        componentAppearance {
+            breadcrumbTemplate: @/breadcrumb
+            templateOptions: #DEFAULT#
+        }
+    )
+
+    region sgt-lst-servicios (
+        name: SGT_LST_SERVICIOS
+        type: interactiveReport
+        source {
+            location: localDatabase
+            tableName: SGT_SERVICIOS
+            orderByClause: ID DESC
+        }
+        layout {
+            sequence: 10
+            slot: body
+        }
+        appearance {
+            template: @/interactive-report
+            templateOptions: [
+                #DEFAULT#
+                t-IRR-region--hideHeader js-addHiddenHeadingRoleDesc
+            ]
+        }
+        link {
+            linkColumn: customTarget
+            target: {
+                page: 50
+                items: {
+                    P50_ID: \#ID#\
+                }
+                clearCache: [
+                    50
+                    51
+                    52
+                    53
+                    54
+                ]
+                action: resetPagination
+            }
+            linkIcon: <span role="img" aria-label="Edit" class="fa fa-edit" title="Edit"></span>
+            authorizationScheme: @implementador-rights
+        }
+        pagination {
+            type: rowRangesXToYOfZ
+            displayPosition: topRight
+        }
+        messages {
+            whenNoDataFound: No data found.
+            whenMoreDataFound: The maximum row count for this report is #MAX_ROW_COUNT# rows.  Please apply a filter to reduce the number of records in your query.
+        }
+        actionsMenu {
+            controlBreak: false
+            highlight: false
+            compute: false
+            aggregate: false
+            chart: false
+            groupBy: false
+            pivot: false
+            flashback: false
+            saveReport: false
+            reset: false
+            help: false
+        }
+        advanced {
+            savedReportMappingIdentifier: 44129480584017328235
+        }
+
+        column ACTUALIZADO_EL (
+            type: plainText
+            heading {
+                heading: Actualizado El
+            }
+            layout {
+                sequence: 53
+            }
+            source {
+                dataType: DATE
+            }
+            advanced {
+                endUserAlias: H
+            }
+            config {
+                buildOption: @commented-out
+            }
+        )
+
+        column ACTUALIZADO_POR (
+            type: plainText
+            heading {
+                heading: Actualizado Por
+            }
+            layout {
+                sequence: 43
+            }
+            source {
+                dataType: STRING
+            }
+            advanced {
+                endUserAlias: G
+            }
+            config {
+                buildOption: @commented-out
+            }
+        )
+
+        column CREADO_EL (
+            type: plainText
+            heading {
+                heading: Creado El
+            }
+            layout {
+                sequence: 33
+            }
+            source {
+                dataType: DATE
+            }
+            advanced {
+                endUserAlias: F
+            }
+            config {
+                buildOption: @commented-out
+            }
+        )
+
+        column CREADO_POR (
+            type: plainText
+            heading {
+                heading: Creado Por
+            }
+            layout {
+                sequence: 23
+            }
+            source {
+                dataType: STRING
+            }
+            advanced {
+                endUserAlias: E
+            }
+            config {
+                buildOption: @commented-out
+            }
+        )
+
+        column DESCRIPCION (
+            type: plainText
+            heading {
+                heading: Descripcion
+            }
+            layout {
+                sequence: 13
+            }
+            source {
+                dataType: STRING
+            }
+            advanced {
+                endUserAlias: J
+            }
+        )
+
+        column ID (
+            type: hidden
+            heading {
+                heading: ID
+            }
+            layout {
+                sequence: 0
+            }
+            source {
+                primaryKey: true
+                dataType: NUMBER
+            }
+            advanced {
+                endUserAlias: A
+            }
+        )
+
+        column NIVEL_DE_PRIORIDAD (
+            type: plainTextBasedOnLov
+            heading {
+                heading: Nivel De Prioridad
+                alignment: end
+            }
+            lov {
+                lov: @servicios-nivel-prioridad
+            }
+            layout {
+                sequence: 3
+                columnAlignment: end
+            }
+            source {
+                dataType: NUMBER
+            }
+            advanced {
+                endUserAlias: C
+            }
+        )
+
+        column NOMBRE (
+            type: plainText
+            heading {
+                heading: Nombre
+            }
+            layout {
+                sequence: 2
+            }
+            source {
+                dataType: STRING
+            }
+            advanced {
+                endUserAlias: B
+            }
+        )
+
+        page {
+            borderWidth: 0.5
+            borderColor: #666666
+        }
+        pageHeader {
+            pageHeaderText: SGT_LST_SERVICIOS
+        }
+
+        savedReport 441311131 (
+            visibility: primaryDefault
+            view {
+                rowsPerPage: 50
+            }
+
+            displayColumn NIVEL_DE_PRIORIDAD (
+                sequence: 2
+            )
+
+            displayColumn NOMBRE (
+                sequence: 1
+            )
+
+        )
+
+    )
+
+    button grilla (
+        buttonName: GRILLA
+        label: Grilla Editable
+        layout {
+            sequence: 30
+            region: @sgt-lst-servicios
+            slot: rightOfInteractiveReportSearchBar
+        }
+        appearance {
+            buttonTemplate: @/text
+            templateOptions: #DEFAULT#
+        }
+        behavior {
+            action: redirectThisApp
+            target: {
+                page: 16
+            }
+            warnOnUnsavedChanges: doNotCheck
+        }
+    )
+
+    button wzrd (
+        buttonName: WZRD
+        label: Asistente
+        layout {
+            sequence: 20
+            region: @sgt-lst-servicios
+            slot: rightOfInteractiveReportSearchBar
+        }
+        appearance {
+            buttonTemplate: @/text
+            templateOptions: #DEFAULT#
+        }
+        behavior {
+            action: redirectThisApp
+            target: {
+                page: 50
+            }
+            warnOnUnsavedChanges: doNotCheck
+        }
+    )
+
+    dynamicAction edit-report-dialog-closed (
+        name: Edit Report - Dialog Closed
+        execution {
+            sequence: 10
+        }
+        when {
+            event: apexafterclosedialog
+            selectionType: region
+            region: @sgt-lst-servicios
+        }
+
+        action native-refresh (
+            action: refresh
+            affectedElements {
+                selectionType: region
+                region: @sgt-lst-servicios
+            }
+            execution {
+                sequence: 10
+                fireOnInit: false
+            }
+        )
+
+    )
+
+)
+

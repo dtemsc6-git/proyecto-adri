@@ -1,0 +1,836 @@
+page 100 (
+    name: Dashboard de Gestión de Auditoría - Últimos 30 días
+    alias: DASHBOARD-DE-GESTIÓN-DE-AUDITORÍA
+    title: Dashboard de Gestión de Auditoría - Últimos 30 días
+    appearance {
+        pageTemplate: @/standard
+        templateOptions: #DEFAULT#
+    }
+    navigation {
+        cursorFocus: doNotFocusCursor
+    }
+    css {
+        inline:
+            ```css
+            .dashboard-page {
+                background-color: #f8f9fc;
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                min-height: 100vh;
+            }
+            
+            .dashboard-card {
+                border-radius: 10px;
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+                transition: transform 0.3s ease, box-shadow 0.3s ease;
+                margin-bottom: 20px;
+                background: white;
+            }
+            
+            .dashboard-card:hover {
+                transform: translateY(-3px);
+                box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+            }
+            
+            /* Estilos para Cards de métricas */
+            .metric-card {
+                text-align: center;
+                padding: 25px;
+                border-left: 4px solid #3498db;
+            }
+            
+            .metric-card.is-danger {
+                border-left-color: #e74c3c;
+                background: linear-gradient(135deg, #fff5f5 0%, #fed7d7 100%);
+            }
+            
+            .metric-card.is-warning {
+                border-left-color: #f39c12;
+                background: linear-gradient(135deg, #fffbf0 0%, #feebcb 100%);
+            }
+            
+            .metric-card.is-success {
+                border-left-color: #27ae60;
+                background: linear-gradient(135deg, #f0fff4 0%, #c6f6d5 100%);
+            }
+            
+            .metric-card.is-info {
+                border-left-color: #3498db;
+                background: linear-gradient(135deg, #ebf8ff 0%, #bee3f8 100%);
+            }
+            
+            .metric-value {
+                font-size: 2.8rem;
+                font-weight: 700;
+                color: #2c3e50;
+                margin: 15px 0;
+                text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+            }
+            
+            .metric-subtitle {
+                color: #7f8c8d;
+                font-size: 0.95rem;
+                font-weight: 500;
+            }
+            
+            /* Estilos para gráficos */
+            .chart-container {
+                background: white;
+                border-radius: 10px;
+                padding: 25px;
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+                margin-bottom: 20px;
+            }
+            
+            .chart-title {
+                font-size: 1.4rem;
+                font-weight: 600;
+                color: #2c3e50;
+                margin-bottom: 20px;
+                text-align: center;
+                border-bottom: 2px solid #ecf0f1;
+                padding-bottom: 10px;
+            }
+            
+            /* Estilos para tabla */
+            .audit-table {
+                background: white;
+                border-radius: 10px;
+                overflow: hidden;
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            }
+            
+            .table-header {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+                padding: 15px 20px;
+                font-size: 1.2rem;
+                font-weight: 600;
+            }
+            
+            /* Filtros */
+            .filter-container {
+                background: white;
+                border-radius: 10px;
+                padding: 20px;
+                margin-bottom: 20px;
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+                border-left: 4px solid #3498db;
+            }
+            
+            .filter-title {
+                font-size: 1.1rem;
+                font-weight: 600;
+                color: #2c3e50;
+                margin-bottom: 15px;
+            }
+            
+            /* Botones */
+            .btn-refresh {
+                background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+                color: white;
+                border: none;
+                padding: 12px 24px;
+                border-radius: 6px;
+                cursor: pointer;
+                font-size: 1rem;
+                font-weight: 500;
+                transition: all 0.3s ease;
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            }
+            
+            .btn-refresh:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+            }
+            
+            /* Header del dashboard */
+            .dashboard-header {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+                padding: 30px;
+                border-radius: 10px;
+                margin-bottom: 30px;
+                text-align: center;
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            }
+            
+            .dashboard-title {
+                font-size: 2.2rem;
+                font-weight: 300;
+                margin-bottom: 10px;
+                text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+            }
+            
+            .dashboard-subtitle {
+                font-size: 1.1rem;
+                opacity: 0.9;
+                font-weight: 400;
+            }
+            
+            /* Responsive Design */
+            @media (max-width: 768px) {
+                .metric-value {
+                    font-size: 2rem;
+                }
+                
+                .dashboard-card {
+                    margin-bottom: 15px;
+                    padding: 15px;
+                }
+                
+                .chart-container {
+                    padding: 15px;
+                }
+                
+                .dashboard-title {
+                    font-size: 1.8rem;
+                }
+            }
+            
+            @media (max-width: 480px) {
+                .metric-value {
+                    font-size: 1.6rem;
+                }
+                
+                .dashboard-header {
+                    padding: 20px;
+                }
+                
+                .filter-container {
+                    padding: 15px;
+                }
+            }
+            
+            /* Animaciones */
+            @keyframes fadeInUp {
+                from {
+                    opacity: 0;
+                    transform: translateY(20px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+            
+            .dashboard-card {
+                animation: fadeInUp 0.6s ease-out;
+            }
+            
+            /* Optimización para gráficos compactos */
+            .chart-container-small {
+                padding: 15px !important;
+                margin-bottom: 15px !important;
+            }
+            
+            .chart-container-small .a-Region-body {
+                padding: 10px !important;
+            }
+            
+            /* Ajustar altura específica para pie chart */
+            .apex-chart-pie {
+                max-height: 250px !important;
+            }
+            
+            /* Mejorar spacing entre regiones */
+            .t-Region {
+                margin-bottom: 15px;
+            }
+            ```
+    }
+    security {
+        pageAccessProtection: argumentsMustHaveChecksum
+        formAutoComplete: false
+    }
+
+    region actividad-por-módulo (
+        name: Actividad por Módulo
+        title: Actividad por Módulo
+        type: chart
+        source {
+            location: localDatabase
+            type: sqlQuery
+            sqlQuery:
+                ```sql
+                SELECT 
+                    MODULO as LABEL,
+                    TOTAL_CAMBIOS as VALUE
+                FROM V_AUDIT_DASHBOARD_EJECUTIVO 
+                WHERE MODULO != 'RESUMEN GENERAL'
+                ORDER BY TOTAL_CAMBIOS DESC;
+                ```
+        }
+        layout {
+            sequence: 30
+            slot: body
+            startNewRow: false
+            columnSpan: 8
+        }
+        appearance {
+            template: @/standard
+            templateOptions: [
+                #DEFAULT#
+                t-Region--scrollBody
+            ]
+        }
+        chartLayout {
+            height: 280
+        }
+        legend {
+            show: false
+        }
+
+        series cambios-por-módulo (
+            name: Cambios por Módulo
+            execution {
+                sequence: 10
+            }
+            source {
+                location: regionSource
+            }
+            columnMapping {
+                label: LABEL
+                value: VALUE
+            }
+        )
+
+        axis x (
+            name: x
+            minorTicks {
+                show: false
+            }
+        )
+
+        axis y (
+            name: y
+            value {
+                format: decimal
+                decimalPlaces: 0
+                formatScaling: none
+            }
+            minorTicks {
+                show: false
+            }
+        )
+
+    )
+
+    region breadcrumb (
+        name: Breadcrumb
+        type: breadcrumb
+        source {
+            breadcrumb: @breadcrumb
+        }
+        layout {
+            sequence: 10
+            slot: breadcrumbBar
+        }
+        appearance {
+            template: @/title-bar
+            templateOptions: [
+                #DEFAULT#
+                t-BreadcrumbRegion--useBreadcrumbTitle
+            ]
+        }
+        componentAppearance {
+            breadcrumbTemplate: @/breadcrumb
+            templateOptions: #DEFAULT#
+        }
+    )
+
+    region distribución-por-criticidad (
+        name: Distribución por Criticidad
+        title: Distribución por Criticidad
+        type: chart
+        source {
+            location: localDatabase
+            type: sqlQuery
+            sqlQuery:
+                ```sql
+                SELECT 
+                    CASE 
+                        WHEN CAMBIOS_CRITICOS > 0 THEN 'Críticos'
+                        ELSE NULL
+                    END as LABEL,
+                    CAMBIOS_CRITICOS as VALUE
+                FROM V_AUDIT_DASHBOARD_EJECUTIVO 
+                WHERE MODULO = 'RESUMEN GENERAL' AND CAMBIOS_CRITICOS > 0
+                
+                UNION ALL
+                
+                SELECT 
+                    CASE 
+                        WHEN CAMBIOS_MEDIOS > 0 THEN 'Medios'
+                        ELSE NULL
+                    END as LABEL,
+                    CAMBIOS_MEDIOS as VALUE
+                FROM V_AUDIT_DASHBOARD_EJECUTIVO 
+                WHERE MODULO = 'RESUMEN GENERAL' AND CAMBIOS_MEDIOS > 0
+                
+                UNION ALL
+                
+                SELECT 
+                    CASE 
+                        WHEN CAMBIOS_BAJOS > 0 THEN 'Bajos'
+                        ELSE NULL
+                    END as LABEL,
+                    CAMBIOS_BAJOS as VALUE
+                FROM V_AUDIT_DASHBOARD_EJECUTIVO 
+                WHERE MODULO = 'RESUMEN GENERAL' AND CAMBIOS_BAJOS > 0;
+                ```
+        }
+        layout {
+            sequence: 20
+            slot: body
+            columnSpan: 4
+        }
+        appearance {
+            template: @/standard
+            templateOptions: [
+                #DEFAULT#
+                t-Region--scrollBody
+            ]
+            cssClasses: chart-container-small
+        }
+        chart {
+            type: pie
+        }
+        chartLayout {
+            height: 200
+        }
+        value {
+            format: decimal
+            decimalPlaces: 0
+            formatScaling: none
+        }
+        componentAdvanced {
+            initJavaScriptFunction:
+                ```javascript-browser
+                function (options) {
+                    options.dataFilter = function(data){
+                        data.series[0].color = "red";
+                        data.series[1].color = "orange";
+                        data.series[2].color = "green";
+                        return data;
+                    };
+                    return options;
+                
+                }
+                ```
+        }
+
+        series distribución-por-criticidad (
+            name: Distribución por Criticidad
+            execution {
+                sequence: 10
+            }
+            source {
+                location: regionSource
+            }
+            columnMapping {
+                label: LABEL
+                value: VALUE
+            }
+            label {
+                show: true
+                displayAs: percentage
+            }
+        )
+
+    )
+
+    region métricas-principales (
+        name: Métricas Principales
+        title: Métricas Principales
+        type: cards
+        source {
+            location: localDatabase
+            type: sqlQuery
+            sqlQuery:
+                ```sql
+                SELECT 
+                    'TOTAL CAMBIOS' as CARD_TITLE,
+                    TO_CHAR(TOTAL_CAMBIOS, '999,999') as CARD_VALUE,
+                    'En los últimos 30 días' as CARD_SUBTITLE,
+                    'fa fa-edit' as CARD_ICON,
+                    CASE 
+                        WHEN TOTAL_CAMBIOS > 1000 THEN 'is-warning'
+                        WHEN TOTAL_CAMBIOS > 500 THEN 'is-info'
+                        ELSE 'is-success'
+                    END as CARD_COLOR
+                FROM V_AUDIT_DASHBOARD_EJECUTIVO 
+                WHERE MODULO = 'RESUMEN GENERAL'
+                
+                UNION ALL
+                
+                SELECT 
+                    'CAMBIOS CRÍTICOS' as CARD_TITLE,
+                    TO_CHAR(CAMBIOS_CRITICOS, '999,999') as CARD_VALUE,
+                    ROUND(PCT_CRITICOS, 1) || '% del total' as CARD_SUBTITLE,
+                    'fa fa-exclamation-triangle' as CARD_ICON,
+                    CASE 
+                        WHEN PCT_CRITICOS > 20 THEN 'is-danger'
+                        WHEN PCT_CRITICOS > 10 THEN 'is-warning'
+                        ELSE 'is-success'
+                    END as CARD_COLOR
+                FROM V_AUDIT_DASHBOARD_EJECUTIVO 
+                WHERE MODULO = 'RESUMEN GENERAL'
+                
+                UNION ALL
+                
+                SELECT 
+                    'USUARIOS ACTIVOS' as CARD_TITLE,
+                    TO_CHAR(USUARIOS_ACTIVOS, '999,999') as CARD_VALUE,
+                    'Usuarios con actividad' as CARD_SUBTITLE,
+                    'fa fa-users' as CARD_ICON,
+                    'is-info' as CARD_COLOR
+                FROM V_AUDIT_DASHBOARD_EJECUTIVO 
+                WHERE MODULO = 'RESUMEN GENERAL'
+                
+                UNION ALL
+                
+                SELECT 
+                    'CAMBIOS HOY' as CARD_TITLE,
+                    TO_CHAR(CAMBIOS_HOY, '999,999') as CARD_VALUE,
+                    ROUND(PCT_HOY, 1) || '% del total' as CARD_SUBTITLE,
+                    'fa fa-calendar-day' as CARD_ICON,
+                    CASE 
+                        WHEN CAMBIOS_HOY > 100 THEN 'is-warning'
+                        WHEN CAMBIOS_HOY > 50 THEN 'is-info'
+                        ELSE 'is-success'
+                    END as CARD_COLOR
+                FROM V_AUDIT_DASHBOARD_EJECUTIVO 
+                WHERE MODULO = 'RESUMEN GENERAL';
+                ```
+        }
+        layout {
+            sequence: 10
+            slot: body
+        }
+        appearance {
+            template: @/cards-container
+            templateOptions: [
+                #DEFAULT#
+                t-CardsRegion--hideHeader js-addHiddenHeadingRoleDesc
+            ]
+        }
+        title {
+            column: CARD_TITLE
+        }
+        subtitle {
+            column: CARD_SUBTITLE
+        }
+        body {
+            column: CARD_VALUE
+        }
+        iconAndBadge {
+            iconSource: iconClassColumn
+            iconColumn: CARD_ICON
+        }
+    )
+
+    region resumen-por-módulo (
+        name: Resumen por Módulo
+        title: Resumen por Módulo
+        type: interactiveReport
+        source {
+            location: localDatabase
+            type: sqlQuery
+            sqlQuery:
+                ```sql
+                SELECT 
+                    MODULO,
+                    TOTAL_CAMBIOS,
+                    REGISTROS_AFECTADOS,
+                    USUARIOS_ACTIVOS,
+                    CAMBIOS_CRITICOS,
+                    CAMBIOS_HOY,
+                    CAMBIOS_SEMANA,
+                    CAMBIOS_MES,
+                    PCT_CRITICOS || '%' as "% CRÍTICOS",
+                    PRIMER_CAMBIO,
+                    ULTIMO_CAMBIO
+                FROM V_AUDIT_DASHBOARD_EJECUTIVO 
+                WHERE MODULO != 'RESUMEN GENERAL'
+                ORDER BY RANKING_ACTIVIDAD;
+                ```
+        }
+        layout {
+            sequence: 40
+            slot: body
+        }
+        appearance {
+            template: @/interactive-report
+            templateOptions: [
+                #DEFAULT#
+                t-IRR-region--hideHeader js-addHiddenHeadingRoleDesc
+            ]
+        }
+        pagination {
+            type: rowRangesXToY
+        }
+        performance {
+            maxRowsToProcess: 1000000
+        }
+        advanced {
+            savedReportMappingIdentifier: 59781395749029353039
+        }
+
+        column "% CRÍTICOS" (
+            type: plainText
+            heading {
+                heading: % Críticos
+            }
+            layout {
+                sequence: 90
+            }
+            source {
+                dataType: STRING
+            }
+            advanced {
+                endUserAlias: I
+            }
+        )
+
+        column CAMBIOS_CRITICOS (
+            type: plainText
+            heading {
+                heading: Cambios Criticos
+                alignment: end
+            }
+            layout {
+                sequence: 50
+                columnAlignment: end
+            }
+            source {
+                dataType: NUMBER
+            }
+            advanced {
+                endUserAlias: E
+            }
+        )
+
+        column CAMBIOS_HOY (
+            type: plainText
+            heading {
+                heading: Cambios Hoy
+                alignment: end
+            }
+            layout {
+                sequence: 60
+                columnAlignment: end
+            }
+            source {
+                dataType: NUMBER
+            }
+            advanced {
+                endUserAlias: F
+            }
+        )
+
+        column CAMBIOS_MES (
+            type: plainText
+            heading {
+                heading: Cambios Mes
+                alignment: end
+            }
+            layout {
+                sequence: 80
+                columnAlignment: end
+            }
+            source {
+                dataType: NUMBER
+            }
+            advanced {
+                endUserAlias: H
+            }
+        )
+
+        column CAMBIOS_SEMANA (
+            type: plainText
+            heading {
+                heading: Cambios Semana
+                alignment: end
+            }
+            layout {
+                sequence: 70
+                columnAlignment: end
+            }
+            source {
+                dataType: NUMBER
+            }
+            advanced {
+                endUserAlias: G
+            }
+        )
+
+        column MODULO (
+            type: plainText
+            heading {
+                heading: Modulo
+            }
+            layout {
+                sequence: 10
+            }
+            source {
+                dataType: STRING
+            }
+            advanced {
+                endUserAlias: A
+            }
+        )
+
+        column PRIMER_CAMBIO (
+            type: plainText
+            heading {
+                heading: Primer Cambio
+            }
+            layout {
+                sequence: 100
+            }
+            source {
+                dataType: STRING
+            }
+            advanced {
+                endUserAlias: J
+            }
+        )
+
+        column REGISTROS_AFECTADOS (
+            type: plainText
+            heading {
+                heading: Registros Afectados
+                alignment: end
+            }
+            layout {
+                sequence: 30
+                columnAlignment: end
+            }
+            source {
+                dataType: NUMBER
+            }
+            advanced {
+                endUserAlias: C
+            }
+        )
+
+        column TOTAL_CAMBIOS (
+            type: plainText
+            heading {
+                heading: Total Cambios
+                alignment: end
+            }
+            layout {
+                sequence: 20
+                columnAlignment: end
+            }
+            source {
+                dataType: NUMBER
+            }
+            advanced {
+                endUserAlias: B
+            }
+        )
+
+        column ULTIMO_CAMBIO (
+            type: plainText
+            heading {
+                heading: Ultimo Cambio
+            }
+            layout {
+                sequence: 110
+            }
+            source {
+                dataType: STRING
+            }
+            advanced {
+                endUserAlias: K
+            }
+        )
+
+        column USUARIOS_ACTIVOS (
+            type: plainText
+            heading {
+                heading: Usuarios Activos
+                alignment: end
+            }
+            layout {
+                sequence: 40
+                columnAlignment: end
+            }
+            source {
+                dataType: NUMBER
+            }
+            advanced {
+                endUserAlias: D
+            }
+        )
+
+        page {
+            size: a4
+            units: millimeters
+            width: 297
+            height: 210
+            borderWidth: 0.5
+            borderColor: #666666
+        }
+        pageHeader {
+            pageHeaderText: Resumen por Módulo
+        }
+
+        savedReport 620823645 (
+            visibility: primaryDefault
+            view {
+                rowsPerPage: 50
+            }
+
+            displayColumn "% CRÍTICOS" (
+                sequence: 9
+            )
+
+            displayColumn CAMBIOS_CRITICOS (
+                sequence: 5
+            )
+
+            displayColumn CAMBIOS_HOY (
+                sequence: 6
+            )
+
+            displayColumn CAMBIOS_MES (
+                sequence: 8
+            )
+
+            displayColumn CAMBIOS_SEMANA (
+                sequence: 7
+            )
+
+            displayColumn MODULO (
+                sequence: 1
+            )
+
+            displayColumn PRIMER_CAMBIO (
+                sequence: 10
+            )
+
+            displayColumn REGISTROS_AFECTADOS (
+                sequence: 3
+            )
+
+            displayColumn TOTAL_CAMBIOS (
+                sequence: 2
+            )
+
+            displayColumn ULTIMO_CAMBIO (
+                sequence: 11
+            )
+
+            displayColumn USUARIOS_ACTIVOS (
+                sequence: 4
+            )
+
+        )
+
+    )
+
+)
+

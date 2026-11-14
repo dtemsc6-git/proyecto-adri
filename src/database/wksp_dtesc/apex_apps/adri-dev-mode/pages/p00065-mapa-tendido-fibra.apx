@@ -1,0 +1,710 @@
+page 65 (
+    name: Mapa Tendido Fibra
+    alias: MAPA-TENDIDO-FIBRA
+    title: Mapa Tendido Fibra
+    appearance {
+        pageTemplate: @/standard
+        templateOptions: #DEFAULT#
+    }
+    navigation {
+        cursorFocus: doNotFocusCursor
+        warnOnUnsavedChanges: false
+    }
+    css {
+        fileUrls: https://unpkg.com/leaflet@1.9.4/dist/leaflet.css
+    }
+    security {
+        pageAccessProtection: argumentsMustHaveChecksum
+        formAutoComplete: false
+    }
+
+    region filtro-mapa (
+        name: FILTRO_MAPA
+        title: Filtrar
+        type: facetedSearch
+        source {
+            filteredRegion: @test-map-enlace-fo
+        }
+        layout {
+            sequence: 10
+            slot: body
+        }
+        appearance {
+            template: @/standard
+            templateOptions: [
+                #DEFAULT#
+                t-Region--scrollBody
+            ]
+        }
+        config {
+            buildOption: @commented-out
+        }
+        settings {
+            compactNosThreshold: 10000
+            displayChartForTopNValues: 10
+        }
+
+        facet P65_SEARCH (
+            type: search
+            label {
+                label: Search
+            }
+            layout {
+                sequence: 10
+            }
+        )
+
+        facet P65_TIPO_SITIO (
+            type: checkboxGroup
+            label {
+                label: TIPO_SITIO
+            }
+            lov {
+                type: distinctValues
+            }
+            layout {
+                sequence: 60
+            }
+            listEntries {
+                maxDisplayedEntries: 7
+            }
+            source {
+                databaseColumn: TIPO_SITIO
+            }
+            config {
+                buildOption: @commented-out
+            }
+        )
+
+        facet P65_ZONA (
+            type: radioGroup
+            label {
+                label: ZONA
+            }
+            lov {
+                type: distinctValues
+            }
+            layout {
+                sequence: 40
+            }
+            listEntries {
+                zeroCountEntries: disable
+                sortByTopCounts: false
+                maxDisplayedEntries: 7
+            }
+            source {
+                databaseColumn: ZONA_ID
+                dataType: number
+            }
+            dependingOn {
+                facet: @P65_SEARCH
+            }
+            config {
+                buildOption: @commented-out
+            }
+        )
+
+    )
+
+    region test-map-enlace-fo (
+        name: TEST_MAP_ENLACE_FO
+        title: Mapas Enlaces
+        type: map
+        source {
+            location: localDatabase
+            type: sqlQuery
+            sqlQuery:
+                ```sql
+                 SELECT 
+                    ef.id,
+                    ef.nombre,
+                    ef.cantidad_de_pelos,
+                	
+                    CASE 
+                        WHEN ef.tipo_cable NOT IN ('ADSS', 'ARMORED', 'OPGW') THEN 'COMBINADOS'
+                        ELSE ef.tipo_cable 
+                    END  FILTRO_CABLE,
+                    ef.tipo_cable, 
+                    ef."CERTIFICACIÓN" CERT,
+                    case when (sa.latitud is null or sa.longitud is null or sb.latitud is null or sb.longitud is null ) then NULL
+                    else 
+                    SDO_GEOMETRY(
+                        2002,  -- Tipo línea en 2D
+                        4326,  -- Sin SRID (o pon el que corresponda, ej: 4326 para WGS84)
+                        NULL,
+                        SDO_ELEM_INFO_ARRAY(1, 2, 1),  -- Línea simple
+                        SDO_ORDINATE_ARRAY(
+                            sa.longitud ,sa.latitud ,  -- Punto A
+                            sb.longitud ,sb.latitud    -- Punto B
+                        )
+                    ) end AS linea,
+                    case when (sa.latitud is null or sa.longitud is null or sb.latitud is null or sb.longitud is null ) then NULL
+                    else
+                    ROUND(SDO_GEOM.SDO_DISTANCE(
+                        SDO_GEOMETRY(2001, 4326, SDO_POINT_TYPE(sa.longitud ,sa.latitud , NULL), NULL, NULL),
+                        SDO_GEOMETRY(2001, 4326, SDO_POINT_TYPE(sb.longitud ,sb.latitud, NULL), NULL, NULL),
+                        0.005
+                    ) / 1000, 2) end AS DISTANCIA_KM,
+                    --dmf: 2026-06-23: Agregado para ver los servicios y enlaces wan
+                    srv.servicios AS SERVICIOS,
+                    WAN.ENLACES_WAN AS ENLACES_WAN
+                
+                   
+                
+                FROM sgt_enlaces_fo ef
+                join sgt_sitios sa on ef.sitio_id_a = sa.id
+                join sgt_sitios sb on ef.sitio_id_b = sb.id
+                --dmf 2026-06-23: agregado para ver los servicios y enlaces wan
+                --dmf 2026-06-23: agregado para ver los servicios y enlaces wan
+                LEFT JOIN (
+                    SELECT es.fo_id,
+                           LISTAGG(DISTINCT s.nombre, ', ')
+                             WITHIN GROUP (ORDER BY s.nombre) servicios
+                    FROM sgt_equipos_servicio es
+                    JOIN sgt_servicios s
+                      ON s.id = es.servicio_id
+                    GROUP BY es.fo_id
+                ) srv ON srv.fo_id = ef.id
+                
+                --VER TODOS LOS ENLACES WAN QUE DEPENDE DE LA FIBRA
+                LEFT JOIN (
+                    SELECT ew.fo_id,
+                           LISTAGG(DISTINCT w.nombre, ', ')
+                             WITHIN GROUP (ORDER BY w.nombre) enlaces_wan
+                    FROM sgt_equipos_wan ew
+                    JOIN sgt_enlaces_wan w
+                      ON w.id = ew.wan_id
+                    GROUP BY ew.fo_id
+                ) wan ON wan.fo_id = ef.id
+                
+                where  
+                ( :P65_ZONAS is null
+                or
+                ef.sitio_id_a IN (select ID from sgt_sitios s where s.zona_id = :P65_ZONAS)
+                or
+                ef.sitio_id_b IN (select ID from sgt_sitios s where s.zona_id = :P65_ZONAS)
+                )
+                and (:P65_ENLACES_FO is null or ef.id = :P65_ENLACES_FO)
+                
+                --dmf 2026-06-23: agregado para ver los servicios y enlaces wan
+                --Filtrar solo los troncales
+                and (ef.tipo = 'Troncal')
+                
+                ```
+            pageItemsToSubmit: [
+                P65_ENLACES_FO
+                P65_ZONAS
+            ]
+        }
+        layout {
+            sequence: 50
+            slot: body
+        }
+        appearance {
+            template: @/blank-with-attributes-no-grid
+            templateOptions: #DEFAULT#
+        }
+        advanced {
+            htmlDomId: TEST_MAP_WAN
+        }
+        controls {
+            options: [
+                mousewheelZoom
+                rectangleZoom
+                scaleBar
+                distanceTool
+            ]
+        }
+        attributes {
+            messagesPosition: below
+        }
+
+        layer adss (
+            name: ADSS
+            layerType: lines
+            layout {
+                sequence: 20
+            }
+            source {
+                location: regionSource
+            }
+            rowAssignment {
+                column: FILTRO_CABLE
+                valueForThisLayer: ADSS
+            }
+            columnMapping {
+                geometryColumn: LINEA
+            }
+            appearance {
+                strokeColor: #4cd964
+            }
+            tooltip {
+                column: NOMBRE
+            }
+            infoWindow {
+                advancedFormatting: true
+                htmlExpression:
+                    ```html
+                    Enlace: &NOMBRE. <br/>
+                    Tipo Cable: &TIPO_CABLE. <br/>
+                    Tipo de FO: &TIPO_DE_FO. <br/>
+                    Cantidad FO: &CANTIDAD_DE_PELOS. <br/>
+                    Certificación FO: &CERT. Km </br>
+                    Distancia lineal (Calculada): &DISTANCIA_KM. Km <br/>
+                    Enlaces Wan: &ENLACES_WAN. </br>
+                    Servicios: &SERVICIOS. </br>
+                    ```
+            }
+        )
+
+        layer armored (
+            name: ARMORED
+            layerType: lines
+            layout {
+                sequence: 40
+            }
+            source {
+                location: regionSource
+            }
+            rowAssignment {
+                column: FILTRO_CABLE
+                valueForThisLayer: ARMORED
+            }
+            columnMapping {
+                geometryColumn: LINEA
+                primaryKeyColumn: ID
+            }
+            appearance {
+                strokeColor: #5856d6
+            }
+            tooltip {
+                column: NOMBRE
+            }
+            infoWindow {
+                advancedFormatting: true
+                htmlExpression:
+                    ```html
+                    Enlace: &NOMBRE. <br/>
+                    Tipo Cable: &TIPO_CABLE. <br/>
+                    Tipo de FO: &TIPO_DE_FO. <br/>
+                    Cantidad FO: &CANTIDAD_DE_PELOS. <br/>
+                    Certificación FO: &CERT. Km </br>
+                    Distancia lineal (Calculada): &DISTANCIA_KM. Km <br/>
+                    Enlaces Wan: &ENLACES_WAN. </br>
+                    Servicios: &SERVICIOS. </br>
+                    ```
+            }
+        )
+
+        layer combinados (
+            name: COMBINADOS
+            layerType: lines
+            label {
+                label: Combinados
+            }
+            layout {
+                sequence: 50
+            }
+            source {
+                location: regionSource
+            }
+            rowAssignment {
+                column: FILTRO_CABLE
+                valueForThisLayer: COMBINADOS
+            }
+            columnMapping {
+                geometryColumn: LINEA
+                primaryKeyColumn: ID
+            }
+            appearance {
+                strokeColor: #ff9500
+            }
+            infoWindow {
+                advancedFormatting: true
+                htmlExpression:
+                    ```html
+                    Enlace: &NOMBRE. <br/>
+                    Tipo Cable: &TIPO_CABLE. <br/>
+                    Tipo de FO: &TIPO_DE_FO. <br/>
+                    Cantidad FO: &CANTIDAD_DE_PELOS. <br/>
+                    Certificación FO: &CERT. Km </br>
+                    Distancia lineal (Calculada): &DISTANCIA_KM. Km <br/>
+                    Enlaces Wan: &ENLACES_WAN. </br>
+                    Servicios: &SERVICIOS. </br>
+                    ```
+            }
+        )
+
+        layer opgw (
+            name: OPGW
+            layerType: lines
+            label {
+                label: OPGW
+            }
+            layout {
+                sequence: 30
+            }
+            source {
+                location: regionSource
+            }
+            rowAssignment {
+                column: FILTRO_CABLE
+                valueForThisLayer: OPGW
+            }
+            columnMapping {
+                geometryColumn: LINEA
+            }
+            appearance {
+                strokeColor: #8e8e93
+            }
+            tooltip {
+                column: NOMBRE
+            }
+            infoWindow {
+                advancedFormatting: true
+                htmlExpression:
+                    ```html
+                    Enlace: &NOMBRE. <br/>
+                    Tipo Cable: &TIPO_CABLE. <br/>
+                    Tipo de FO: &TIPO_DE_FO. <br/>
+                    Cantidad FO: &CANTIDAD_DE_PELOS. <br/>
+                    Certificación FO: &CERT. Km </br>
+                    Distancia lineal (Calculada): &DISTANCIA_KM. Km <br/>
+                    Enlaces Wan: &ENLACES_WAN. </br>
+                    Servicios: &SERVICIOS. </br>
+                    ```
+            }
+        )
+
+        layer sitios (
+            name: SITIOS
+            label {
+                label: SITIOS
+            }
+            layout {
+                sequence: 10
+            }
+            source {
+                type: sqlQuery
+                sqlQuery:
+                    ```sql
+                     select s.ID,
+                           SIGLAS,
+                           s.NOMBRE,
+                           s.TIPO_DE_SITIO,
+                           PROPIETARIO,
+                           ZONA_ID,
+                           CIUDAD_ID,
+                           LATITUD_OLD,
+                           LONGITUD_OLD,
+                           "UBICACIÓN",
+                           OBSERVACION,
+                           s.CREADO_POR,
+                           s.CREADO_EL,
+                           s.MODIFICADO_POR,
+                           s.MODIFICADO_EL,
+                           LATITUD,
+                           LONGITUD
+                      from SGT_SITIOS s
+                    
+                        
+                    
+                    where 1=1 and 
+                    
+                    (:P65_ZONAS is null or s.id in (select id from sgt_sitios s where s.zona_id = :P65_ZONAS))
+                    
+                    and
+                    
+                    (:P65_enlaces_fo is null or S.ID IN 
+                    (SELECT sitio_id_a from sgt_enlaces_fo where id = :P65_enlaces_fo
+                    union
+                    SELECT sitio_id_b from sgt_enlaces_fo where id = :P65_enlaces_fo
+                    ) )
+                    
+                    ```
+                pageItemsToSubmit: [
+                    P65_ZONAS
+                    P65_ENLACES_FO
+                ]
+            }
+            columnMapping {
+                geometryColumnDataType: longitudeLatitude
+                longitudeColumn: LONGITUD
+                latitudeColumn: LATITUD
+                primaryKeyColumn: ID
+            }
+            tooltip {
+                column: NOMBRE
+            }
+            infoWindow {
+                titleColumn: SIGLAS
+                bodyColumn: NOMBRE
+            }
+            messages {
+                whenNoDataFound: No data
+                whenMoreDataFound: More data
+            }
+        )
+
+    )
+
+    pageItem P65_ENLACES_FO (
+        type: popupLov
+        label {
+            label: Enlace FO
+            alignment: left
+        }
+        lov {
+            type: sqlQuery
+            sqlQuery:
+                ```sql
+                select ef.nombre, ef.id from sgt_enlaces_fo ef
+                where
+                (
+                :P65_ZONAS is null 
+                or    
+                ef.sitio_id_a in (select id from sgt_sitios s where s.zona_id = :P65_ZONAS)
+                or
+                ef.sitio_id_b in (select id from sgt_sitios s where s.zona_id = :P65_ZONAS)
+                )
+                and 
+                (ef.tipo = 'Troncal')
+                ```
+            nullDisplayValue: Seleccione Una
+        }
+        cascadingLov {
+            parentItems: [
+                P65_ZONAS
+                P65_TIPO_ENLACE
+            ]
+            itemsToSubmit: [
+                P65_ZONAS
+                P65_TIPO_ENLACE
+            ]
+        }
+        layout {
+            sequence: 40
+            slot: body
+            alignment: left
+            startNewRow: false
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+            width: 30
+        }
+    )
+
+    pageItem P65_TIPO_ENLACE (
+        type: selectList
+        label {
+            label: Tipo de Enlace
+            alignment: left
+        }
+        lov {
+            type: sharedComponent
+            lov: @tipo-enlace
+            nullDisplayValue: Seleccione Una
+        }
+        layout {
+            sequence: 30
+            slot: body
+            alignment: left
+            startNewRow: false
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+            height: 1
+        }
+        config {
+            buildOption: @commented-out
+        }
+    )
+
+    pageItem P65_ZONAS (
+        type: selectList
+        label {
+            label: Zonas
+            alignment: left
+        }
+        lov {
+            type: sharedComponent
+            lov: @lov-sgt-zonas
+            nullDisplayValue: Seleccione Una
+        }
+        layout {
+            sequence: 20
+            slot: body
+            alignment: left
+            startNewRow: false
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+            height: 1
+        }
+    )
+
+    dynamicAction refrescar (
+        name: Refrescar
+        execution {
+            sequence: 30
+        }
+        when {
+            selectionType: items
+            items: [
+                P65_ENLACES_FO
+                P65_ZONAS
+                P65_TIPO_ENLACE
+            ]
+        }
+
+        action native-refresh (
+            action: refresh
+            affectedElements {
+                selectionType: region
+                region: @test-map-enlace-fo
+            }
+            execution {
+                sequence: 10
+                fireOnInit: false
+            }
+        )
+
+    )
+
+    dynamicAction setearlistener (
+        name: SetearListener
+        execution {
+            sequence: 20
+        }
+        when {
+            selectionType: items
+            items: P65_ENLACES_FO
+        }
+
+        action native-javascript-code (
+            action: executeJsCode
+            settings {
+                jsCode:
+                    ```javascript-browser
+                    /*
+                    var mapRegion = apex.region("TEST_MAP_WAN"); // Static ID de tu mapa
+                    console.log(mapRegion);
+                    
+                    
+                    mapRegion.widget().one("spatialmapchanged", function(){
+                        // Obtener capa con las geometrías cargadas
+                        var layerGroup = mapRegion.getLayer("features");
+                        if (layerGroup && layerGroup.getLayers().length > 0) {
+                            // Ajustar la vista a los puntos cargados
+                            mapRegion.getMap().fitBounds(layerGroup.getBounds());
+                        }
+                    });
+                    */
+                    
+                    
+                    
+                    
+                    /*var region = apex.region("TEST_MAP_WAN");
+                    console.log(region);
+                    
+                    region.widget().one("spatialmapchanged", function () {
+                        var map = region.getMap();
+                        var bounds = null;
+                        console.log("spatialmapchanged");
+                        map.eachLayer(function (layer) {
+                            try {
+                                // 🟢 CAPA DE PUNTOS (marcadores)
+                                if (layer.getLatLng) {
+                                    var ll = layer.getLatLng();
+                                    if (!bounds) bounds = L.latLngBounds(ll, ll);
+                                    else bounds.extend(ll);
+                                }
+                    
+                                // 🔵 CAPA DE RUTAS (líneas o polígonos)
+                                else if (layer.getLatLngs) {
+                                    var addLatLngs = function (arr) {
+                                        arr.forEach(function (item) {
+                                            if (Array.isArray(item)) {
+                                                addLatLngs(item);
+                                            } else {
+                                                if (!bounds) bounds = L.latLngBounds(item, item);
+                                                else bounds.extend(item);
+                                            }
+                                        });
+                                    };
+                                    addLatLngs(layer.getLatLngs());
+                                }
+                    
+                                // 🟣 GeoJSON (por si APEX devuelve datos como feature collection)
+                                else if (layer.feature && layer.feature.geometry) {
+                                    var coords = layer.feature.geometry.coordinates;
+                                    var addCoords = function (c) {
+                                        if (Array.isArray(c[0])) c.forEach(addCoords);
+                                        else {
+                                            var ll = L.latLng(c[1], c[0]);
+                                            if (!bounds) bounds = L.latLngBounds(ll, ll);
+                                            else bounds.extend(ll);
+                                        }
+                                    };
+                                    addCoords(coords);
+                                }
+                            } catch (e) {
+                                console.error("Error procesando capa:", e);
+                            }
+                        });
+                    
+                        // Ajustar cámara si hay datos válidos
+                        if (bounds && bounds.isValid()) {
+                            map.fitBounds(bounds, { padding: [20, 20] }); // padding para no pegarse a los bordes
+                        } else {
+                            console.log("⚠️ No se encontraron coordenadas para centrar el mapa.");
+                        }
+                    });
+                    */
+                    ```
+            }
+            execution {
+                sequence: 10
+                fireOnInit: false
+            }
+        )
+
+    )
+
+    process get-one-lng-lat (
+        name: GET_ONE_LNG_LAT
+        type: executeCode
+        source {
+            plsqlCode:
+                ```plsql
+                --OBTIENE UNA LNG Y LAT PARA MOVER EL MAPA
+                declare
+                l_cursor SYS_REFCURSOR;
+                BEGIN
+                
+                    open l_cursor for
+                    SELECT LON, LAT FROM V_SITIOS_GPS V
+                    INNER JOIN SGT_SITIOS_ENLACE_WAN SW ON V.ID = SW.SITIO_ID
+                    WHERE SW.ENLACE_WAN_ID = :P65_WAN;
+                
+                    -- DEBO RETORNAR EL PRIMER ELEMENTO NOMAS 
+                    APEX_JSON.OPEN_OBJECT;
+                    APEX_JSON.WRITE('data', l_cursor); -- Convierte el cursor a JSON array
+                    APEX_JSON.CLOSE_OBJECT;
+                END;
+                ```
+        }
+        execution {
+            sequence: 10
+            point: ajaxCallback
+        }
+        advanced {
+            executionMappingIdentifier: 18969588458285096
+        }
+    )
+
+)
+

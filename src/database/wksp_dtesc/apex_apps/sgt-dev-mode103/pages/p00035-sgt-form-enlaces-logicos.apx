@@ -1,0 +1,676 @@
+page 35 (
+    name: SGT_FORM_ENLACES_LOGICOS
+    alias: SGT-FORM-ENLACES-LOGICOS
+    title: Agregar / Editar
+    pageGroup: @implementadores
+    appearance {
+        pageMode: modalDialog
+        dialogTemplate: @/drawer
+        templateOptions: [
+            #DEFAULT#
+            js-dialog-class-t-Drawer--pullOutEnd
+        ]
+    }
+    dialog {
+        chained: false
+    }
+    navigation {
+        cursorFocus: doNotFocusCursor
+    }
+    security {
+        authorizationScheme: @implementador-rights
+        pageAccessProtection: argumentsMustHaveChecksum
+        formAutoComplete: false
+    }
+
+    region buttons (
+        name: Buttons
+        type: staticContent
+        layout {
+            sequence: 20
+            slot: dialogFooter
+        }
+        appearance {
+            template: @/buttons-container
+            templateOptions: #DEFAULT#
+        }
+        settings {
+            outputAs: text
+        }
+    )
+
+    region sgt-form-enlaces-logicos (
+        name: SGT_FORM_ENLACES_LOGICOS
+        title: Agregar / Editar
+        type: form
+        source {
+            location: localDatabase
+            tableName: SGT_ENLACES_LOGICOS
+        }
+        layout {
+            sequence: 10
+            slot: contentBody
+        }
+        appearance {
+            template: @/blank-with-attributes
+            templateOptions: #DEFAULT#
+        }
+        edit {
+            enabled: true
+            allowedOperations: [
+                add
+                update
+                delete
+            ]
+        }
+    )
+
+    pageItem P35_ACTUALIZADO_EL (
+        type: datePicker
+        label {
+            label: Actualizado El
+            alignment: left
+        }
+        layout {
+            sequence: 130
+            region: @sgt-form-enlaces-logicos
+            slot: regionBody
+            alignment: left
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+            width: 32
+        }
+        validation {
+            maxLength: 255
+        }
+        source {
+            formRegion: @sgt-form-enlaces-logicos
+            column: ACTUALIZADO_EL
+            dataType: timestamp
+        }
+        config {
+            buildOption: @commented-out
+        }
+    )
+
+    pageItem P35_ACTUALIZADO_POR (
+        type: textField
+        label {
+            label: Actualizado Por
+            alignment: left
+        }
+        layout {
+            sequence: 120
+            region: @sgt-form-enlaces-logicos
+            slot: regionBody
+            alignment: left
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+            width: 32
+        }
+        validation {
+            maxLength: 255
+        }
+        source {
+            formRegion: @sgt-form-enlaces-logicos
+            column: ACTUALIZADO_POR
+            dataType: varchar2
+        }
+        config {
+            buildOption: @commented-out
+        }
+    )
+
+    pageItem P35_CREADO_EL (
+        type: datePicker
+        label {
+            label: Creado El
+            alignment: left
+        }
+        layout {
+            sequence: 110
+            region: @sgt-form-enlaces-logicos
+            slot: regionBody
+            alignment: left
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+            width: 32
+        }
+        validation {
+            maxLength: 255
+        }
+        source {
+            formRegion: @sgt-form-enlaces-logicos
+            column: CREADO_EL
+            dataType: timestamp
+        }
+        config {
+            buildOption: @commented-out
+        }
+    )
+
+    pageItem P35_CREADO_POR (
+        type: textField
+        label {
+            label: Creado Por
+            alignment: left
+        }
+        layout {
+            sequence: 100
+            region: @sgt-form-enlaces-logicos
+            slot: regionBody
+            alignment: left
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+            width: 32
+        }
+        validation {
+            maxLength: 255
+        }
+        source {
+            formRegion: @sgt-form-enlaces-logicos
+            column: CREADO_POR
+            dataType: varchar2
+        }
+        config {
+            buildOption: @commented-out
+        }
+    )
+
+    pageItem P35_EQUIPO_A_ID (
+        type: popupLov
+        label {
+            label: Equipo A
+            alignment: left
+        }
+        lov {
+            type: sqlQuery
+            sqlQuery:
+                ```sql
+                select e.nombre Mostrar, e.id Valor from SGT_EQUIPOS e
+                left join sgt_racks r on e.rack_id = r.id
+                left join sgt_salas s on r.sala_id = s.id
+                left join sgt_sitios ss on s.sitio_id = ss.id
+                where ss.id = :P35_SITIO_A_ID
+                ```
+        }
+        cascadingLov {
+            parentItems: P35_SITIO_A_ID
+            itemsToSubmit: P35_SITIO_A_ID
+        }
+        layout {
+            sequence: 50
+            region: @sgt-form-enlaces-logicos
+            slot: regionBody
+            alignment: left
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+            width: 30
+        }
+        validation {
+            valueRequired: true
+        }
+        source {
+            formRegion: @sgt-form-enlaces-logicos
+            column: EQUIPO_A_ID
+            dataType: number
+        }
+    )
+
+    pageItem P35_EQUIPO_B_ID (
+        type: popupLov
+        label {
+            label: Equipo B
+            alignment: left
+        }
+        lov {
+            type: sqlQuery
+            sqlQuery:
+                ```sql
+                select e.nombre Mostrar, e.id Valor from SGT_EQUIPOS e
+                left join sgt_racks r on e.rack_id = r.id
+                left join sgt_salas s on r.sala_id = s.id
+                left join sgt_sitios ss on s.sitio_id = ss.id
+                where ss.id = :P35_SITIO_B_ID
+                ```
+        }
+        cascadingLov {
+            parentItems: P35_SITIO_B_ID
+            itemsToSubmit: P35_SITIO_B_ID
+        }
+        layout {
+            sequence: 80
+            region: @sgt-form-enlaces-logicos
+            slot: regionBody
+            alignment: left
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+            width: 30
+        }
+        validation {
+            valueRequired: true
+        }
+        source {
+            formRegion: @sgt-form-enlaces-logicos
+            column: EQUIPO_B_ID
+            dataType: number
+        }
+    )
+
+    pageItem P35_GRUPO_RED (
+        type: selectList
+        label {
+            label: Grupo Red
+            alignment: left
+        }
+        lov {
+            type: sharedComponent
+            lov: @enlaces-wan-grupo-red
+        }
+        layout {
+            sequence: 30
+            region: @sgt-form-enlaces-logicos
+            slot: regionBody
+            alignment: left
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+            height: 1
+        }
+        source {
+            formRegion: @sgt-form-enlaces-logicos
+            column: GRUPO_RED
+            dataType: varchar2
+        }
+    )
+
+    pageItem P35_ID (
+        type: hidden
+        layout {
+            sequence: 10
+            region: @sgt-form-enlaces-logicos
+            slot: regionBody
+        }
+        source {
+            formRegion: @sgt-form-enlaces-logicos
+            column: ID
+            dataType: number
+            queryOnly: true
+            primaryKey: true
+        }
+        security {
+            sessionStateProtection: checksumRequiredSessionLevel
+        }
+    )
+
+    pageItem P35_INTERFAZ_A_ID (
+        type: popupLov
+        label {
+            label: Interfaz A
+            alignment: left
+        }
+        lov {
+            type: sqlQuery
+            sqlQuery:
+                ```sql
+                select i.nombre, i.id
+                from sgt_interfaces i
+                where i.equipo_id = :P35_equipo_a_id
+                ```
+        }
+        cascadingLov {
+            parentItems: P35_EQUIPO_A_ID
+            itemsToSubmit: P35_EQUIPO_A_ID
+        }
+        layout {
+            sequence: 60
+            region: @sgt-form-enlaces-logicos
+            slot: regionBody
+            alignment: left
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+            width: 30
+        }
+        validation {
+            valueRequired: true
+        }
+        source {
+            formRegion: @sgt-form-enlaces-logicos
+            column: INTERFAZ_A_ID
+            dataType: number
+        }
+    )
+
+    pageItem P35_INTERFAZ_B_ID (
+        type: popupLov
+        label {
+            label: Interfaz B
+            alignment: left
+        }
+        lov {
+            type: sqlQuery
+            sqlQuery:
+                ```sql
+                select i.nombre, i.id
+                from sgt_interfaces i
+                where i.equipo_id = :P35_equipo_b_id
+                ```
+        }
+        cascadingLov {
+            parentItems: P35_EQUIPO_B_ID
+            itemsToSubmit: P35_EQUIPO_B_ID
+        }
+        layout {
+            sequence: 90
+            region: @sgt-form-enlaces-logicos
+            slot: regionBody
+            alignment: left
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+            width: 30
+        }
+        validation {
+            valueRequired: true
+        }
+        source {
+            formRegion: @sgt-form-enlaces-logicos
+            column: INTERFAZ_B_ID
+            dataType: number
+        }
+    )
+
+    pageItem P35_NOMBRE (
+        type: textField
+        label {
+            label: Nombre
+            alignment: left
+        }
+        layout {
+            sequence: 20
+            region: @sgt-form-enlaces-logicos
+            slot: regionBody
+            alignment: left
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+            width: 30
+        }
+        validation {
+            valueRequired: true
+            maxLength: 255
+        }
+        source {
+            formRegion: @sgt-form-enlaces-logicos
+            column: NOMBRE
+            dataType: varchar2
+        }
+        help {
+            inlineHelpText: Nombre único para todo el sistema, ejemplo EQUIPO_SITIO_SITIO
+            helpText: El nombre debe ser unico para todo el sistema, debe ser significativo y puede estar compuesto por ejemplo del equipo involucrado y los sitios de origen y destino, ej: ECI_VHA_AYO
+        }
+    )
+
+    pageItem P35_SITIO_A_ID (
+        type: popupLov
+        label {
+            label: Sitio A
+            alignment: left
+        }
+        lov {
+            type: sharedComponent
+            lov: @sgt-sitios-siglas
+        }
+        layout {
+            sequence: 40
+            region: @sgt-form-enlaces-logicos
+            slot: regionBody
+            alignment: left
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+            width: 30
+        }
+        validation {
+            valueRequired: true
+        }
+        source {
+            formRegion: @sgt-form-enlaces-logicos
+            column: SITIO_A_ID
+            dataType: number
+        }
+    )
+
+    pageItem P35_SITIO_B_ID (
+        type: popupLov
+        label {
+            label: Sitio B
+            alignment: left
+        }
+        lov {
+            type: sharedComponent
+            lov: @sgt-sitios-siglas
+        }
+        layout {
+            sequence: 70
+            region: @sgt-form-enlaces-logicos
+            slot: regionBody
+            alignment: left
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+            width: 30
+        }
+        validation {
+            valueRequired: true
+        }
+        source {
+            formRegion: @sgt-form-enlaces-logicos
+            column: SITIO_B_ID
+            dataType: number
+        }
+    )
+
+    button cancel (
+        buttonName: CANCEL
+        label: Cancel
+        layout {
+            sequence: 10
+            region: @buttons
+            slot: close
+        }
+        appearance {
+            buttonTemplate: @/text
+            templateOptions: #DEFAULT#
+        }
+        behavior {
+            action: definedByDynamicAction
+        }
+    )
+
+    button create (
+        buttonName: CREATE
+        label: &APP_TEXT$BTN_CREAR!RAW.
+        layout {
+            sequence: 40
+            region: @buttons
+            slot: next
+        }
+        appearance {
+            buttonTemplate: @/text
+            hot: true
+            templateOptions: #DEFAULT#
+        }
+        behavior {
+            warnOnUnsavedChanges: doNotCheck
+            databaseAction: insert
+        }
+        serverSideCondition {
+            type: itemIsNull
+            item: P35_ID
+        }
+    )
+
+    button delete (
+        buttonName: DELETE
+        label: Delete
+        layout {
+            sequence: 20
+            region: @buttons
+            slot: delete
+        }
+        appearance {
+            buttonTemplate: @/text
+            templateOptions: #DEFAULT#
+        }
+        behavior {
+            executeValidations: false
+            warnOnUnsavedChanges: doNotCheck
+            databaseAction: delete
+            requiresConfirmation: true
+        }
+        confirmation {
+            message: &APP_TEXT$DELETE_MSG!RAW.
+            style: danger
+        }
+        serverSideCondition {
+            type: itemIsNotNull
+            item: P35_ID
+        }
+    )
+
+    button save (
+        buttonName: SAVE
+        label: &APP_TEXT$BTN_APLICAR_CAMBIOS!RAW.
+        layout {
+            sequence: 30
+            region: @buttons
+            slot: next
+        }
+        appearance {
+            buttonTemplate: @/text
+            hot: true
+            templateOptions: #DEFAULT#
+        }
+        behavior {
+            warnOnUnsavedChanges: doNotCheck
+            databaseAction: update
+        }
+        serverSideCondition {
+            type: itemIsNotNull
+            item: P35_ID
+        }
+    )
+
+    dynamicAction cancel-dialog (
+        name: Cancel Dialog
+        execution {
+            sequence: 10
+        }
+        when {
+            event: click
+            selectionType: button
+            button: @cancel
+        }
+
+        action native-dialog-cancel (
+            action: cancelDialog
+            execution {
+                sequence: 10
+                fireOnInit: false
+            }
+        )
+
+    )
+
+    validation p35-actualizado-el-must-be-timestamp (
+        name: P35_ACTUALIZADO_EL must be timestamp
+        execution {
+            sequence: 180
+        }
+        validation {
+            type: itemIsAValidTimestamp
+            item: P35_ACTUALIZADO_EL
+        }
+        error {
+            errorMessage: #LABEL# must be a valid timestamp.
+            associatedItem: @P35_ACTUALIZADO_EL
+        }
+    )
+
+    validation p35-creado-el-must-be-timestamp (
+        name: P35_CREADO_EL must be timestamp
+        execution {
+            sequence: 160
+        }
+        validation {
+            type: itemIsAValidTimestamp
+            item: P35_CREADO_EL
+        }
+        error {
+            errorMessage: #LABEL# must be a valid timestamp.
+            associatedItem: @P35_CREADO_EL
+        }
+    )
+
+    process close-dialog (
+        name: Close Dialog
+        type: closeDialog
+        execution {
+            sequence: 50
+        }
+        advanced {
+            executionMappingIdentifier: 43769686577761608876
+        }
+        serverSideCondition {
+            type: requestIsContainedInValue
+            value: CREATE,SAVE,DELETE
+        }
+    )
+
+    process initialize-form-sgt-form-enlaces-logicos (
+        name: Initialize form SGT_FORM_ENLACES_LOGICOS
+        type: formInitialization
+        formRegion: @sgt-form-enlaces-logicos
+        execution {
+            sequence: 10
+            point: beforeHeader
+        }
+        advanced {
+            executionMappingIdentifier: 43769685711622608876
+        }
+    )
+
+    process process-form-sgt-form-enlaces-logicos (
+        name: Process form SGT_FORM_ENLACES_LOGICOS
+        type: formAutoRowProcessing
+        formRegion: @sgt-form-enlaces-logicos
+        execution {
+            sequence: 10
+        }
+        advanced {
+            executionMappingIdentifier: 43769686141053608876
+        }
+    )
+
+)
+

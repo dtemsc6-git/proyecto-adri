@@ -1,0 +1,326 @@
+page 53 (
+    name: Paso 3
+    alias: PASO-3
+    title: Seleccionar Enlaces WAN
+    appearance {
+        pageMode: modalDialog
+        dialogTemplate: @/wizard-modal-dialog
+        templateOptions: #DEFAULT#
+    }
+    dialog {
+        height: 400
+    }
+    navigation {
+        cursorFocus: doNotFocusCursor
+    }
+    security {
+        pageAccessProtection: argumentsMustHaveChecksum
+        formAutoComplete: false
+    }
+
+    region buttons (
+        name: Buttons
+        type: staticContent
+        layout {
+            sequence: 10
+            slot: wizardButtons
+        }
+        appearance {
+            template: @/buttons-container
+            templateOptions: #DEFAULT#
+        }
+    )
+
+    region step (
+        name: Step 2
+        title: Crear Enlace Lógico
+        type: staticContent
+        layout {
+            sequence: 10
+            slot: wizardBody
+        }
+        appearance {
+            template: @/blank-with-attributes
+            templateOptions: #DEFAULT#
+        }
+    )
+
+    region wizard-progress (
+        name: Wizard Progress
+        type: list
+        source {
+            list: @asistente-servicios
+        }
+        layout {
+            sequence: 10
+            slot: wizardProgressBar
+        }
+        appearance {
+            template: @/blank-with-attributes
+            templateOptions: #DEFAULT#
+        }
+        componentAppearance {
+            listTemplate: @/wizard-progress
+            templateOptions: [
+                #DEFAULT#
+                t-WizardSteps--displayLabels
+            ]
+        }
+    )
+
+    pageItem P53_BUSCAR_ENLACES_WAN (
+        type: textField
+        label {
+            label: Buscar Enlaces Wan
+            alignment: left
+        }
+        layout {
+            sequence: 30
+            region: @step
+            slot: regionBody
+            alignment: left
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+            width: 30
+        }
+    )
+
+    pageItem P53_ENLACES_WAN (
+        type: shuttle
+        label {
+            label: Enlaces Wan
+            alignment: left
+        }
+        lov {
+            type: sqlQuery
+            sqlQuery:
+                ```sql
+                select distinct nombre, valor from (
+                
+                
+                SELECT 
+                    wan.nombre, WAN.ID VALOR
+                FROM 
+                  sgt_enlaces_wan wan inner join  sgt_sitios_enlace_wan sitios_wan on wan.id = sitios_wan.enlace_wan_id
+                
+                WHERE
+                    sitios_wan.sitio_id IN (
+                        SELECT column_value 
+                        FROM apex_string.split_numbers(:P51_SITIOS_TRANSITO, ',')
+                    )
+                order by sitios_wan.seq    
+                
+                )
+                ```
+        }
+        multipleValues {
+            separator: ,
+        }
+        layout {
+            sequence: 50
+            region: @step
+            slot: regionBody
+            alignment: left
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+            height: 5
+        }
+        source {
+            type: sqlQueryMultipleValues
+            sqlQuery:
+                ```sql
+                select enlace_id from SGT_ENLACES_WAN_SERVICIO
+                where servicio_id = :P50_ID
+                ```
+        }
+    )
+
+    button cancel (
+        buttonName: CANCEL
+        label: Cancel
+        layout {
+            sequence: 10
+            region: @buttons
+            slot: close
+        }
+        appearance {
+            buttonTemplate: @/text
+            templateOptions: #DEFAULT#
+        }
+        behavior {
+            action: definedByDynamicAction
+        }
+    )
+
+    button next (
+        buttonName: NEXT
+        label: Next
+        layout {
+            sequence: 30
+            region: @buttons
+            slot: next
+        }
+        appearance {
+            buttonTemplate: @/text-with-icon
+            hot: true
+            templateOptions: t-Button--iconRight
+            icon: fa-chevron-right
+        }
+        behavior {
+            warnOnUnsavedChanges: doNotCheck
+        }
+    )
+
+    button previous (
+        buttonName: PREVIOUS
+        label: Previous
+        layout {
+            sequence: 20
+            region: @buttons
+            slot: previous
+        }
+        appearance {
+            buttonTemplate: @/icon
+            templateOptions: #DEFAULT#
+            icon: fa-chevron-left
+        }
+        behavior {
+            executeValidations: false
+            warnOnUnsavedChanges: doNotCheck
+        }
+    )
+
+    dynamicAction cancel-dialog (
+        name: Cancel Dialog
+        execution {
+            sequence: 10
+        }
+        when {
+            event: click
+            selectionType: button
+            button: @cancel
+        }
+
+        action native-dialog-cancel (
+            action: cancelDialog
+            execution {
+                sequence: 10
+                fireOnInit: false
+            }
+        )
+
+    )
+
+    dynamicAction filtrar (
+        name: Filtrar
+        execution {
+            sequence: 20
+        }
+        when {
+            selectionType: items
+            items: P53_BUSCAR_ENLACES_WAN
+        }
+
+        action native-javascript-code (
+            action: executeJsCode
+            settings {
+                jsCode:
+                    ```javascript-browser
+                    //function filtrarShuttle(filtro) {
+                      console.log("filtrar datos")
+                    
+                      var filtro = $("#P53_BUSCAR_ENLACES_WAN").val();
+                      var filtroLower = filtro.toLowerCase();
+                      var opciones = document.querySelectorAll("#P53_ENLACES_WAN_LEFT option");
+                    
+                      opciones.forEach(function(opt) {
+                        if (opt.text.toLowerCase().includes(filtroLower)) {
+                          opt.style.display = "";   // mostrar
+                        } else {
+                          opt.style.display = "none"; // ocultar
+                        }
+                      });
+                    //}
+                    ```
+            }
+            execution {
+                sequence: 10
+                fireOnInit: false
+            }
+        )
+
+    )
+
+    dynamicAction nosubmit (
+        name: NoSubmit
+        execution {
+            sequence: 30
+        }
+        when {
+            event: keypress
+            selectionType: items
+            items: P53_BUSCAR_ENLACES_WAN
+        }
+
+        action native-javascript-code (
+            action: executeJsCode
+            settings {
+                jsCode:
+                    ```javascript-browser
+                    console.log("Key Press")
+                    console.log(event);
+                    
+                    if (event.key === "Enter") {
+                        event.preventDefault(); // evita el submit
+                        return false;
+                    }
+                    
+                    
+                    
+                    ```
+            }
+            execution {
+                sequence: 10
+                fireOnInit: false
+            }
+        )
+
+    )
+
+    branch (
+        name: Go To Page 51
+        execution {
+            sequence: 10
+            point: validating
+        }
+        behavior {
+            target: {
+                page: 51
+            }
+        }
+        serverSideCondition {
+            whenButtonPressed: @previous
+        }
+    )
+
+    branch (
+        name: Go To Page 52
+        execution {
+            sequence: 20
+        }
+        behavior {
+            target: {
+                page: 52
+            }
+        }
+        serverSideCondition {
+            whenButtonPressed: @next
+        }
+    )
+
+)
+

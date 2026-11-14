@@ -1,0 +1,520 @@
+page 407 (
+    name: Enlaces WAN
+    alias: ENLACES-WAN
+    title: Conexiones de enlaces WAN
+    appearance {
+        pageTemplate: @/standard
+        templateOptions: #DEFAULT#
+    }
+    navigation {
+        cursorFocus: doNotFocusCursor
+    }
+    security {
+        pageAccessProtection: argumentsMustHaveChecksum
+        formAutoComplete: false
+    }
+
+    region enlaces-wan (
+        name: Enlaces WAN
+        type: interactiveGrid
+        source {
+            location: localDatabase
+            type: sqlQuery
+            sqlQuery:
+                ```sql
+                select ew.ID,
+                       WAN_ID,
+                       e.SITIO_ID,
+                       EQUIPO_A_ID,
+                       INTERFAZ_A_ID,
+                       FO_ID,
+                       SEQ,
+                       PARENT_WAN_ID AS PARENT_WAN
+                
+                  from SGT_EQUIPOS_WAN ew
+                
+                  LEFT join sgt_equipos e on ew.equipo_a_id = e.id
+                
+                  WHERE :P407_ENLACE_WAN is null or WAn_ID = :P407_ENLACE_WAN
+                
+                ```
+            pageItemsToSubmit: P407_ENLACE_WAN
+        }
+        layout {
+            sequence: 20
+            slot: body
+        }
+        appearance {
+            template: @/interactive-report
+            templateOptions: [
+                #DEFAULT#
+                t-IRR-region--hideHeader js-addHiddenHeadingRoleDesc
+            ]
+        }
+        edit {
+            enabled: true
+            allowedOperations: [
+                add
+                update
+                delete
+            ]
+        }
+        toolbar {
+            controls: [
+                searchCol
+                searchField
+                actionsMenu
+                resetButton
+                saveButton
+            ]
+        }
+        download {
+            formats: [
+                csv
+                html
+                pdf
+                excel
+            ]
+        }
+        advanced {
+            savedReportMappingIdentifier: 20382192505201355
+        }
+
+        savedReport 203826 (
+            visibility: primary
+            view {
+                default: grid
+            }
+            singleRowView {
+                displayedColumns: true
+            }
+
+            displayColumn (
+                column: @APEX$ROW_ACTION
+                layout {
+                    frozen: true
+                    width: 99
+                    sequence: 1
+                }
+            )
+
+            displayColumn (
+                column: @ID
+                layout {
+                    sequence: 2
+                }
+            )
+
+            displayColumn (
+                column: @WAN_ID
+                layout {
+                    sequence: 3
+                }
+            )
+
+            displayColumn (
+                column: @SITIO_ID
+                layout {
+                    sequence: 4
+                }
+            )
+
+            displayColumn (
+                column: @FO_ID
+                layout {
+                    width: 117.641
+                    sequence: 8
+                }
+            )
+
+            displayColumn (
+                column: @SEQ
+                layout {
+                    sequence: 9
+                }
+            )
+
+            displayColumn (
+                column: @EQUIPO_A_ID
+                layout {
+                    sequence: 6
+                }
+            )
+
+            displayColumn (
+                column: @INTERFAZ_A_ID
+                layout {
+                    sequence: 7
+                }
+            )
+
+            displayColumn (
+                column: @PARENT_WAN
+                layout {
+                    sequence: 10
+                }
+            )
+
+            filter (
+                column: @WAN_ID
+                operator: contains
+                value: RIBBON_CBO_SPP
+            )
+
+            sort (
+                column: @SEQ
+                sort {
+                    nulls: last
+                    sequence: 1
+                }
+            )
+
+        )
+
+        column APEX$ROW_ACTION (
+            type: actionsMenu
+            layout {
+                sequence: 20
+            }
+        )
+
+        column APEX$ROW_SELECTOR (
+            type: rowSelector
+            layout {
+                sequence: 10
+            }
+        )
+
+        column EQUIPO_A_ID (
+            type: popupLov
+            heading {
+                heading: Equipo
+                alignment: center
+            }
+            lov {
+                type: sharedComponent
+                lov: @equipos-nombre-filtrado
+                nullDisplayValue: Seleccione Una
+            }
+            cascadingLov {
+                parentColumns: SITIO_ID
+                itemsToSubmit: SITIO_ID
+            }
+            layout {
+                sequence: 70
+            }
+            source {
+                databaseColumn: EQUIPO_A_ID
+                dataType: number
+            }
+        )
+
+        column FO_ID (
+            type: popupLov
+            heading {
+                heading: FO
+                alignment: center
+            }
+            lov {
+                type: sqlQuery
+                sqlQuery:
+                    ```sql
+                    Select nombre , id
+                    from sgt_enlaces_fo
+                    where sgt_enlaces_fo.equipo_id_a = :EQUIPO_A_ID 
+                    or 
+                    sgt_enlaces_fo.equipo_id_b = :EQUIPO_A_ID 
+                    and lower(estado) = 'activo'
+                    
+                    ```
+                nullDisplayValue: Seleccione Una
+            }
+            cascadingLov {
+                parentColumns: EQUIPO_A_ID
+                itemsToSubmit: EQUIPO_A_ID
+            }
+            layout {
+                sequence: 90
+            }
+            source {
+                databaseColumn: FO_ID
+                dataType: number
+            }
+        )
+
+        column ID (
+            type: hidden
+            layout {
+                sequence: 30
+            }
+            source {
+                databaseColumn: ID
+                dataType: number
+                queryOnly: true
+                primaryKey: true
+            }
+            exportPrinting {
+                includeInExportPrint: false
+            }
+        )
+
+        column INTERFAZ_A_ID (
+            type: popupLov
+            heading {
+                heading: Interfaz
+                alignment: center
+            }
+            lov {
+                type: sqlQuery
+                sqlQuery:
+                    ```sql
+                    select i.nombre || ' : '|| nvl(i.etiqueta, 'Sin etiqueta') , i.id
+                    from
+                    sgt_interfaces i
+                    where i.equipo_id = :EQUIPO_A_ID
+                    order by i.nombre
+                    ```
+                nullDisplayValue: Seleccione Una
+            }
+            cascadingLov {
+                parentColumns: EQUIPO_A_ID
+                itemsToSubmit: EQUIPO_A_ID
+            }
+            layout {
+                sequence: 80
+            }
+            source {
+                databaseColumn: INTERFAZ_A_ID
+                dataType: number
+            }
+        )
+
+        column PARENT_WAN (
+            type: popupLov
+            heading {
+                heading: Parent Wan
+            }
+            settings {
+                fetchOnSearch: true
+            }
+            lov {
+                type: sharedComponent
+                lov: @enlaces-wan-filtrado-sitios
+                nullDisplayValue: Seleccione Una
+            }
+            cascadingLov {
+                parentColumns: SITIO_ID
+            }
+            layout {
+                sequence: 50
+            }
+            source {
+                databaseColumn: PARENT_WAN
+                dataType: number
+            }
+        )
+
+        column SEQ (
+            type: numberField
+            heading {
+                heading: Seq
+                alignment: center
+            }
+            layout {
+                sequence: 100
+                columnAlignment: end
+            }
+            source {
+                databaseColumn: SEQ
+                dataType: number
+            }
+            columnFilter {
+                lovType: none
+            }
+        )
+
+        column SITIO_ID (
+            type: popupLov
+            heading {
+                heading: Sitio
+                alignment: center
+            }
+            lov {
+                type: sharedComponent
+                lov: @sgt-sitios-siglas
+                nullDisplayValue: Seleccione Una
+            }
+            layout {
+                sequence: 40
+            }
+            source {
+                type: sqlExpression
+                sqlExpression:
+                    ```sql
+                    select e.sitio_id from sgt_equipos e
+                    where
+                    e.id = equipo_a_id 
+                    
+                    ```
+                dataType: number
+            }
+            columnFilter {
+                performanceImpactingOperators: [
+                    contains
+                    startsWith
+                    caseInsensitive
+                    regexp
+                ]
+            }
+        )
+
+        column WAN_ID (
+            type: popupLov
+            heading {
+                heading: Wan
+                alignment: center
+            }
+            lov {
+                type: sharedComponent
+                lov: @enlaces-wan
+            }
+            layout {
+                sequence: 60
+            }
+            source {
+                databaseColumn: WAN_ID
+                dataType: number
+            }
+            columnFilter {
+                performanceImpactingOperators: [
+                    contains
+                    startsWith
+                    caseInsensitive
+                    regexp
+                ]
+            }
+        )
+
+        page {
+            borderWidth: 0.5
+            borderColor: #666666
+        }
+        pageHeader {
+            pageHeaderText: Enlaces WAN
+        }
+    )
+
+    pageItem P407_ENLACE_WAN (
+        type: popupLov
+        label {
+            label: Enlace Wan
+            alignment: left
+        }
+        settings {
+            fetchOnSearch: true
+        }
+        lov {
+            type: sharedComponent
+            lov: @enlaces-wan
+            nullDisplayValue: Seleccione Una
+        }
+        layout {
+            sequence: 30
+            region: @enlaces-wan
+            slot: sortOrder
+            alignment: left
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+            width: 30
+        }
+        advanced {
+            warnOnUnsavedChanges: ignore
+        }
+    )
+
+    button wan (
+        buttonName: WAN
+        label: Ir a Lista de Enlaces Wan
+        layout {
+            sequence: 20
+            region: @enlaces-wan
+            slot: sortOrder
+        }
+        appearance {
+            buttonTemplate: @/text
+            templateOptions: #DEFAULT#
+        }
+        behavior {
+            action: redirectThisApp
+            target: {
+                page: 10
+            }
+            warnOnUnsavedChanges: doNotCheck
+        }
+    )
+
+    dynamicAction clear-equipo (
+        name: CLEAR_EQUIPO
+        execution {
+            sequence: 10
+        }
+        when {
+            selectionType: columns
+            interactiveGrid: @enlaces-wan
+            columns: PARENT_WAN
+        }
+
+        action native-clear (
+            action: clear
+            affectedElements {
+                selectionType: columns
+                columns: EQUIPO_A_ID
+            }
+            execution {
+                sequence: 10
+                fireOnInit: false
+            }
+        )
+
+    )
+
+    dynamicAction refresh-region (
+        name: REFRESH_REGION
+        execution {
+            sequence: 20
+        }
+        when {
+            selectionType: items
+            items: P407_ENLACE_WAN
+        }
+
+        action native-refresh (
+            action: refresh
+            affectedElements {
+                selectionType: region
+                region: @enlaces-wan
+            }
+            execution {
+                sequence: 10
+                fireOnInit: false
+            }
+        )
+
+    )
+
+    process enlaces-wan-save-interactive-grid-data (
+        name: Enlaces WAN - Save Interactive Grid Data
+        type: interactiveGridAutoRowProcessing
+        editableRegion: @enlaces-wan
+        execution {
+            sequence: 10
+        }
+        advanced {
+            executionMappingIdentifier: 20397401502201346
+        }
+    )
+
+)
+

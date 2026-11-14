@@ -1,0 +1,179 @@
+page 20 (
+    name: PRUEBATREE
+    alias: PRUEBATREE
+    title: PRUEBATREE
+    appearance {
+        pageTemplate: @/standard
+        templateOptions: #DEFAULT#
+    }
+    navigation {
+        cursorFocus: doNotFocusCursor
+    }
+    security {
+        pageAccessProtection: argumentsMustHaveChecksum
+        formAutoComplete: false
+    }
+
+    region pruebatree (
+        name: PRUEBATREE
+        type: tree
+        source {
+            location: localDatabase
+            type: sqlQuery
+            sqlQuery:
+                ```sql
+                with data as (
+                /*
+                select 'Z' as link_type, to_char(parent_id) as PARENT_ID, to_char(sgt_zonas.id) as ID , NOMBRE AS name, null as sub_id from sgt_zonas 
+                union all
+                select 'S' as link_type, to_char(zona_id) as PARENT_ID, to_char(b.zona_id) ||'-'||to_char(b.id) as ID,  nombre as name, b.id as sub_id from sgt_sitios b
+                union all
+                select ('SC') as link_type, to_char(c.zona_id) || '-' || to_char(sitio_id) as PARENT_ID, to_char(zona_id) ||'-'||to_char(c.sitio_id) ||'-'||to_char(c.id) as ID, c.nombre as name, c.id as sub_id from sgt_salas c
+                union all
+                select ('R') as link_type,to_char(zona_id)||'-'||to_char(sitio_id)||'-'||to_char(sala_id) as PARENT_ID, to_char(zona_id) || '-' || to_char(sitio_id) || '-'||to_char(sala_id)||'-'||to_char(d.id) as ID, d.nombre as name, d.id as sub_id from sgt_racks d  
+                */
+                select 'Z' as link_type, to_char(parent_id) as PARENT_ID, to_char(sgt_zonas.id) as ID , NOMBRE AS name, null as sub_id from sgt_zonas 
+                union all
+                select 'S' as link_type, to_char(zona_id) as PARENT_ID, 'S-'||to_char(b.id) as ID,  nombre as name, b.id as sub_id from sgt_sitios b
+                union all
+                select ('SC') as link_type, 'S-'||to_char(sitio_id) as PARENT_ID, 'SC-'||to_char(c.id) as ID, c.siglas as name, c.id as sub_id from sgt_salas c
+                union all
+                select ('R') as link_type,'SC-'||to_char(sala_id) as PARENT_ID, 'R-'||to_char(d.id) as ID, d.nombre as name, d.id as sub_id from sgt_racks d  
+                union all 
+                select ('E') as link_type,  'R-'||to_char(rack_id) as parent_id , 'E-'||to_char(e.id) as ID, e.nombre as name, e.id as sub_id from sgt_equipos e
+                /*
+                union all
+                select ('E') as link_type,
+                to_char(zona_id)||'-'||to_char(sitio_id)||'-'||to_char(sala_id)||'-'||to_char(rack_id) as PARENT_ID, 
+                to_char(zona_id)||'-'||to_char(sitio_id)||'-'||to_char(sala_id)||'-'||to_char(rack_id)||'-'||to_char(E.ID) as ID,
+                E.NOMBRE AS name,
+                e.id as sub_id
+                from sgt_equipos E  
+                */
+                )
+                select case when connect_by_isleaf = 1 then 0
+                            when level = 1             then 1
+                            else                           -1
+                       end as status, 
+                       level,
+                       name as title, 
+                       null as icon, 
+                       "ID" as value, 
+                       null as tooltip, 
+                       null as link 
+                from data
+                start with "PARENT_ID" is null
+                connect by prior "ID" = "PARENT_ID"
+                order siblings by name
+                ```
+        }
+        layout {
+            sequence: 10
+            slot: body
+        }
+        appearance {
+            template: @/standard
+            templateOptions: [
+                #DEFAULT#
+                t-Region--scrollBody
+            ]
+        }
+        settings {
+            nodeLabelColumn: TITLE
+            nodeValueColumn: VALUE
+            hierarchy: notComputed
+            nodeStatusColumn: STATUS
+            hierarchyLevelColumn: LEVEL
+            linkColumn: LINK
+            iconCssClassColumn: ICON
+            defaultIconCssClass: icon-tree-folder
+            iconTypeCssClass: a-Icon
+        }
+    )
+
+    button contract-all (
+        buttonName: CONTRACT_ALL
+        label: Collapse All
+        layout {
+            sequence: 10
+            region: @pruebatree
+            slot: create
+        }
+        appearance {
+            buttonTemplate: @/text
+            templateOptions: #DEFAULT#
+        }
+        behavior {
+            action: definedByDynamicAction
+        }
+    )
+
+    button expand-all (
+        buttonName: EXPAND_ALL
+        label: Expand All
+        layout {
+            sequence: 10
+            region: @pruebatree
+            slot: create
+        }
+        appearance {
+            buttonTemplate: @/text
+            templateOptions: #DEFAULT#
+        }
+        behavior {
+            action: definedByDynamicAction
+        }
+    )
+
+    dynamicAction contract-all (
+        name: CONTRACT_ALL
+        execution {
+            sequence: 10
+        }
+        when {
+            event: click
+            selectionType: button
+            button: @contract-all
+        }
+
+        action native-tree-collapse (
+            action: collapseTree
+            affectedElements {
+                selectionType: region
+                region: @pruebatree
+            }
+            execution {
+                sequence: 10
+                fireOnInit: false
+            }
+        )
+
+    )
+
+    dynamicAction expand-all (
+        name: EXPAND_ALL
+        execution {
+            sequence: 10
+        }
+        when {
+            event: click
+            selectionType: button
+            button: @expand-all
+        }
+
+        action native-tree-expand (
+            action: expandTree
+            affectedElements {
+                selectionType: region
+                region: @pruebatree
+            }
+            execution {
+                sequence: 10
+                fireOnInit: false
+            }
+        )
+
+    )
+
+)
+

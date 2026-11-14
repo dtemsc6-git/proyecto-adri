@@ -1,0 +1,784 @@
+page 64 (
+    name: Dependencias FO
+    alias: DEPENDENCIAS-FO
+    title: Dependencias FO
+    appearance {
+        pageMode: modalDialog
+        dialogTemplate: @/modal-dialog
+        templateOptions: #DEFAULT#
+    }
+    navigation {
+        cursorFocus: doNotFocusCursor
+    }
+    security {
+        pageAccessProtection: argumentsMustHaveChecksum
+        formAutoComplete: false
+    }
+
+    region enlaces-wan (
+        name: Enlaces WAN
+        type: interactiveReport
+        source {
+            location: localDatabase
+            tableName: SGT_EQUIPOS_WAN
+            whereClause: FO_ID = :P64_ID
+            pageItemsToSubmit: P64_ID
+        }
+        layout {
+            sequence: 10
+            parentRegion: @new
+            slot: subRegions
+        }
+        appearance {
+            template: @/interactive-report
+            templateOptions: [
+                #DEFAULT#
+                t-IRR-region--hideHeader js-addHiddenHeadingRoleDesc
+            ]
+        }
+        advanced {
+            regionDisplaySelector: true
+        }
+        pagination {
+            type: rowRangesXToY
+        }
+        performance {
+            maxRowsToProcess: 1000000
+        }
+        messages {
+            whenNoDataFound: No hay datos para mostrar
+        }
+        searchBar {
+            includeSearchBar: false
+        }
+        advanced {
+            savedReportMappingIdentifier: 24831010637840835
+        }
+
+        column CREADO_EL (
+            type: plainText
+            heading {
+                heading: Creado El
+            }
+            layout {
+                sequence: 110
+            }
+            source {
+                dataType: DATE
+            }
+            advanced {
+                endUserAlias: J
+            }
+            config {
+                buildOption: @commented-out
+            }
+        )
+
+        column CREADO_POR (
+            type: plainText
+            heading {
+                heading: Creado Por
+            }
+            layout {
+                sequence: 100
+            }
+            source {
+                dataType: STRING
+            }
+            advanced {
+                endUserAlias: I
+            }
+            config {
+                buildOption: @commented-out
+            }
+        )
+
+        column EQUIPO_A_ID (
+            type: plainTextBasedOnLov
+            heading {
+                heading: Equipo A Id
+                alignment: end
+            }
+            lov {
+                lov: @equipos-nombre
+            }
+            layout {
+                sequence: 40
+                columnAlignment: end
+            }
+            source {
+                dataType: NUMBER
+            }
+            advanced {
+                endUserAlias: C
+            }
+        )
+
+        column EQUIPO_B_ID (
+            type: plainText
+            heading {
+                heading: Equipo B Id
+                alignment: end
+            }
+            layout {
+                sequence: 60
+                columnAlignment: end
+            }
+            source {
+                dataType: NUMBER
+            }
+            advanced {
+                endUserAlias: E
+            }
+            config {
+                buildOption: @commented-out
+            }
+        )
+
+        column FO_ID (
+            type: plainText
+            heading {
+                heading: Fo Id
+                alignment: end
+            }
+            layout {
+                sequence: 80
+                columnAlignment: end
+            }
+            source {
+                dataType: NUMBER
+            }
+            advanced {
+                endUserAlias: G
+            }
+            config {
+                buildOption: @commented-out
+            }
+        )
+
+        column ID (
+            type: hidden
+            heading {
+                heading: Id
+            }
+            layout {
+                sequence: 10
+            }
+            source {
+                dataType: NUMBER
+            }
+            advanced {
+                endUserAlias: A
+            }
+        )
+
+        column INTERFAZ_A_ID (
+            type: plainTextBasedOnLov
+            heading {
+                heading: Interfaz A Id
+                alignment: end
+            }
+            lov {
+                lov: @interfaces-nombre-equiqueta
+            }
+            layout {
+                sequence: 50
+                columnAlignment: end
+            }
+            source {
+                dataType: NUMBER
+            }
+            advanced {
+                endUserAlias: D
+            }
+        )
+
+        column INTERFAZ_B_ID (
+            type: plainText
+            heading {
+                heading: Interfaz B Id
+                alignment: end
+            }
+            layout {
+                sequence: 70
+                columnAlignment: end
+            }
+            source {
+                dataType: NUMBER
+            }
+            advanced {
+                endUserAlias: F
+            }
+            config {
+                buildOption: @commented-out
+            }
+        )
+
+        column MODIFICADO_EL (
+            type: plainText
+            heading {
+                heading: Modificado El
+            }
+            layout {
+                sequence: 130
+            }
+            source {
+                dataType: DATE
+            }
+            advanced {
+                endUserAlias: L
+            }
+            config {
+                buildOption: @commented-out
+            }
+        )
+
+        column MODIFICADO_POR (
+            type: plainText
+            heading {
+                heading: Modificado Por
+            }
+            layout {
+                sequence: 120
+            }
+            source {
+                dataType: STRING
+            }
+            advanced {
+                endUserAlias: K
+            }
+            config {
+                buildOption: @commented-out
+            }
+        )
+
+        column PARENT_WAN_ID (
+            type: plainText
+            heading {
+                heading: Parent Wan Id
+                alignment: end
+            }
+            layout {
+                sequence: 30
+                columnAlignment: end
+            }
+            source {
+                dataType: NUMBER
+            }
+            advanced {
+                endUserAlias: M
+            }
+            config {
+                buildOption: @commented-out
+            }
+        )
+
+        column SEQ (
+            type: plainText
+            heading {
+                heading: Seq
+                alignment: end
+            }
+            layout {
+                sequence: 90
+                columnAlignment: end
+            }
+            source {
+                dataType: NUMBER
+            }
+            advanced {
+                endUserAlias: H
+            }
+        )
+
+        column WAN_ID (
+            type: plainTextBasedOnLov
+            heading {
+                heading: Wan Id
+                alignment: end
+            }
+            lov {
+                lov: @enlaces-wan
+            }
+            layout {
+                sequence: 20
+                columnAlignment: end
+            }
+            source {
+                dataType: NUMBER
+            }
+            advanced {
+                endUserAlias: B
+            }
+        )
+
+        savedReport 251207 (
+            visibility: primaryDefault
+            view {
+                rowsPerPage: 50
+            }
+
+            displayColumn CREADO_EL (
+                sequence: 11
+            )
+
+            displayColumn CREADO_POR (
+                sequence: 10
+            )
+
+            displayColumn EQUIPO_A_ID (
+                sequence: 4
+            )
+
+            displayColumn EQUIPO_B_ID (
+                sequence: 6
+            )
+
+            displayColumn FO_ID (
+                sequence: 8
+            )
+
+            displayColumn ID (
+                sequence: 1
+            )
+
+            displayColumn INTERFAZ_A_ID (
+                sequence: 5
+            )
+
+            displayColumn INTERFAZ_B_ID (
+                sequence: 7
+            )
+
+            displayColumn MODIFICADO_EL (
+                sequence: 13
+            )
+
+            displayColumn MODIFICADO_POR (
+                sequence: 12
+            )
+
+            displayColumn PARENT_WAN_ID (
+                sequence: 3
+            )
+
+            displayColumn SEQ (
+                sequence: 9
+            )
+
+            displayColumn WAN_ID (
+                sequence: 2
+            )
+
+        )
+
+    )
+
+    region new (
+        name: New
+        type: regionDisplaySelector
+        layout {
+            sequence: 20
+            slot: contentBody
+        }
+        appearance {
+            template: @/standard
+            templateOptions: [
+                #DEFAULT#
+                t-Region--noPadding
+                t-Region--removeHeader js-removeLandmark
+                t-Region--scrollBody
+            ]
+        }
+        settings {
+            includeShowAll: false
+        }
+    )
+
+    region servicios (
+        name: Servicios
+        type: interactiveReport
+        source {
+            location: localDatabase
+            tableName: SGT_EQUIPOS_SERVICIO
+            whereClause: FO_ID = :P64_ID
+            pageItemsToSubmit: P64_ID
+        }
+        layout {
+            sequence: 20
+            parentRegion: @new
+            slot: subRegions
+        }
+        appearance {
+            template: @/interactive-report
+            templateOptions: [
+                #DEFAULT#
+                t-IRR-region--hideHeader js-addHiddenHeadingRoleDesc
+            ]
+        }
+        advanced {
+            regionDisplaySelector: true
+        }
+        pagination {
+            type: rowRangesXToY
+        }
+        performance {
+            maxRowsToProcess: 1000000
+        }
+        messages {
+            whenNoDataFound: No hay datos para mostrar
+        }
+        searchBar {
+            includeSearchBar: false
+        }
+        advanced {
+            savedReportMappingIdentifier: 25121426796279901
+        }
+
+        column CREADO_EL (
+            type: plainText
+            heading {
+                heading: Creado El
+            }
+            layout {
+                sequence: 110
+            }
+            source {
+                dataType: DATE
+            }
+            advanced {
+                endUserAlias: K
+            }
+            config {
+                buildOption: @commented-out
+            }
+        )
+
+        column CREADO_POR (
+            type: plainText
+            heading {
+                heading: Creado Por
+            }
+            layout {
+                sequence: 100
+            }
+            source {
+                dataType: STRING
+            }
+            advanced {
+                endUserAlias: J
+            }
+            config {
+                buildOption: @commented-out
+            }
+        )
+
+        column EQUIPO_A_ID (
+            type: plainTextBasedOnLov
+            heading {
+                heading: Equipo A Id
+                alignment: end
+            }
+            lov {
+                lov: @equipos-nombre
+            }
+            layout {
+                sequence: 40
+                columnAlignment: end
+            }
+            source {
+                dataType: NUMBER
+            }
+            advanced {
+                endUserAlias: D
+            }
+        )
+
+        column EQUIPO_B_ID (
+            type: plainText
+            heading {
+                heading: Equipo B Id
+                alignment: end
+            }
+            layout {
+                sequence: 60
+                columnAlignment: end
+            }
+            source {
+                dataType: NUMBER
+            }
+            advanced {
+                endUserAlias: F
+            }
+            config {
+                buildOption: @commented-out
+            }
+        )
+
+        column FO_ID (
+            type: plainText
+            heading {
+                heading: Fo Id
+                alignment: end
+            }
+            layout {
+                sequence: 80
+                columnAlignment: end
+            }
+            source {
+                dataType: NUMBER
+            }
+            advanced {
+                endUserAlias: H
+            }
+            config {
+                buildOption: @commented-out
+            }
+        )
+
+        column ID (
+            type: plainText
+            heading {
+                heading: Id
+                alignment: end
+            }
+            layout {
+                sequence: 10
+                columnAlignment: end
+            }
+            source {
+                dataType: NUMBER
+            }
+            advanced {
+                endUserAlias: A
+            }
+        )
+
+        column INTERFAZ_A_ID (
+            type: plainTextBasedOnLov
+            heading {
+                heading: Interfaz A Id
+                alignment: end
+            }
+            lov {
+                lov: @interfaces-nombre-equiqueta
+            }
+            layout {
+                sequence: 50
+                columnAlignment: end
+            }
+            source {
+                dataType: NUMBER
+            }
+            advanced {
+                endUserAlias: E
+            }
+        )
+
+        column INTERFAZ_B_ID (
+            type: plainText
+            heading {
+                heading: Interfaz B Id
+                alignment: end
+            }
+            layout {
+                sequence: 70
+                columnAlignment: end
+            }
+            source {
+                dataType: NUMBER
+            }
+            advanced {
+                endUserAlias: G
+            }
+            config {
+                buildOption: @commented-out
+            }
+        )
+
+        column MODIFICADO_EL (
+            type: plainText
+            heading {
+                heading: Modificado El
+            }
+            layout {
+                sequence: 130
+            }
+            source {
+                dataType: DATE
+            }
+            advanced {
+                endUserAlias: M
+            }
+            config {
+                buildOption: @commented-out
+            }
+        )
+
+        column MODIFICADO_POR (
+            type: plainText
+            heading {
+                heading: Modificado Por
+            }
+            layout {
+                sequence: 120
+            }
+            source {
+                dataType: STRING
+            }
+            advanced {
+                endUserAlias: L
+            }
+            config {
+                buildOption: @commented-out
+            }
+        )
+
+        column SEQ (
+            type: plainText
+            heading {
+                heading: Seq
+                alignment: end
+            }
+            layout {
+                sequence: 90
+                columnAlignment: end
+            }
+            source {
+                dataType: NUMBER
+            }
+            advanced {
+                endUserAlias: I
+            }
+        )
+
+        column SERVICIO_ID (
+            type: plainTextBasedOnLov
+            heading {
+                heading: Servicio Id
+                alignment: end
+            }
+            lov {
+                lov: @servicios-nombre
+            }
+            layout {
+                sequence: 20
+                columnAlignment: end
+            }
+            source {
+                dataType: NUMBER
+            }
+            advanced {
+                endUserAlias: B
+            }
+        )
+
+        column WAN_ID (
+            type: plainTextBasedOnLov
+            heading {
+                heading: Wan Id
+                alignment: end
+            }
+            lov {
+                lov: @enlaces-wan
+            }
+            layout {
+                sequence: 30
+                columnAlignment: end
+            }
+            source {
+                dataType: NUMBER
+            }
+            advanced {
+                endUserAlias: C
+            }
+        )
+
+        savedReport 251319 (
+            visibility: primaryDefault
+            view {
+                rowsPerPage: 50
+            }
+
+            displayColumn CREADO_EL (
+                sequence: 11
+            )
+
+            displayColumn CREADO_POR (
+                sequence: 10
+            )
+
+            displayColumn EQUIPO_A_ID (
+                sequence: 4
+            )
+
+            displayColumn EQUIPO_B_ID (
+                sequence: 6
+            )
+
+            displayColumn FO_ID (
+                sequence: 8
+            )
+
+            displayColumn ID (
+                sequence: 1
+            )
+
+            displayColumn INTERFAZ_A_ID (
+                sequence: 5
+            )
+
+            displayColumn INTERFAZ_B_ID (
+                sequence: 7
+            )
+
+            displayColumn MODIFICADO_EL (
+                sequence: 13
+            )
+
+            displayColumn MODIFICADO_POR (
+                sequence: 12
+            )
+
+            displayColumn SEQ (
+                sequence: 9
+            )
+
+            displayColumn SERVICIO_ID (
+                sequence: 2
+            )
+
+            displayColumn WAN_ID (
+                sequence: 3
+            )
+
+        )
+
+    )
+
+    pageItem P64_ID (
+        type: displayOnly
+        label {
+            label: Nombre del Enlace FO
+            alignment: left
+        }
+        settings {
+            basedOn: lov
+        }
+        lov {
+            type: sharedComponent
+            lov: @enlaces-fo-nombre
+        }
+        layout {
+            sequence: 10
+            slot: contentBody
+            alignment: left
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+        }
+    )
+
+)
+

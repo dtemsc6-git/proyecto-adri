@@ -1,0 +1,748 @@
+page 470 (
+    name: Subir Fotos
+    alias: SUBIR-FOTOS
+    title: Subir Fotos
+    pageGroup: @archivos
+    appearance {
+        pageMode: modalDialog
+        dialogTemplate: @/modal-dialog
+        templateOptions: #DEFAULT#
+    }
+    navigation {
+        cursorFocus: doNotFocusCursor
+    }
+    css {
+        inline:
+            ```css
+            .nuevo {
+                border-left: 4px solid #2ecc71;
+            }
+            
+            .obsoleto {
+                border-left: 4px solid #f39c12;
+            }
+            .eliminado {
+                border-left: 4px solid red;
+            }
+            ```
+    }
+    security {
+        formAutoComplete: false
+    }
+
+    region buttons (
+        name: Buttons
+        type: staticContent
+        layout {
+            sequence: 20
+            slot: dialogFooter
+        }
+        appearance {
+            template: @/buttons-container
+            templateOptions: #DEFAULT#
+        }
+        settings {
+            outputAs: text
+        }
+    )
+
+    region imagenes (
+        name: IMAGENES
+        type: cards
+        source {
+            location: localDatabase
+            tableName: SGT_ARCHIVOS
+            whereClause: pk_id = :P470_pk_id AND ENTIDAD = :P470_ENTIDAD
+            pageItemsToSubmit: [
+                P470_PK_ID
+                P470_ENTIDAD
+            ]
+        }
+        layout {
+            sequence: 80
+            slot: contentBody
+        }
+        appearance {
+            template: @/cards-container
+            templateOptions: [
+                #DEFAULT#
+                t-CardsRegion--hideHeader js-addHiddenHeadingRoleDesc
+            ]
+            cssClasses: btn-imagenes
+        }
+        serverSideCondition {
+            type: rowsReturned
+            sqlQuery: select id from SGT_ARCHIVOS where pk_id = :P470_PK_ID
+        }
+        card {
+            cssClasses: &INTERNAL_ATTR.
+            primaryKeyColumn1: ID
+        }
+        title {
+            column: FILE_NAME
+        }
+        subtitle {
+            column: FILE_MIMETYPE
+        }
+        body {
+            column: OBSERVACIONES
+        }
+        iconAndBadge {
+            badgeColumn: INTERNAL_ATTR
+        }
+        media {
+            source: blobColumn
+            blobColumn: FILE_BLOB
+        }
+        blobAttributes {
+            mimeTypeColumn: FILE_MIMETYPE
+            lastUpdatedColumn: ACTUALIZADO_EL
+        }
+
+        action action (
+            label: Eliminar
+            layout {
+                sequence: 40
+            }
+            behavior {
+                type: redirectUrl
+                targetUrl: javascript:void(0);
+                linkAttributes: data-id="&ID." data-estado="3"
+            }
+            appearance {
+                displayType: textWithIcon
+                icon: fa-warning
+                hot: true
+                cssClasses: btn-eliminar
+            }
+        )
+
+        action action-2 (
+            label: Obsoleto
+            layout {
+                sequence: 30
+            }
+            behavior {
+                type: redirectUrl
+                targetUrl: javascript:void(0);
+                linkAttributes: data-id="&ID."
+            }
+            appearance {
+                cssClasses: btn-obsoleto
+            }
+        )
+
+        action action-3 (
+            label: Descargar
+            layout {
+                sequence: 10
+            }
+            behavior {
+                type: redirectUrl
+                targetUrl: javascript:void(0);
+                linkAttributes: data-id="&ID."
+            }
+            appearance {
+                cssClasses: btn-descargar
+            }
+        )
+
+    )
+
+    region subir-fotos (
+        name: Subir Fotos
+        type: form
+        source {
+            location: localDatabase
+            tableName: SGT_ARCHIVOS
+        }
+        layout {
+            sequence: 90
+            slot: contentBody
+        }
+        appearance {
+            template: @/blank-with-attributes
+            templateOptions: #DEFAULT#
+        }
+        serverSideCondition {
+            type: expression
+            plsqlExpression: :P470_CONTEO < 3
+        }
+        edit {
+            enabled: true
+            allowedOperations: [
+                add
+                update
+                delete
+            ]
+        }
+    )
+
+    pageItem P470_CONTEO (
+        type: hidden
+        layout {
+            sequence: 60
+            slot: contentBody
+        }
+    )
+
+    pageItem P470_ENTIDAD (
+        type: hidden
+        layout {
+            sequence: 50
+            slot: contentBody
+        }
+        source {
+            formRegion: @subir-fotos
+            column: ENTIDAD
+            dataType: number
+        }
+    )
+
+    pageItem P470_EQUIPO_FULL_NAME (
+        type: displayOnly
+        label {
+            label: Equipo (Full name):
+            alignment: left
+        }
+        settings {
+            basedOn: lov
+        }
+        lov {
+            type: sharedComponent
+            lov: @equipos-nombre-compuesto
+        }
+        layout {
+            sequence: 70
+            slot: contentBody
+            alignment: left
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+        }
+        default {
+            type: item
+            item: P470_PK_ID
+        }
+        serverSideCondition {
+            type: item=value
+            item: P470_ENTIDAD
+            value: 4
+        }
+    )
+
+    pageItem P470_ESTADO (
+        type: hidden
+        layout {
+            sequence: 30
+            slot: contentBody
+        }
+        source {
+            formRegion: @subir-fotos
+            column: ESTADO
+            dataType: number
+        }
+    )
+
+    pageItem P470_FILE_BLOB (
+        type: imageUpload
+        label {
+            label: Imagen a subir
+            alignment: left
+        }
+        display {
+            previewSize: medium
+            downloadLinkText: Descargar
+        }
+        storage {
+            mimeTypeColumn: FILE_MIMETYPE
+            filenameColumn: FILE_NAME
+            blobLastUpdatedColumn: ACTUALIZADO_EL
+        }
+        cropping {
+            allowCropping: true
+        }
+        layout {
+            sequence: 70
+            region: @subir-fotos
+            slot: regionBody
+            alignment: left
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+            width: 60
+        }
+        validation {
+            valueRequired: true
+            maxLength: 255
+        }
+        source {
+            formRegion: @subir-fotos
+            column: FILE_BLOB
+            dataType: blob
+        }
+        help {
+            inlineHelpText: Seleccione un archivo la cual se asociará al activo seleccionado.
+        }
+    )
+
+    pageItem P470_FILE_ID (
+        type: hidden
+        settings {
+            valueProtected: false
+        }
+        layout {
+            sequence: 20
+            slot: contentBody
+        }
+    )
+
+    pageItem P470_ID (
+        type: hidden
+        layout {
+            sequence: 10
+            region: @subir-fotos
+            slot: regionBody
+        }
+        source {
+            formRegion: @subir-fotos
+            column: ID
+            dataType: number
+            queryOnly: true
+            primaryKey: true
+        }
+        security {
+            sessionStateProtection: checksumRequiredSessionLevel
+        }
+    )
+
+    pageItem P470_OBSERVACIONES (
+        type: textarea
+        label {
+            label: Observaciones
+            alignment: left
+        }
+        layout {
+            sequence: 80
+            region: @subir-fotos
+            slot: regionBody
+            alignment: left
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+            width: 60
+            height: 4
+        }
+        validation {
+            maxLength: 4000
+        }
+        source {
+            formRegion: @subir-fotos
+            column: OBSERVACIONES
+            dataType: varchar2
+        }
+    )
+
+    pageItem P470_PK_ID (
+        type: hidden
+        layout {
+            sequence: 40
+            slot: contentBody
+        }
+        source {
+            formRegion: @subir-fotos
+            column: PK_ID
+            dataType: number
+        }
+    )
+
+    button cancel (
+        buttonName: CANCEL
+        label: Cancel
+        layout {
+            sequence: 10
+            region: @buttons
+            slot: close
+        }
+        appearance {
+            buttonTemplate: @/text
+            templateOptions: #DEFAULT#
+        }
+        behavior {
+            action: definedByDynamicAction
+        }
+    )
+
+    button create (
+        buttonName: CREATE
+        label: &APP_TEXT$BTN_CREAR!RAW.
+        layout {
+            sequence: 40
+            region: @buttons
+            slot: next
+        }
+        appearance {
+            buttonTemplate: @/text
+            hot: true
+            templateOptions: #DEFAULT#
+        }
+        behavior {
+            warnOnUnsavedChanges: doNotCheck
+            databaseAction: insert
+        }
+        serverSideCondition {
+            type: expression
+            plsqlExpression: :P470_ID is null and :P470_CONTEO < 3
+        }
+    )
+
+    button delete (
+        buttonName: DELETE
+        label: Delete
+        layout {
+            sequence: 20
+            region: @buttons
+            slot: delete
+        }
+        appearance {
+            buttonTemplate: @/text
+            templateOptions: #DEFAULT#
+        }
+        behavior {
+            executeValidations: false
+            warnOnUnsavedChanges: doNotCheck
+            databaseAction: delete
+            requiresConfirmation: true
+        }
+        confirmation {
+            message: &APP_TEXT$DELETE_MSG!RAW.
+            style: danger
+        }
+        serverSideCondition {
+            type: itemIsNotNull
+            item: P470_ID
+        }
+    )
+
+    button save (
+        buttonName: SAVE
+        label: Apply Changes
+        layout {
+            sequence: 30
+            region: @buttons
+            slot: next
+        }
+        appearance {
+            buttonTemplate: @/text
+            hot: true
+            templateOptions: #DEFAULT#
+        }
+        behavior {
+            warnOnUnsavedChanges: doNotCheck
+            databaseAction: update
+        }
+        serverSideCondition {
+            type: itemIsNotNull
+            item: P470_ID
+        }
+    )
+
+    dynamicAction cancel-dialog (
+        name: Cancel Dialog
+        execution {
+            sequence: 40
+        }
+        when {
+            event: click
+            selectionType: button
+            button: @cancel
+        }
+
+        action native-dialog-cancel (
+            action: cancelDialog
+            execution {
+                sequence: 10
+                fireOnInit: false
+            }
+        )
+
+    )
+
+    dynamicAction descargar (
+        name: Descargar
+        execution {
+            sequence: 25
+            eventScope: dynamic
+            staticContainer: .btn-imagenes
+        }
+        when {
+            event: click
+            selectionType: jQuerySelector
+            jquerySelector: .btn-descargar
+        }
+
+        action native-download (
+            action: download
+            source {
+                sqlQuery:
+                    ```sql
+                    select file_blob, file_name , file_mimetype from SGT_archivos
+                    where id = :P470_FILE_ID
+                    ```
+                itemsToSubmit: P470_FILE_ID
+            }
+            execution {
+                sequence: 20
+                fireOnInit: false
+            }
+        )
+
+        action native-set-value (
+            action: setValue
+            settings {
+                type: jsExpression
+                jsExpression: this.triggeringElement.dataset.id
+            }
+            affectedElements {
+                selectionType: items
+                items: P470_FILE_ID
+            }
+            execution {
+                sequence: 10
+            }
+        )
+
+    )
+
+    dynamicAction eliminar (
+        name: ELIMINAR
+        execution {
+            sequence: 20
+            eventScope: dynamic
+            staticContainer: .btn-imagenes
+        }
+        when {
+            event: click
+            selectionType: jQuerySelector
+            jquerySelector: .btn-eliminar
+        }
+
+        action native-confirm (
+            action: confirm
+            settings {
+                title: Antención
+                message: Borrar el elemento?
+                style: danger
+            }
+            execution {
+                sequence: 10
+                fireOnInit: false
+            }
+        )
+
+        action native-execute-plsql-code (
+            action: executeServerSideCode
+            settings {
+                plsqlCode:
+                    ```plsql
+                    delete from SGT_archivos
+                    
+                    WHERE ID = :P470_FILE_ID;
+                    ```
+                itemsToSubmit: [
+                    P470_FILE_ID
+                    P470_ESTADO
+                ]
+            }
+            execution {
+                sequence: 30
+                fireOnInit: false
+            }
+        )
+
+        action native-refresh (
+            action: refresh
+            affectedElements {
+                selectionType: region
+                region: @imagenes
+            }
+            execution {
+                sequence: 40
+                fireOnInit: false
+            }
+        )
+
+        action native-refresh-2 (
+            action: refresh
+            affectedElements {
+                selectionType: items
+                items: P470_CONTEO
+            }
+            execution {
+                sequence: 50
+                fireOnInit: false
+            }
+        )
+
+        action native-refresh-3 (
+            action: refresh
+            affectedElements {
+                selectionType: region
+                region: @subir-fotos
+            }
+            execution {
+                sequence: 60
+                fireOnInit: false
+            }
+        )
+
+        action set-file-id (
+            name: SET_FILE_ID
+            action: setValue
+            settings {
+                type: jsExpression
+                jsExpression: this.triggeringElement.dataset.id
+            }
+            affectedElements {
+                selectionType: items
+                items: P470_FILE_ID
+            }
+            execution {
+                sequence: 20
+                fireOnInit: false
+            }
+        )
+
+    )
+
+    dynamicAction obsoleto (
+        name: Obsoleto
+        execution {
+            sequence: 30
+        }
+        when {
+            event: click
+            selectionType: jQuerySelector
+            jquerySelector: .btn-obsoleto
+        }
+
+        action native-confirm (
+            action: confirm
+            settings {
+                title: Atención
+                message: Marcar como obsoleto el elemento?
+                style: warning
+            }
+            execution {
+                sequence: 10
+                fireOnInit: false
+            }
+        )
+
+        action native-execute-plsql-code (
+            action: executeServerSideCode
+            settings {
+                plsqlCode:
+                    ```plsql
+                    UPDATE SGT_ARCHIVOS
+                    SET ESTADO = 2
+                    WHERE ID = :P470_FILE_ID;
+                    ```
+                itemsToSubmit: P470_FILE_ID
+            }
+            execution {
+                sequence: 30
+                fireOnInit: false
+            }
+        )
+
+        action native-refresh (
+            action: refresh
+            affectedElements {
+                selectionType: region
+                region: @imagenes
+            }
+            execution {
+                sequence: 40
+                fireOnInit: false
+            }
+        )
+
+        action set-value (
+            name: SET_VALUE
+            action: setValue
+            settings {
+                type: jsExpression
+                jsExpression: this.triggeringElement.dataset.id
+            }
+            affectedElements {
+                selectionType: items
+                items: P470_FILE_ID
+            }
+            execution {
+                sequence: 20
+                fireOnInit: false
+            }
+        )
+
+    )
+
+    computation p470-conteo (
+        itemName: P470_CONTEO
+        execution {
+            sequence: 10
+        }
+        computation {
+            sqlQuery:
+                ```sql
+                select count(*) from sgt_archivos
+                where entidad = 4 and pk_id =:P470_PK_ID
+                ```
+        }
+    )
+
+    process close-dialog (
+        name: Close Dialog
+        type: closeDialog
+        execution {
+            sequence: 50
+        }
+        advanced {
+            executionMappingIdentifier: 21354297398568578
+        }
+        serverSideCondition {
+            type: requestIsContainedInValue
+            value: CREATE,SAVE,DELETE
+        }
+    )
+
+    process initialize-form-subir-fotos (
+        name: Initialize form Subir Fotos
+        type: formInitialization
+        formRegion: @subir-fotos
+        execution {
+            sequence: 10
+            point: beforeHeader
+        }
+        advanced {
+            executionMappingIdentifier: 21353405593568577
+        }
+    )
+
+    process process-form-subir-fotos (
+        name: Process form Subir Fotos
+        type: formAutoRowProcessing
+        formRegion: @subir-fotos
+        execution {
+            sequence: 10
+        }
+        advanced {
+            executionMappingIdentifier: 21353862333568578
+        }
+    )
+
+)
+

@@ -1,0 +1,450 @@
+installScript CREAR_FUNCIONES (
+    execution {
+        sequence: 20
+    }
+    script {
+        contentFile: crear-funciones.sql
+    }
+
+    databaseObject (
+        owner: WKSP_DTESC
+        type: function
+        name: F_GET_LOVS
+    )
+
+    databaseObject (
+        owner: WKSP_DTESC
+        type: function
+        name: PARSE_FLEXIBLE_DATE
+    )
+
+    databaseObject (
+        owner: #OWNER#
+        type: function
+        name: CREAR_RUTA_SRV
+    )
+
+    databaseObject (
+        owner: #OWNER#
+        type: function
+        name: CREAR_RUTA_WAN
+    )
+
+    databaseObject (
+        owner: #OWNER#
+        type: function
+        name: GET_EDGES_EQUIPOS
+    )
+
+    databaseObject (
+        owner: #OWNER#
+        type: function
+        name: GET_EDGES_IFACE
+    )
+
+    databaseObject (
+        owner: #OWNER#
+        type: function
+        name: GET_EDGES_WAN
+    )
+
+    databaseObject (
+        owner: #OWNER#
+        type: function
+        name: GET_NODOS_EQUIPOS
+    )
+
+    databaseObject (
+        owner: #OWNER#
+        type: function
+        name: GET_NODOS_IFACE
+    )
+
+    databaseObject (
+        owner: #OWNER#
+        type: function
+        name: GET_NODOS_SITIOS
+    )
+
+    databaseObject (
+        owner: #OWNER#
+        type: function
+        name: SEXAGESIMAL_TO_DECIMAL
+    )
+
+    databaseObject (
+        owner: #OWNER#
+        type: function
+        name: URL_TO_LAT
+    )
+
+    databaseObject (
+        owner: WKSP_DTESC
+        type: function
+        name: GET_WAN_EDGES_IFACE
+    )
+
+    databaseObject (
+        owner: WKSP_DTESC
+        type: function
+        name: GET_WAN_NODOS_IFACE
+    )
+
+    databaseObject (
+        owner: WKSP_DTESC
+        type: function
+        name: VERIFICAR_DISPONIBILIDAD_U
+    )
+
+)
+
+installScript CREAR_PKG (
+    execution {
+        sequence: 30
+    }
+    script {
+        contentFile: crear-pkg.sql
+    }
+
+    databaseObject (
+        owner: #OWNER#
+        type: package
+        name: AUDIT_PKG
+    )
+
+)
+
+installScript CREAR_SEQ (
+    execution {
+        sequence: 40
+    }
+    script {
+        contentFile: crear-seq.sql
+    }
+
+    databaseObject (
+        owner: #OWNER#
+        type: sequence
+        name: AUDIT_SEQ
+    )
+
+    databaseObject (
+        owner: #OWNER#
+        type: sequence
+        name: AUDIT_DETAIL_SEQ
+    )
+
+    databaseObject (
+        owner: #OWNER#
+        type: sequence
+        name: SGT_ENLACES_WAN_SERVICIO_ID_SEQ
+    )
+
+)
+
+installScript CREAR_TABLAS (
+    execution {
+        sequence: 60
+    }
+    script {
+        contentFile: crear-tablas.sql
+    }
+
+    databaseObject (
+        owner: WKSP_DTESC
+        type: table
+        name: SGT_INTERFACES_L2
+    )
+
+    databaseObject (
+        owner: WKSP_DTESC
+        type: table
+        name: SGT_INTERFACES_L3
+    )
+
+    databaseObject (
+        owner: WKSP_DTESC
+        type: table
+        name: SGT_IP_ADM
+    )
+
+    databaseObject (
+        owner: #OWNER#
+        type: table
+        name: SGT_TIPO_CABLE
+    )
+
+    databaseObject (
+        owner: #OWNER#
+        type: table
+        name: SGT_TIPO_EQUIPOS
+    )
+
+    databaseObject (
+        owner: #OWNER#
+        type: table
+        name: SGT_TIPO_INTERFAZ
+    )
+
+    databaseObject (
+        owner: #OWNER#
+        type: table
+        name: SGT_ZONAS
+    )
+
+    databaseObject (
+        owner: #OWNER#
+        type: table
+        name: AUDIT_MASTER
+    )
+
+    databaseObject (
+        owner: #OWNER#
+        type: table
+        name: AUDIT_DETAIL
+    )
+
+    databaseObject (
+        owner: #OWNER#
+        type: table
+        name: SGT_DEPTO
+    )
+
+    databaseObject (
+        owner: #OWNER#
+        type: table
+        name: SGT_CIUDAD
+    )
+
+    databaseObject (
+        owner: #OWNER#
+        type: table
+        name: SGT_SITIOS
+    )
+
+    databaseObject (
+        owner: #OWNER#
+        type: table
+        name: SGT_SALAS
+    )
+
+    databaseObject (
+        owner: #OWNER#
+        type: table
+        name: SGT_RACKS
+    )
+
+    databaseObject (
+        owner: #OWNER#
+        type: table
+        name: SGT_EQUIPOS
+    )
+
+    databaseObject (
+        owner: #OWNER#
+        type: table
+        name: SGT_INTERFACES
+    )
+
+    databaseObject (
+        owner: #OWNER#
+        type: table
+        name: SGT_ENLACES_FO
+    )
+
+    databaseObject (
+        owner: #OWNER#
+        type: table
+        name: SGT_ENLACES_WAN
+    )
+
+    databaseObject (
+        owner: #OWNER#
+        type: table
+        name: SGT_SERVICIOS
+    )
+
+    databaseObject (
+        owner: #OWNER#
+        type: table
+        name: SGT_ENLACES_TRAMOS
+    )
+
+    databaseObject (
+        owner: #OWNER#
+        type: table
+        name: SGT_ENLACES_WAN_SERVICIO
+    )
+
+    databaseObject (
+        owner: #OWNER#
+        type: table
+        name: SGT_SITIOS_ENLACE_WAN
+    )
+
+    databaseObject (
+        owner: #OWNER#
+        type: table
+        name: SGT_SITIOS_SERVICIO
+    )
+
+    databaseObject (
+        owner: #OWNER#
+        type: table
+        name: SGT_CONEXIONES_ENLACE_WAN
+    )
+
+    databaseObject (
+        owner: #OWNER#
+        type: table
+        name: SGT_CONEXIONES_SERVICIO
+    )
+
+    databaseObject (
+        owner: #OWNER#
+        type: sequence
+        name: AUDIT_DETAIL_SEQ
+    )
+
+    databaseObject (
+        owner: WKSP_DTESC
+        type: table
+        name: SGT_EQUIPOS_WAN
+    )
+
+    databaseObject (
+        owner: WKSP_DTESC
+        type: table
+        name: SGT_EQUIPOS_SERVICIO
+    )
+
+    databaseObject (
+        owner: WKSP_DTESC
+        type: table
+        name: SGT_ARCHIVOS
+    )
+
+    databaseObject (
+        owner: WKSP_DTESC
+        type: table
+        name: SGT_COMENTARIOS
+    )
+
+    databaseObject (
+        owner: WKSP_DTESC
+        type: table
+        name: SGT_SITIOS_ARCHIVOS
+    )
+
+    databaseObject (
+        owner: WKSP_DTESC
+        type: table
+        name: SGT_TIPO_WAN
+    )
+
+)
+
+installScript CREAR_TYPES (
+    execution {
+        sequence: 70
+    }
+    script {
+        contentFile: crear-types.sql
+    }
+
+    databaseObject (
+        owner: #OWNER#
+        type: type
+        name: TABLA_IDS
+    )
+
+    databaseObject (
+        owner: #OWNER#
+        type: type
+        name: COORD_OBJ
+    )
+
+)
+
+installScript CREAR_VISTAS (
+    execution {
+        sequence: 80
+    }
+    script {
+        contentFile: crear-vistas.sql
+    }
+
+    databaseObject (
+        owner: WKSP_DTESC
+        type: view
+        name: V_AUDIT_CONSOLIDADO
+    )
+
+    databaseObject (
+        owner: #OWNER#
+        type: view
+        name: V_AUDIT_CUMPLIMIENTO
+    )
+
+    databaseObject (
+        owner: #OWNER#
+        type: view
+        name: V_AUDIT_DASHBOARD_EJECUTIVO
+    )
+
+    databaseObject (
+        owner: #OWNER#
+        type: view
+        name: V_AUDIT_DETALLE
+    )
+
+    databaseObject (
+        owner: #OWNER#
+        type: view
+        name: V_AUDIT_GENERAL
+    )
+
+    databaseObject (
+        owner: #OWNER#
+        type: view
+        name: V_CONEXIONES_GENERAL_V2
+    )
+
+    databaseObject (
+        owner: #OWNER#
+        type: view
+        name: V_SITIOS_GPS
+    )
+
+    databaseObject (
+        owner: #OWNER#
+        type: view
+        name: V_TRAMOS_NOMBRES
+    )
+
+    databaseObject (
+        owner: WKSP_DTESC
+        type: view
+        name: V_AUDIT_EQUIPOS
+    )
+
+    databaseObject (
+        owner: WKSP_DTESC
+        type: view
+        name: V_SERVICIOS
+    )
+
+    databaseObject (
+        owner: WKSP_DTESC
+        type: view
+        name: V_SITIOS_EQUIPOS
+    )
+
+    databaseObject (
+        owner: WKSP_DTESC
+        type: view
+        name: V_ZONAS_VISTA_GENERAL
+    )
+
+)
+

@@ -1,0 +1,285 @@
+page 68 (
+    name: Tipo Equipo
+    alias: TIPO-EQUIPO
+    title: Tipo Equipo
+    appearance {
+        pageTemplate: @/standard
+        templateOptions: #DEFAULT#
+    }
+    navigation {
+        cursorFocus: doNotFocusCursor
+    }
+    security {
+        pageAccessProtection: argumentsMustHaveChecksum
+        formAutoComplete: false
+    }
+
+    region tipo-equipo (
+        name: Tipo Equipo
+        type: interactiveGrid
+        source {
+            location: localDatabase
+            tableName: SGT_TIPO_EQUIPOS
+        }
+        layout {
+            sequence: 20
+            slot: body
+        }
+        appearance {
+            template: @/interactive-report
+            templateOptions: [
+                #DEFAULT#
+                t-IRR-region--hideHeader js-addHiddenHeadingRoleDesc
+            ]
+        }
+        edit {
+            enabled: true
+            allowedOperations: [
+                add
+                update
+                delete
+            ]
+        }
+        toolbar {
+            controls: [
+                searchCol
+                searchField
+                actionsMenu
+                resetButton
+                saveButton
+            ]
+        }
+        download {
+            formats: [
+                csv
+                html
+                pdf
+                excel
+            ]
+        }
+        advanced {
+            savedReportMappingIdentifier: 23185786695418475
+        }
+
+        savedReport 231862 (
+            visibility: primary
+            view {
+                default: grid
+            }
+            singleRowView {
+                displayedColumns: true
+            }
+
+            displayColumn (
+                column: @APEX$ROW_ACTION
+                layout {
+                    sequence: 0
+                }
+            )
+
+            displayColumn (
+                column: @ID
+                layout {
+                    sequence: 1
+                }
+            )
+
+            displayColumn (
+                column: @NOMBRE
+                layout {
+                    sequence: 2
+                }
+            )
+
+            displayColumn (
+                column: @DESCRIPCION
+                layout {
+                    sequence: 3
+                }
+            )
+
+            displayColumn (
+                column: @GRUPO_EQUIPO
+                layout {
+                    sequence: 4
+                }
+            )
+
+            displayColumn (
+                column: @SIGLAS
+                layout {
+                    sequence: 5
+                }
+            )
+
+        )
+
+        column APEX$ROW_ACTION (
+            type: actionsMenu
+            layout {
+                sequence: 20
+            }
+        )
+
+        column APEX$ROW_SELECTOR (
+            type: rowSelector
+            layout {
+                sequence: 10
+            }
+        )
+
+        column DESCRIPCION (
+            type: textarea
+            heading {
+                heading: Descripción
+                alignment: center
+            }
+            layout {
+                sequence: 50
+            }
+            validation {
+                maxLength: 4000
+            }
+            source {
+                databaseColumn: DESCRIPCION
+                dataType: varchar2
+            }
+            columnFilter {
+                performanceImpactingOperators: [
+                    contains
+                    startsWith
+                    caseInsensitive
+                    regexp
+                ]
+                lovType: none
+            }
+            enableUsersTo {
+                sort: false
+            }
+        )
+
+        column GRUPO_EQUIPO (
+            type: selectList
+            heading {
+                heading: Grupo Equipo
+                alignment: center
+            }
+            lov {
+                type: staticValues
+                staticValues: STATIC:Activo;Activo,Pasivo;Pasivo,Energía;Energía,Desconocido;Desconocido
+            }
+            layout {
+                sequence: 60
+            }
+            validation {
+                valueRequired: true
+            }
+            source {
+                databaseColumn: GRUPO_EQUIPO
+                dataType: varchar2
+            }
+            columnFilter {
+                performanceImpactingOperators: [
+                    contains
+                    startsWith
+                    caseInsensitive
+                    regexp
+                ]
+                lovType: useLov
+            }
+        )
+
+        column ID (
+            type: hidden
+            layout {
+                sequence: 30
+            }
+            source {
+                databaseColumn: ID
+                dataType: number
+                queryOnly: true
+                primaryKey: true
+            }
+            exportPrinting {
+                includeInExportPrint: false
+            }
+        )
+
+        column NOMBRE (
+            type: textField
+            heading {
+                heading: Nombre
+                alignment: center
+            }
+            layout {
+                sequence: 40
+            }
+            validation {
+                maxLength: 50
+            }
+            source {
+                databaseColumn: NOMBRE
+                dataType: varchar2
+            }
+            columnFilter {
+                performanceImpactingOperators: [
+                    contains
+                    startsWith
+                    caseInsensitive
+                    regexp
+                ]
+            }
+        )
+
+        column SIGLAS (
+            type: textField
+            heading {
+                heading: Siglas
+                alignment: center
+            }
+            layout {
+                sequence: 70
+            }
+            validation {
+                maxLength: 4
+            }
+            source {
+                databaseColumn: SIGLAS
+                dataType: varchar2
+            }
+            columnFilter {
+                performanceImpactingOperators: [
+                    contains
+                    startsWith
+                    caseInsensitive
+                    regexp
+                ]
+            }
+            config {
+                buildOption: @commented-out
+            }
+        )
+
+        page {
+            borderWidth: 0.5
+            borderColor: #666666
+        }
+        pageHeader {
+            pageHeaderText: Tipo Equipo
+        }
+    )
+
+    process tipo-equipo-save-interactive-grid-data (
+        name: Tipo Equipo - Save Interactive Grid Data
+        type: interactiveGridAutoRowProcessing
+        editableRegion: @tipo-equipo
+        execution {
+            sequence: 10
+        }
+        advanced {
+            executionMappingIdentifier: 23193007857418478
+        }
+    )
+
+)
+

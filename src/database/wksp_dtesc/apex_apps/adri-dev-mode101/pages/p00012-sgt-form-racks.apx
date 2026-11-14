@@ -1,0 +1,1031 @@
+page 12 (
+    name: SGT_FORM_RACKS
+    alias: SGT-FORM-RACKS
+    title: Formulario Racks
+    pageGroup: @implementadores
+    appearance {
+        pageMode: modalDialog
+        dialogTemplate: @/drawer
+        templateOptions: [
+            #DEFAULT#
+            js-dialog-class-t-Drawer--pullOutEnd
+        ]
+    }
+    navigation {
+        cursorFocus: doNotFocusCursor
+    }
+    css {
+        fileUrls: #APP_FILES#racks.css
+    }
+    security {
+        authorizationScheme: @implementador-rights
+        pageAccessProtection: argumentsMustHaveChecksum
+        formAutoComplete: false
+    }
+
+    region aviso-de-no-asignacion (
+        name: Aviso de no asignacion
+        title: Equipos ubicados en el rack sin información de ubicación:
+        type: staticContent
+        source {
+            htmlCode: &P12_SIN_ASIGNAR.
+        }
+        layout {
+            sequence: 20
+            parentRegion: @equipos
+            slot: subRegions
+        }
+        appearance {
+            template: @/alert
+            templateOptions: [
+                #DEFAULT#
+                t-Alert--horizontal
+                t-Alert--defaultIcons
+                t-Alert--warning
+            ]
+        }
+        serverSideCondition {
+            type: itemIsNotNull
+            item: P12_SIN_ASIGNAR
+        }
+    )
+
+    region buttons (
+        name: Buttons
+        type: staticContent
+        layout {
+            sequence: 20
+            parentRegion: @sgt-racks-form
+            slot: subRegions
+        }
+        appearance {
+            template: @/buttons-container
+            templateOptions: #DEFAULT#
+        }
+        settings {
+            outputAs: text
+        }
+    )
+
+    region datos (
+        name: Datos
+        type: staticContent
+        layout {
+            sequence: 20
+            parentRegion: @tabs
+            slot: subRegions
+        }
+        appearance {
+            template: @/standard
+            templateOptions: [
+                #DEFAULT#
+                t-Region--removeHeader js-removeLandmark
+                t-Region--scrollBody
+            ]
+        }
+        advanced {
+            regionDisplaySelector: true
+        }
+    )
+
+    region datos-2 (
+        name: Datos
+        type: staticContent
+        source {
+            htmlCode: Rack: &P12_NOMBRE.
+        }
+        layout {
+            sequence: 10
+            parentRegion: @equipos
+            slot: subRegions
+        }
+        appearance {
+            template: @/standard
+            templateOptions: [
+                #DEFAULT#
+                t-Region--removeHeader js-removeLandmark
+                t-Region--scrollBody
+            ]
+            cssClasses: u-libre
+        }
+    )
+
+    region equipos (
+        name: Equipos
+        type: staticContent
+        layout {
+            sequence: 30
+            parentRegion: @tabs
+            slot: subRegions
+            columnCssClasses: racks
+        }
+        appearance {
+            template: @/standard
+            templateOptions: [
+                #DEFAULT#
+                t-Region--removeHeader js-removeLandmark
+                t-Region--scrollBody
+            ]
+        }
+        advanced {
+            regionDisplaySelector: true
+        }
+    )
+
+    region sgt-racks-form (
+        name: SGT_RACKS_FORM
+        type: form
+        source {
+            location: localDatabase
+            tableName: SGT_RACKS
+        }
+        layout {
+            sequence: 20
+            slot: contentBody
+            startNewRow: false
+        }
+        appearance {
+            template: @/blank-with-attributes
+            templateOptions: #DEFAULT#
+        }
+        edit {
+            enabled: true
+            allowedOperations: [
+                add
+                update
+                delete
+            ]
+        }
+    )
+
+    region tabs (
+        name: Tabs
+        title: Seleccione
+        type: regionDisplaySelector
+        layout {
+            sequence: 10
+            parentRegion: @sgt-racks-form
+            slot: regionBody
+        }
+        appearance {
+            template: @/standard
+            templateOptions: [
+                #DEFAULT#
+                t-Region--removeHeader js-removeLandmark
+                t-Region--scrollBody
+            ]
+        }
+        advanced {
+            regionDisplaySelector: true
+        }
+        settings {
+            displayRegionIcons: true
+            includeShowAll: false
+        }
+    )
+
+    region vista-back (
+        name: VISTA_BACK
+        title: Vista Posterior Rack
+        type: classicReport
+        source {
+            location: localDatabase
+            type: sqlQuery
+            sqlQuery:
+                ```sql
+                WITH Pisos(posicion_u) AS (
+                  SELECT 1 FROM dual
+                  UNION ALL
+                  SELECT posicion_u + 1 FROM Pisos
+                  WHERE posicion_u + 1 <= (
+                    SELECT altura_u FROM sgt_Racks WHERE id=:P12_ID
+                  )
+                )
+                
+                SELECT 
+                  'U'||p.posicion_u as "U", 
+                  CASE 
+                    WHEN EXISTS (
+                      SELECT 1 FROM sgt_Equipos e
+                      WHERE e.rack_id = :P12_ID
+                        AND p.posicion_u BETWEEN e.u AND (e.u + e.altura_u - 1)
+                        AND e.posicion = 'Back'
+                    ) THEN 
+                      '<span class="u-ocupada u-clickable">'|| 
+                      (SELECT e.nombre FROM sgt_Equipos e
+                       WHERE e.rack_id = :P12_ID
+                         AND p.posicion_u BETWEEN e.u AND (e.u + e.altura_u - 1)
+                         AND e.posicion = 'Back'
+                       AND ROWNUM = 1) ||'</span>'
+                    ELSE
+                      '<span class="u-libre u-clickable" data-ua="'|| p.posicion_u ||'">Seleccionar Aqui</span>'
+                  END AS Equipo
+                FROM Pisos p
+                ORDER BY p.posicion_u DESC;
+                ```
+        }
+        layout {
+            sequence: 40
+            parentRegion: @equipos
+            slot: subRegions
+            startNewRow: false
+            columnCssClasses: back
+        }
+        appearance {
+            template: @/standard
+            templateOptions: [
+                #DEFAULT#
+                t-Region--scrollBody
+            ]
+        }
+        reportLayout {
+            numberOfRows: 60
+        }
+        componentAppearance {
+            template: @/standard
+            templateOptions: [
+                #DEFAULT#
+                t-Report--altRowsDefault
+                t-Report--rowHighlight
+            ]
+        }
+        pagination {
+            type: nextAndPreviousLinks
+        }
+
+        column EQUIPO (
+            reportColumnQueryId: 2
+            derivedColumn: N
+            type: richText
+            heading {
+                heading: Equipo
+            }
+            layout {
+                sequence: 20
+            }
+            settings {
+                format: html
+            }
+            sorting {
+                sortable: false
+            }
+        )
+
+        column U (
+            reportColumnQueryId: 1
+            derivedColumn: N
+            heading {
+                heading: U
+            }
+            layout {
+                sequence: 10
+            }
+            sorting {
+                sortable: false
+            }
+        )
+
+    )
+
+    region vista-front (
+        name: VISTA_FRONT
+        title: Vista Frontal Rack
+        type: classicReport
+        source {
+            location: localDatabase
+            type: sqlQuery
+            sqlQuery:
+                ```sql
+                WITH Pisos(posicion_u) AS (
+                  SELECT 1 FROM dual
+                  UNION ALL
+                  SELECT posicion_u + 1 FROM Pisos
+                  WHERE posicion_u + 1 <= (
+                    SELECT altura_u FROM sgt_Racks WHERE id=:P12_ID
+                  )
+                )
+                
+                SELECT 
+                  'U'||p.posicion_u as "U", 
+                  CASE 
+                    WHEN EXISTS (
+                      SELECT 1 FROM sgt_Equipos e
+                      WHERE e.rack_id = :P12_ID
+                        AND p.posicion_u BETWEEN e.u AND (e.u + e.altura_u - 1)
+                        AND e.posicion = 'Front'
+                    ) THEN 
+                      '<span class="u-ocupada u-clickable">'|| 
+                      (SELECT e.nombre FROM sgt_Equipos e
+                       WHERE e.rack_id = :P12_ID
+                         AND p.posicion_u BETWEEN e.u AND (e.u + e.altura_u - 1)
+                         AND e.posicion = 'Front'
+                       AND ROWNUM = 1) ||'</span>'
+                    ELSE
+                      '<span class="u-libre u-clickable" data-ua="'|| p.posicion_u ||'">Seleccionar Aqui</span>'
+                  END AS Equipo
+                FROM Pisos p
+                ORDER BY p.posicion_u DESC;
+                ```
+            pageItemsToSubmit: P12_ID
+        }
+        layout {
+            sequence: 30
+            parentRegion: @equipos
+            slot: subRegions
+        }
+        appearance {
+            template: @/standard
+            templateOptions: [
+                #DEFAULT#
+                t-Region--scrollBody
+            ]
+        }
+        reportLayout {
+            numberOfRows: 60
+        }
+        componentAppearance {
+            template: @/standard
+            templateOptions: [
+                #DEFAULT#
+                t-Report--altRowsDefault
+                t-Report--rowHighlight
+            ]
+        }
+        pagination {
+            type: nextAndPreviousLinks
+        }
+
+        column EQUIPO (
+            reportColumnQueryId: 2
+            derivedColumn: N
+            type: richText
+            heading {
+                heading: Equipo
+            }
+            layout {
+                sequence: 20
+            }
+            settings {
+                format: html
+            }
+            sorting {
+                sortable: false
+            }
+        )
+
+        column U (
+            reportColumnQueryId: 1
+            derivedColumn: N
+            heading {
+                heading: U
+            }
+            layout {
+                sequence: 10
+            }
+            sorting {
+                sortable: false
+            }
+        )
+
+    )
+
+    pageItem P12_ALTURA_U (
+        type: numberField
+        label {
+            label: Cantidad de U
+            alignment: left
+        }
+        settings {
+            minValue: 1
+            maxValue: 60
+            virtualKeyboard: numeric
+        }
+        layout {
+            sequence: 50
+            region: @datos
+            slot: regionBody
+            alignment: left
+        }
+        appearance {
+            template: @/required-floating
+            templateOptions: #DEFAULT#
+            width: 30
+        }
+        validation {
+            valueRequired: true
+            maxLength: 50
+        }
+        source {
+            formRegion: @sgt-racks-form
+            column: ALTURA_U
+            dataType: varchar2
+        }
+        help {
+            inlineHelpText: Ingresar cantidad de U que posee rack
+        }
+    )
+
+    pageItem P12_CIUDAD (
+        type: hidden
+        layout {
+            sequence: 120
+            region: @datos
+            slot: regionBody
+        }
+    )
+
+    pageItem P12_DEPARTAMENTO (
+        type: hidden
+        layout {
+            sequence: 130
+            region: @datos
+            slot: regionBody
+        }
+    )
+
+    pageItem P12_DETALLE (
+        type: textField
+        label {
+            label: Nombre del Rack
+            alignment: left
+        }
+        settings {
+            trimSpaces: none
+        }
+        layout {
+            sequence: 40
+            region: @datos
+            slot: regionBody
+            alignment: left
+        }
+        appearance {
+            template: @/required-floating
+            templateOptions: #DEFAULT#
+            width: 32
+        }
+        validation {
+            valueRequired: true
+            maxLength: 255
+        }
+        source {
+            formRegion: @sgt-racks-form
+            column: DETALLE
+            dataType: varchar2
+        }
+        help {
+            inlineHelpText: Ingresar descripción o referencia para ubicar el rack
+        }
+    )
+
+    pageItem P12_DIMENCIONES (
+        type: textField
+        label {
+            label: Dimensiones
+            alignment: left
+        }
+        layout {
+            sequence: 100
+            region: @datos
+            slot: regionBody
+            alignment: left
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+            width: 30
+        }
+        validation {
+            maxLength: 255
+        }
+        source {
+            formRegion: @sgt-racks-form
+            column: DIMENSIONES
+            dataType: varchar2
+        }
+        help {
+            inlineHelpText: Indicar dimensiones del rack (Largo*ancho*altura)
+        }
+    )
+
+    pageItem P12_ID (
+        type: hidden
+        layout {
+            sequence: 140
+            region: @datos
+            slot: regionBody
+        }
+        source {
+            formRegion: @sgt-racks-form
+            column: ID
+            dataType: number
+            queryOnly: true
+            primaryKey: true
+        }
+        security {
+            sessionStateProtection: checksumRequiredSessionLevel
+        }
+    )
+
+    pageItem P12_MARCA (
+        type: textField
+        label {
+            label: Marca
+            alignment: left
+        }
+        layout {
+            sequence: 70
+            region: @datos
+            slot: regionBody
+            alignment: left
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+            width: 30
+        }
+        validation {
+            maxLength: 255
+        }
+        source {
+            formRegion: @sgt-racks-form
+            column: MARCA
+            dataType: varchar2
+        }
+        help {
+            inlineHelpText: Indicar marca del rack
+        }
+    )
+
+    pageItem P12_MODELO (
+        type: textField
+        label {
+            label: Modelo
+            alignment: left
+        }
+        settings {
+            trimSpaces: none
+        }
+        layout {
+            sequence: 80
+            region: @datos
+            slot: regionBody
+            alignment: left
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+            width: 32
+        }
+        validation {
+            maxLength: 255
+        }
+        source {
+            formRegion: @sgt-racks-form
+            column: MODELO
+            dataType: varchar2
+        }
+        help {
+            inlineHelpText: Indicar modelo del rack
+        }
+    )
+
+    pageItem P12_NOMBRE (
+        type: textField
+        label {
+            label: Sigla del Rack
+            alignment: left
+        }
+        layout {
+            sequence: 30
+            region: @datos
+            slot: regionBody
+            alignment: left
+        }
+        appearance {
+            template: @/required-floating
+            templateOptions: #DEFAULT#
+            width: 30
+        }
+        validation {
+            valueRequired: true
+            maxLength: 50
+        }
+        source {
+            formRegion: @sgt-racks-form
+            column: NOMBRE
+            dataType: varchar2
+        }
+        help {
+            inlineHelpText: Asignar sigla/abreviación identificatoria del rack (nombre corto)
+        }
+    )
+
+    pageItem P12_SALA_ID (
+        type: popupLov
+        label {
+            label: Sitio.Sala
+            alignment: left
+        }
+        lov {
+            type: sharedComponent
+            lov: @salas-nombre
+        }
+        cascadingLov {
+            parentItems: P12_SITIO
+        }
+        layout {
+            sequence: 20
+            region: @datos
+            slot: regionBody
+            alignment: left
+        }
+        appearance {
+            template: @/required-floating
+            templateOptions: #DEFAULT#
+            width: 30
+        }
+        validation {
+            valueRequired: true
+        }
+        source {
+            formRegion: @sgt-racks-form
+            column: SALA_ID
+            dataType: number
+        }
+        help {
+            inlineHelpText: Seleccionar sala donde se encuentra ubicado el rack
+        }
+    )
+
+    pageItem P12_SIN_ASIGNAR (
+        type: hidden
+        layout {
+            sequence: 10
+            region: @datos-2
+            slot: regionBody
+        }
+        serverSideCondition {
+            type: itemIsNotNull
+            item: P37_SIN_ASIGNAR
+        }
+    )
+
+    pageItem P12_SITIO (
+        type: hidden
+        layout {
+            sequence: 110
+            region: @datos
+            slot: regionBody
+        }
+    )
+
+    pageItem P12_TITULO (
+        type: hidden
+        layout {
+            sequence: 10
+            region: @datos
+            slot: regionBody
+        }
+    )
+
+    pageItem P12_UNIDAD_ENCARGADA (
+        type: selectMany
+        label {
+            label: Unidad Encargada
+            alignment: left
+        }
+        settings {
+            infiniteScroll: false
+        }
+        lov {
+            type: sharedComponent
+            lov: @uni-encar
+        }
+        layout {
+            sequence: 60
+            region: @datos
+            slot: regionBody
+            alignment: left
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+            width: 30
+        }
+        source {
+            formRegion: @sgt-racks-form
+            column: UNIDAD_ENCARGADA
+            dataType: varchar2
+        }
+        help {
+            inlineHelpText: Seleccionar unidad administrativa encargada del rack
+        }
+    )
+
+    button cancel (
+        buttonName: CANCEL
+        label: Cancelar
+        layout {
+            sequence: 10
+            region: @buttons
+            slot: close
+        }
+        appearance {
+            buttonTemplate: @/text
+            templateOptions: #DEFAULT#
+        }
+        behavior {
+            action: redirectThisApp
+            target: {
+                page: 11
+            }
+            warnOnUnsavedChanges: doNotCheck
+        }
+    )
+
+    button create (
+        buttonName: CREATE
+        label: &APP_TEXT$BTN_CREAR!RAW.
+        layout {
+            sequence: 40
+            region: @buttons
+            slot: next
+        }
+        appearance {
+            buttonTemplate: @/text
+            hot: true
+            templateOptions: #DEFAULT#
+        }
+        behavior {
+            warnOnUnsavedChanges: doNotCheck
+            databaseAction: insert
+        }
+        serverSideCondition {
+            type: itemIsNull
+            item: P12_ID
+        }
+    )
+
+    button delete (
+        buttonName: DELETE
+        label: DELETE
+        layout {
+            sequence: 20
+            region: @buttons
+            slot: delete
+        }
+        appearance {
+            buttonTemplate: @/text
+            templateOptions: #DEFAULT#
+        }
+        behavior {
+            executeValidations: false
+            warnOnUnsavedChanges: doNotCheck
+            databaseAction: delete
+            requiresConfirmation: true
+        }
+        confirmation {
+            message: &APP_TEXT$DELETE_MSG!RAW.
+            style: danger
+        }
+        serverSideCondition {
+            type: itemIsNotNull
+            item: P12_ID
+        }
+    )
+
+    button save (
+        buttonName: SAVE
+        label: &APP_TEXT$BTN_APLICAR_CAMBIOS!RAW.
+        layout {
+            sequence: 30
+            region: @buttons
+            slot: next
+        }
+        appearance {
+            buttonTemplate: @/text
+            hot: true
+            templateOptions: #DEFAULT#
+        }
+        behavior {
+            warnOnUnsavedChanges: doNotCheck
+            databaseAction: update
+        }
+        serverSideCondition {
+            type: itemIsNotNull
+            item: P12_ID
+        }
+    )
+
+    dynamicAction actualizar-titulo-de-página (
+        name: Actualizar titulo de página
+        execution {
+            sequence: 20
+        }
+        when {
+            event: ready
+        }
+        config {
+            buildOption: @commented-out
+        }
+
+        action native-javascript-code (
+            action: executeJsCode
+            settings {
+                jsCode:
+                    ```javascript-browser
+                    $(document).ready(function() {
+                    
+                    apex.util.getTopApex().jQuery(".t-Body-title").dialog("option", "title", "&P12_TITULO.");
+                    });
+                    ```
+            }
+            execution {
+                sequence: 10
+            }
+        )
+
+    )
+
+    dynamicAction check-nombre (
+        name: CHECK_NOMBRE
+        execution {
+            sequence: 30
+        }
+        when {
+            selectionType: items
+            items: P12_NOMBRE
+        }
+
+        action native-javascript-code (
+            action: executeJsCode
+            settings {
+                jsCode:
+                    ```javascript-browser
+                    apex.server.process("CHECK_RACK_DUPLICADO", {
+                        pageItems: "#P12_ID,#P12_NOMBRE,#P12_SALA_ID",
+                        loadingIndicator: "#P12_NOMBRE",  // opcional: puedes asociar el spinner a este campo
+                        showWait: true
+                    }, {
+                        success: function(pData) {
+                            apex.message.clearErrors();
+                        },
+                        error: function(pData) {
+                            if (pData.responseJSON.error) {
+                                apex.message.showErrors([
+                                    {
+                                        type: "error",
+                                        location: ["inline"],
+                                        pageItem: "P12_NOMBRE",
+                                        message: pData.responseJSON.error,
+                                        unsafe: false
+                                    }
+                                ]);
+                                let $campo = $("#P12_NOMBRE");
+                                $campo.addClass("apex-page-item-error");
+                    
+                            }
+                        }
+                    });
+                    ```
+            }
+            execution {
+                sequence: 10
+                fireOnInit: false
+            }
+        )
+
+    )
+
+    computation p12-sin-asignar (
+        itemName: P12_SIN_ASIGNAR
+        execution {
+            sequence: 20
+        }
+        computation {
+            sqlQuery:
+                ```sql
+                    SELECT LISTAGG(NOMBRE, ', ') AS mostrar
+                FROM SGT_EQUIPOS
+                WHERE RACK_ID = :P12_ID
+                  AND U IS NULL;
+                ```
+        }
+        error {
+            errorMessage: sE PRODUJO UN ERROR
+        }
+    )
+
+    process check-rack-duplicado (
+        name: CHECK_RACK_DUPLICADO
+        type: executeCode
+        source {
+            plsqlCode:
+                ```plsql
+                DECLARE
+                    v_count NUMBER;
+                    v_sugerencias  VARCHAR2(1000);
+                    v_id number;
+                BEGIN
+                    IF :P12_ID IS NULL OR TRIM(:P12_ID) = '' THEN
+                      v_id := NULL;
+                   ELSE
+                      v_id := TO_NUMBER(:P12_ID);
+                   END IF;  
+                
+                    SELECT COUNT(*)
+                      INTO v_count
+                      FROM SGT_RACKS
+                     WHERE NOMBRE = UPPER(:P12_NOMBRE)
+                       AND SALA_ID = :P12_SALA_ID
+                       AND (v_id IS NULL OR ID != v_id); 
+                       
+                    IF v_count > 0 THEN
+                        -- Devuelve un mensaje de error al cliente (en JSON)
+                        -- Sugerencias: buscar racks similares del mismo sitio
+                        APEX_JSON.OPEN_OBJECT;
+                        APEX_JSON.WRITE('success', false);
+                        APEX_JSON.WRITE('error_code', 'ORA-00001');
+                        APEX_JSON.WRITE('error', 'Ya existe un rack con ese nombre en la sala seleccionada.');
+                        APEX_JSON.CLOSE_OBJECT;
+                
+                
+                
+                    ELSE
+                        APEX_JSON.OPEN_OBJECT;
+                        APEX_JSON.WRITE('success', 'OK');
+                        APEX_JSON.CLOSE_OBJECT;
+                    END IF;
+                END;
+                ```
+        }
+        execution {
+            sequence: 10
+            point: ajaxCallback
+        }
+        advanced {
+            executionMappingIdentifier: 51494081674121384824
+        }
+    )
+
+    process close-dialog (
+        name: Close Dialog
+        type: closeDialog
+        execution {
+            sequence: 50
+        }
+        advanced {
+            executionMappingIdentifier: 79373490565435883606
+        }
+        serverSideCondition {
+            type: requestIsContainedInValue
+            value: CREATE,SAVE,DELETE
+        }
+        config {
+            buildOption: @commented-out
+        }
+    )
+
+    process initialize-form-sgt-racks-form (
+        name: Initialize form SGT_RACKS_FORM
+        type: formInitialization
+        formRegion: @sgt-racks-form
+        execution {
+            sequence: 10
+            point: beforeHeader
+        }
+        advanced {
+            executionMappingIdentifier: 79373489781556883606
+        }
+    )
+
+    process process-form-sgt-racks-form (
+        name: Process form SGT_RACKS_FORM
+        type: formAutoRowProcessing
+        formRegion: @sgt-racks-form
+        execution {
+            sequence: 10
+        }
+        advanced {
+            executionMappingIdentifier: 79373490124085883606
+        }
+        serverSideCondition {
+            type: requestIsContainedInValue
+            value: CREATE,SAVE,DELETE
+        }
+    )
+
+    branch (
+        name: LISTADO
+        execution {
+            sequence: 10
+        }
+        behavior {
+            target: {
+                page: 11
+            }
+        }
+    )
+
+)
+

@@ -1,0 +1,582 @@
+page 8 (
+    name: SGT_LST_INTERFACES
+    alias: SGT-LST-INTERFACES
+    title: Interfaces
+    pageGroup: @implementadores
+    appearance {
+        pageTemplate: @/standard
+        templateOptions: #DEFAULT#
+    }
+    navigation {
+        cursorFocus: doNotFocusCursor
+    }
+    security {
+        pageAccessProtection: argumentsMustHaveChecksum
+        formAutoComplete: false
+    }
+
+    region breadcrumb (
+        name: Breadcrumb
+        type: breadcrumb
+        source {
+            breadcrumb: @breadcrumb
+        }
+        layout {
+            sequence: 10
+            slot: breadcrumbBar
+        }
+        appearance {
+            template: @/title-bar
+            templateOptions: [
+                #DEFAULT#
+                t-BreadcrumbRegion--useBreadcrumbTitle
+            ]
+        }
+        componentAppearance {
+            breadcrumbTemplate: @/breadcrumb
+            templateOptions: #DEFAULT#
+        }
+    )
+
+    region sgt-interfaces (
+        name: SGT_INTERFACES
+        title: Lista de Interfaces
+        type: interactiveReport
+        source {
+            location: localDatabase
+            tableName: SGT_INTERFACES
+        }
+        layout {
+            sequence: 10
+            slot: body
+        }
+        appearance {
+            template: @/interactive-report
+            templateOptions: [
+                #DEFAULT#
+                t-IRR-region--hideHeader js-addHiddenHeadingRoleDesc
+            ]
+        }
+        link {
+            linkColumn: customTarget
+            target: {
+                page: 30
+                items: {
+                    P30_ID: #ID#
+                }
+            }
+            linkIcon: <span role="img" aria-label="Edit" class="fa fa-edit" title="Edit"></span>
+        }
+        pagination {
+            type: rowRangesXToY
+            displayPosition: topRight
+        }
+        performance {
+            maxRowsToProcess: 1000000
+        }
+        advanced {
+            savedReportMappingIdentifier: 17228485095417133
+        }
+
+        column ACTUALIZADO_EL (
+            type: plainText
+            heading {
+                heading: Actualizado el
+                alignment: center
+            }
+            layout {
+                sequence: 140
+            }
+            source {
+                dataType: DATE
+            }
+            advanced {
+                endUserAlias: K
+            }
+        )
+
+        column ACTUALIZADO_POR (
+            type: plainText
+            heading {
+                heading: Actualizado por
+                alignment: center
+            }
+            layout {
+                sequence: 150
+            }
+            source {
+                dataType: STRING
+            }
+            advanced {
+                endUserAlias: L
+            }
+        )
+
+        column CREADO_EL (
+            type: plainText
+            heading {
+                heading: Creado El
+                alignment: center
+            }
+            layout {
+                sequence: 130
+            }
+            source {
+                dataType: DATE
+            }
+            advanced {
+                endUserAlias: J
+            }
+            config {
+                buildOption: @commented-out
+            }
+        )
+
+        column CREADO_POR (
+            type: plainText
+            heading {
+                heading: Creado Por
+                alignment: center
+            }
+            layout {
+                sequence: 160
+            }
+            source {
+                dataType: STRING
+            }
+            advanced {
+                endUserAlias: M
+            }
+            config {
+                buildOption: @commented-out
+            }
+        )
+
+        column EQUIPO_ID (
+            type: plainTextBasedOnLov
+            heading {
+                heading: Equipo
+                alignment: center
+            }
+            lov {
+                lov: @equipos-nombre-compuesto
+            }
+            layout {
+                sequence: 20
+            }
+            source {
+                dataType: NUMBER
+            }
+            advanced {
+                endUserAlias: B
+            }
+        )
+
+        column ESTADO (
+            type: plainText
+            heading {
+                heading: Estado
+                alignment: center
+            }
+            layout {
+                sequence: 50
+                columnAlignment: center
+            }
+            source {
+                dataType: STRING
+            }
+            advanced {
+                endUserAlias: E
+            }
+        )
+
+        column ETIQUETA (
+            type: plainText
+            heading {
+                heading: Etiqueta/Descripción
+                alignment: center
+            }
+            layout {
+                sequence: 40
+            }
+            source {
+                dataType: STRING
+            }
+            advanced {
+                endUserAlias: D
+            }
+        )
+
+        column ID (
+            type: hidden
+            heading {
+                heading: Id
+            }
+            layout {
+                sequence: 10
+            }
+            source {
+                primaryKey: true
+                dataType: NUMBER
+            }
+            advanced {
+                endUserAlias: A
+            }
+        )
+
+        column MAC_ADDRESS (
+            type: plainText
+            heading {
+                heading: MAC Address
+                alignment: center
+            }
+            layout {
+                sequence: 120
+            }
+            source {
+                dataType: STRING
+            }
+            advanced {
+                endUserAlias: I
+            }
+        )
+
+        column NOMBRE (
+            type: plainText
+            heading {
+                heading: Nombre
+                alignment: center
+            }
+            layout {
+                sequence: 30
+                columnAlignment: center
+            }
+            source {
+                dataType: STRING
+            }
+            advanced {
+                endUserAlias: C
+            }
+        )
+
+        column RX_EN_DBM (
+            type: plainText
+            heading {
+                heading: Rx en dBm
+                alignment: center
+            }
+            layout {
+                sequence: 110
+                columnAlignment: end
+            }
+            source {
+                dataType: STRING
+            }
+            advanced {
+                endUserAlias: H
+            }
+        )
+
+        column TIPO_INTERFACE_ID (
+            type: plainTextBasedOnLov
+            heading {
+                heading: Tipo de Interfaz
+                alignment: center
+            }
+            lov {
+                lov: @tipo-interfaz-nombre
+            }
+            layout {
+                sequence: 70
+                columnAlignment: center
+            }
+            source {
+                dataType: NUMBER
+            }
+            advanced {
+                endUserAlias: F
+            }
+        )
+
+        column TX_EN_DBM (
+            type: plainText
+            heading {
+                heading: Tx en dBm
+                alignment: center
+            }
+            layout {
+                sequence: 100
+                columnAlignment: end
+            }
+            source {
+                dataType: STRING
+            }
+            advanced {
+                endUserAlias: G
+            }
+        )
+
+        column VELOCIDAD_MBPS (
+            type: plainText
+            heading {
+                heading: Velocidad (Mbps)
+                alignment: center
+            }
+            layout {
+                sequence: 80
+                columnAlignment: end
+            }
+            source {
+                dataType: NUMBER
+            }
+            advanced {
+                endUserAlias: N
+            }
+        )
+
+        column VELOCIDAD_MPBS (
+            type: plainText
+            heading {
+                heading: Velocidad Mpbs
+                alignment: center
+            }
+            layout {
+                sequence: 170
+                columnAlignment: end
+            }
+            source {
+                dataType: NUMBER
+            }
+            advanced {
+                endUserAlias: O
+            }
+            config {
+                buildOption: @commented-out
+            }
+        )
+
+        page {
+            size: a4
+            units: millimeters
+            width: 297
+            height: 210
+            borderWidth: 0.5
+            borderColor: #666666
+        }
+        pageHeader {
+            pageHeaderText: Lista de Interfaces
+        }
+
+        savedReport 175789 (
+            visibility: primaryDefault
+            view {
+                rowsPerPage: 50
+            }
+
+            displayColumn ACTUALIZADO_EL (
+                sequence: 11
+            )
+
+            displayColumn ACTUALIZADO_POR (
+                sequence: 12
+            )
+
+            displayColumn CREADO_EL (
+                sequence: 10
+            )
+
+            displayColumn CREADO_POR (
+                sequence: 13
+            )
+
+            displayColumn EQUIPO_ID (
+                sequence: 2
+            )
+
+            displayColumn ESTADO (
+                sequence: 5
+            )
+
+            displayColumn ETIQUETA (
+                sequence: 4
+            )
+
+            displayColumn ID (
+                sequence: 1
+            )
+
+            displayColumn MAC_ADDRESS (
+                sequence: 9
+            )
+
+            displayColumn NOMBRE (
+                sequence: 3
+            )
+
+            displayColumn RX_EN_DBM (
+                sequence: 8
+            )
+
+            displayColumn TIPO_INTERFACE_ID (
+                sequence: 6
+            )
+
+            displayColumn TX_EN_DBM (
+                sequence: 7
+            )
+
+            displayColumn VELOCIDAD_MBPS (
+                sequence: 14
+            )
+
+            displayColumn VELOCIDAD_MPBS (
+                sequence: 15
+            )
+
+        )
+
+    )
+
+    button create (
+        buttonName: CREATE
+        label: &APP_TEXT$BTN_CREAR!RAW.
+        layout {
+            sequence: 70
+            region: @sgt-interfaces
+            slot: rightOfInteractiveReportSearchBar
+        }
+        appearance {
+            buttonTemplate: @/text
+            templateOptions: #DEFAULT#
+        }
+        behavior {
+            action: redirectThisApp
+            target: {
+                page: 30
+            }
+            warnOnUnsavedChanges: doNotCheck
+        }
+        security {
+            authorizationScheme: @implementador-rights
+        }
+    )
+
+    button grilla (
+        buttonName: GRILLA
+        label: &APP_TEXT$BTN_GRILLA_EDITABLE!RAW.
+        layout {
+            sequence: 50
+            region: @sgt-interfaces
+            slot: rightOfInteractiveReportSearchBar
+        }
+        appearance {
+            buttonTemplate: @/text
+            templateOptions: #DEFAULT#
+        }
+        behavior {
+            action: redirectThisApp
+            target: {
+                page: 49
+            }
+            warnOnUnsavedChanges: doNotCheck
+        }
+    )
+
+    button importar (
+        buttonName: IMPORTAR
+        label: &APP_TEXT$BTN_IMPORTAR_XLS!RAW.
+        layout {
+            sequence: 90
+            region: @sgt-interfaces
+            slot: rightOfInteractiveReportSearchBar
+        }
+        appearance {
+            buttonTemplate: @/text
+            hot: true
+            templateOptions: #DEFAULT#
+        }
+        behavior {
+            action: redirectThisApp
+            target: {
+                page: 28
+            }
+            warnOnUnsavedChanges: doNotCheck
+        }
+        security {
+            authorizationScheme: @implementador-rights
+        }
+        config {
+            buildOption: @commented-out
+        }
+    )
+
+    button importar-varios (
+        buttonName: IMPORTAR_VARIOS
+        label: &APP_TEXT$BTN_IMPORTAR_XLS!RAW.
+        layout {
+            sequence: 80
+            region: @sgt-interfaces
+            slot: rightOfInteractiveReportSearchBar
+        }
+        appearance {
+            buttonTemplate: @/text
+            hot: true
+            templateOptions: #DEFAULT#
+        }
+        behavior {
+            action: redirectThisApp
+            target: {
+                page: 60
+            }
+            warnOnUnsavedChanges: doNotCheck
+        }
+    )
+
+    button tipo-interfaz (
+        buttonName: TIPO_INTERFAZ
+        label: Tipo de Interfaz
+        layout {
+            sequence: 40
+            region: @sgt-interfaces
+            slot: rightOfInteractiveReportSearchBar
+        }
+        appearance {
+            buttonTemplate: @/text
+            templateOptions: #DEFAULT#
+        }
+        behavior {
+            action: redirectThisApp
+            target: {
+                page: 58
+            }
+            warnOnUnsavedChanges: doNotCheck
+        }
+    )
+
+    dynamicAction dialog-closed (
+        name: Dialog Closed
+        execution {
+            sequence: 10
+        }
+        when {
+            event: apexafterclosedialog
+            selectionType: region
+            region: @sgt-interfaces
+        }
+
+        action native-refresh (
+            action: refresh
+            affectedElements {
+                selectionType: region
+                region: @sgt-interfaces
+            }
+            execution {
+                sequence: 10
+                fireOnInit: false
+            }
+        )
+
+    )
+
+)
+

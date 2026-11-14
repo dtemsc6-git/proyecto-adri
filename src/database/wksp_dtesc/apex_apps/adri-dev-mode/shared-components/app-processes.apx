@@ -1,0 +1,17 @@
+appProcess set-timezone-py (
+    name: set-timezone-py
+    type: executeCode
+    source {
+        plsqlCode:
+            ```plsql
+            BEGIN
+                APEX_UTIL.SET_SESSION_TIME_ZONE('-03:00');
+            END;
+            ```
+    }
+    execution {
+        sequence: 1
+        point: afterAuthentication
+    }
+)
+

@@ -1,0 +1,743 @@
+page 26 (
+    name: SGT_FORM_SITIOS
+    alias: SGT-FORM-SITIOS
+    title: Formulario Sitios
+    pageGroup: @implementadores
+    appearance {
+        pageMode: modalDialog
+        dialogTemplate: @/drawer
+        templateOptions: [
+            #DEFAULT#
+            js-dialog-class-t-Drawer--pullOutEnd
+        ]
+    }
+    dialog {
+        chained: false
+    }
+    navigation {
+        cursorFocus: doNotFocusCursor
+    }
+    security {
+        authorizationScheme: @implementador-rights
+        pageAccessProtection: argumentsMustHaveChecksum
+        formAutoComplete: false
+    }
+
+    region arbol (
+        name: ARBOL
+        title: Racks y Equipos
+        type: staticContent
+        layout {
+            sequence: 20
+            parentRegion: @contenedor
+            slot: subRegions
+        }
+        appearance {
+            template: @/standard
+            templateOptions: [
+                #DEFAULT#
+                t-Region--scrollBody
+            ]
+        }
+        advanced {
+            regionDisplaySelector: true
+        }
+        config {
+            buildOption: @commented-out
+        }
+    )
+
+    region buttons (
+        name: Buttons
+        type: staticContent
+        layout {
+            sequence: 20
+            slot: dialogFooter
+        }
+        appearance {
+            template: @/buttons-container
+            templateOptions: #DEFAULT#
+        }
+        settings {
+            outputAs: text
+        }
+    )
+
+    region contenedor (
+        name: CONTENEDOR
+        type: regionDisplaySelector
+        layout {
+            sequence: 10
+            slot: contentBody
+        }
+        appearance {
+            template: @/standard
+            templateOptions: [
+                #DEFAULT#
+                t-Region--noPadding
+                t-Region--removeHeader js-removeLandmark
+                t-Region--noBorder
+                t-Region--scrollBody
+            ]
+        }
+        settings {
+            includeShowAll: false
+        }
+    )
+
+    region new (
+        name: New
+        type: tree
+        source {
+            location: localDatabase
+            type: sqlQuery
+            sqlQuery:
+                ```sql
+                with data as (
+                select ('SC') as link_type, 'S-'||to_char(sitio_id) as PARENT_ID, 'SC-'||to_char(c.id) as ID, c.siglas as name, c.id as sub_id from sgt_salas c
+                union all
+                select ('R') as link_type,'SC-'||to_char(sala_id) as PARENT_ID, 'R-'||to_char(d.id) as ID, d.nombre as name, d.id as sub_id from sgt_racks d  
+                union all 
+                select ('E') as link_type,  'R-'||to_char(rack_id) as parent_id , 'E-'||to_char(e.id) as ID, 'U: '||e.u||', '||e.nombre as name, e.id as sub_id from sgt_equipos e
+                
+                
+                )
+                select case when connect_by_isleaf = 1 then 0
+                            when level = 1             then 1
+                            else                           -1
+                       end as status, 
+                       level,
+                       name as title, 
+                       null as icon, 
+                       "ID" as value, 
+                       null as tooltip, 
+                       null as link 
+                from data 
+                
+                start with "PARENT_ID" = 'S-'||:P26_ID
+                connect by prior "ID" = "PARENT_ID"
+                order siblings by name
+                ```
+        }
+        layout {
+            sequence: 10
+            parentRegion: @arbol
+            slot: subRegions
+        }
+        appearance {
+            template: @/standard
+            templateOptions: [
+                #DEFAULT#
+                t-Region--noPadding
+                t-Region--removeHeader js-removeLandmark
+                t-Region--noBorder
+                t-Region--scrollBody
+            ]
+        }
+        settings {
+            nodeLabelColumn: TITLE
+            nodeValueColumn: VALUE
+            hierarchy: notComputed
+            nodeStatusColumn: STATUS
+            hierarchyLevelColumn: LEVEL
+            defaultIconCssClass: icon-tree-folder
+            iconTypeCssClass: a-Icon
+        }
+    )
+
+    region sitio (
+        name: SITIO
+        type: form
+        source {
+            location: localDatabase
+            tableName: SGT_SITIOS
+        }
+        layout {
+            sequence: 10
+            parentRegion: @contenedor
+            slot: subRegions
+        }
+        appearance {
+            template: @/blank-with-attributes
+            templateOptions: #DEFAULT#
+        }
+        advanced {
+            regionDisplaySelector: true
+        }
+        edit {
+            enabled: true
+            allowedOperations: [
+                add
+                update
+                delete
+            ]
+        }
+    )
+
+    pageItem P26_CIUDAD_ID (
+        type: popupLov
+        label {
+            label: Ciudad
+            alignment: left
+        }
+        lov {
+            type: sharedComponent
+            lov: @ciudad-nombre-compuesto
+            nullDisplayValue: Seleccione Una
+        }
+        cascadingLov {
+            parentItems: P26_DEPARTAMENTO_ID
+            itemsToSubmit: P26_DEPARTAMENTO_ID
+        }
+        layout {
+            sequence: 90
+            region: @sitio
+            slot: regionBody
+            alignment: left
+        }
+        appearance {
+            template: @/required-floating
+            templateOptions: #DEFAULT#
+            width: 30
+        }
+        validation {
+            valueRequired: true
+        }
+        source {
+            formRegion: @sitio
+            column: CIUDAD_ID
+            dataType: number
+        }
+        help {
+            inlineHelpText: Indicar ciudad a la cual perternece el sitio
+        }
+    )
+
+    pageItem P26_DEPARTAMENTO_ID (
+        type: selectList
+        label {
+            label: Departamento
+            alignment: left
+        }
+        lov {
+            type: sharedComponent
+            lov: @lov-sgt-dpto
+        }
+        layout {
+            sequence: 80
+            region: @sitio
+            slot: regionBody
+            alignment: left
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+            height: 1
+        }
+        config {
+            buildOption: @commented-out
+        }
+    )
+
+    pageItem P26_ID (
+        type: hidden
+        layout {
+            sequence: 20
+            region: @sitio
+            slot: regionBody
+        }
+        source {
+            formRegion: @sitio
+            column: ID
+            dataType: number
+            queryOnly: true
+            primaryKey: true
+        }
+        security {
+            sessionStateProtection: checksumRequiredSessionLevel
+        }
+    )
+
+    pageItem P26_LATITUD (
+        type: numberField
+        label {
+            label: Latitud
+            alignment: left
+        }
+        layout {
+            sequence: 110
+            region: @sitio
+            slot: regionBody
+            alignment: left
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+            width: 32
+        }
+        validation {
+            maxLength: 50
+        }
+        source {
+            formRegion: @sitio
+            column: LATITUD
+            dataType: varchar2
+        }
+        help {
+            inlineHelpText: Indicar la coordenada de latitud en formato decimal. Ejemplo: -25,277778
+        }
+    )
+
+    pageItem P26_LONGITUD (
+        type: numberField
+        label {
+            label: Longitud
+            alignment: left
+        }
+        layout {
+            sequence: 120
+            region: @sitio
+            slot: regionBody
+            alignment: left
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+            width: 32
+        }
+        validation {
+            maxLength: 50
+        }
+        source {
+            formRegion: @sitio
+            column: LONGITUD
+            dataType: varchar2
+        }
+        help {
+            inlineHelpText: Indicar la coordenada de longitud en formato decimal. Ejemplo: -57,573889
+        }
+    )
+
+    pageItem P26_NOMBRE (
+        type: textField
+        label {
+            label: Nombre del sitio
+            alignment: left
+        }
+        layout {
+            sequence: 50
+            region: @sitio
+            slot: regionBody
+            alignment: left
+        }
+        appearance {
+            template: @/required-floating
+            templateOptions: #DEFAULT#
+            width: 32
+        }
+        validation {
+            valueRequired: true
+            maxLength: 255
+        }
+        source {
+            formRegion: @sitio
+            column: NOMBRE
+            dataType: varchar2
+        }
+        help {
+            inlineHelpText: Indicar nombre del sitio
+        }
+    )
+
+    pageItem P26_OBSERVACION (
+        type: textField
+        label {
+            label: Observación
+            alignment: left
+        }
+        layout {
+            sequence: 140
+            region: @sitio
+            slot: regionBody
+            alignment: left
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+            width: 32
+        }
+        validation {
+            maxLength: 255
+        }
+        source {
+            formRegion: @sitio
+            column: OBSERVACION
+            dataType: varchar2
+        }
+        help {
+            inlineHelpText: Indicar si posee alguna observación acerca del sitio
+        }
+        config {
+            buildOption: @commented-out
+        }
+    )
+
+    pageItem P26_PROPIETARIO (
+        type: selectList
+        label {
+            label: Propietario
+            alignment: left
+        }
+        lov {
+            type: sharedComponent
+            lov: @sitios-propietarios
+            nullDisplayValue: Seleccione Una
+        }
+        layout {
+            sequence: 30
+            region: @sitio
+            slot: regionBody
+            alignment: left
+        }
+        appearance {
+            template: @/required-floating
+            templateOptions: #DEFAULT#
+            height: 1
+        }
+        validation {
+            valueRequired: true
+        }
+        source {
+            formRegion: @sitio
+            column: PROPIETARIO
+            dataType: varchar2
+        }
+        help {
+            inlineHelpText: Seleccionar propietario del sitio
+        }
+    )
+
+    pageItem P26_SIGLAS (
+        type: textField
+        label {
+            label: Sigla del sitio
+            alignment: left
+        }
+        layout {
+            sequence: 40
+            region: @sitio
+            slot: regionBody
+            alignment: left
+        }
+        appearance {
+            template: @/required-floating
+            templateOptions: #DEFAULT#
+            width: 32
+        }
+        validation {
+            valueRequired: true
+            maxLength: 50
+        }
+        source {
+            formRegion: @sitio
+            column: SIGLAS
+            dataType: varchar2
+        }
+        help {
+            inlineHelpText: Asignar sigla/abreviación indentificatoria del sitio
+        }
+    )
+
+    pageItem P26_TIPO_DE_SITIO (
+        type: selectList
+        label {
+            label: Tipo de sitio
+            alignment: left
+        }
+        lov {
+            type: sharedComponent
+            lov: @tipo-sitio
+            nullDisplayValue: Seleccione Una
+        }
+        layout {
+            sequence: 60
+            region: @sitio
+            slot: regionBody
+            alignment: left
+        }
+        appearance {
+            template: @/required-floating
+            templateOptions: #DEFAULT#
+            height: 1
+        }
+        validation {
+            valueRequired: true
+        }
+        source {
+            formRegion: @sitio
+            column: TIPO_DE_SITIO
+            dataType: varchar2
+        }
+        help {
+            inlineHelpText: Indicar tipo de sitio
+        }
+    )
+
+    pageItem P26_TITULO (
+        type: hidden
+        layout {
+            sequence: 10
+            region: @sitio
+            slot: regionBody
+        }
+    )
+
+    pageItem P26_UBICACIÓN (
+        type: textField
+        label {
+            label: Ubicación
+            alignment: left
+        }
+        settings {
+            subtype: url
+        }
+        layout {
+            sequence: 130
+            region: @sitio
+            slot: regionBody
+            alignment: left
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+            width: 32
+        }
+        validation {
+            maxLength: 255
+        }
+        source {
+            formRegion: @sitio
+            column: UBICACIÓN
+            dataType: varchar2
+        }
+        config {
+            buildOption: @commented-out
+        }
+    )
+
+    pageItem P26_ZONA_ID (
+        type: selectList
+        label {
+            label: Zona
+            alignment: left
+        }
+        lov {
+            type: sharedComponent
+            lov: @lov-sgt-zonas
+            nullDisplayValue: Seleccione Una
+        }
+        layout {
+            sequence: 70
+            region: @sitio
+            slot: regionBody
+            alignment: left
+        }
+        appearance {
+            template: @/required-floating
+            templateOptions: #DEFAULT#
+            height: 1
+        }
+        validation {
+            valueRequired: true
+        }
+        source {
+            formRegion: @sitio
+            column: ZONA_ID
+            dataType: number
+        }
+        help {
+            inlineHelpText: Indicar zona a la cual perternece el sitio
+        }
+    )
+
+    button cancel (
+        buttonName: CANCEL
+        label: Cancelar
+        layout {
+            sequence: 10
+            region: @buttons
+            slot: close
+        }
+        appearance {
+            buttonTemplate: @/text
+            templateOptions: #DEFAULT#
+        }
+        behavior {
+            action: definedByDynamicAction
+        }
+    )
+
+    button create (
+        buttonName: CREATE
+        label: &APP_TEXT$BTN_CREAR!RAW.
+        layout {
+            sequence: 40
+            region: @buttons
+            slot: next
+        }
+        appearance {
+            buttonTemplate: @/text
+            hot: true
+            templateOptions: #DEFAULT#
+        }
+        behavior {
+            warnOnUnsavedChanges: doNotCheck
+            databaseAction: insert
+        }
+        serverSideCondition {
+            type: itemIsNull
+            item: P26_ID
+        }
+    )
+
+    button delete (
+        buttonName: DELETE
+        label: Eliminar
+        layout {
+            sequence: 20
+            region: @buttons
+            slot: delete
+        }
+        appearance {
+            buttonTemplate: @/text
+            templateOptions: #DEFAULT#
+        }
+        behavior {
+            executeValidations: false
+            warnOnUnsavedChanges: doNotCheck
+            databaseAction: delete
+            requiresConfirmation: true
+        }
+        confirmation {
+            message: &APP_TEXT$DELETE_MSG!RAW.
+            style: danger
+        }
+        serverSideCondition {
+            type: itemIsNotNull
+            item: P26_ID
+        }
+    )
+
+    button save (
+        buttonName: SAVE
+        label: &APP_TEXT$BTN_APLICAR_CAMBIOS!RAW.
+        layout {
+            sequence: 30
+            region: @buttons
+            slot: next
+        }
+        appearance {
+            buttonTemplate: @/text
+            hot: true
+            templateOptions: #DEFAULT#
+        }
+        behavior {
+            warnOnUnsavedChanges: doNotCheck
+            databaseAction: update
+        }
+        serverSideCondition {
+            type: itemIsNotNull
+            item: P26_ID
+        }
+    )
+
+    dynamicAction actualizar-título-de-página (
+        name: Actualizar título de página
+        execution {
+            sequence: 20
+        }
+        when {
+            event: ready
+        }
+
+        action native-javascript-code (
+            action: executeJsCode
+            settings {
+                jsCode:
+                    ```javascript-browser
+                    $(document).ready(function() {
+                    
+                    apex.util.getTopApex().jQuery(".ui-dialog-content").dialog("option", "title", "&P26_TITULO.");
+                    });
+                    ```
+            }
+            execution {
+                sequence: 10
+            }
+        )
+
+    )
+
+    dynamicAction cancel-dialog (
+        name: Cancel Dialog
+        execution {
+            sequence: 10
+        }
+        when {
+            event: click
+            selectionType: button
+            button: @cancel
+        }
+
+        action native-dialog-cancel (
+            action: cancelDialog
+            execution {
+                sequence: 10
+                fireOnInit: false
+            }
+        )
+
+    )
+
+    process close-dialog (
+        name: Close Dialog
+        type: closeDialog
+        execution {
+            sequence: 50
+        }
+        advanced {
+            executionMappingIdentifier: 6937189029694263842
+        }
+        serverSideCondition {
+            type: requestIsContainedInValue
+            value: CREATE,SAVE,DELETE
+        }
+    )
+
+    process initialize-form-sgt-form-sitios (
+        name: Initialize form SGT_FORM_SITIOS
+        type: formInitialization
+        formRegion: @sitio
+        execution {
+            sequence: 10
+            point: beforeHeader
+        }
+        advanced {
+            executionMappingIdentifier: 6937188205053263842
+        }
+    )
+
+    process process-form-sgt-form-sitios (
+        name: Process form SGT_FORM_SITIOS
+        type: formAutoRowProcessing
+        formRegion: @sitio
+        execution {
+            sequence: 10
+        }
+        advanced {
+            executionMappingIdentifier: 6937188658023263842
+        }
+    )
+
+)
+

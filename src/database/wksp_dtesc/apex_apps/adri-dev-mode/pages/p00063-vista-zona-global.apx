@@ -1,0 +1,522 @@
+page 63 (
+    name: VISTA_ZONA_GLOBAL
+    alias: VISTA-ZONA-GLOBAL
+    title: Vista global zona
+    appearance {
+        pageTemplate: @/left-side-column
+        templateOptions: #DEFAULT#
+    }
+    navigation {
+        cursorFocus: doNotFocusCursor
+    }
+    security {
+        pageAccessProtection: argumentsMustHaveChecksum
+        formAutoComplete: false
+    }
+
+    region breadcrumb (
+        name: Breadcrumb
+        type: breadcrumb
+        source {
+            breadcrumb: @breadcrumb
+        }
+        layout {
+            sequence: 10
+            slot: breadcrumbBar
+        }
+        appearance {
+            template: @/title-bar
+            templateOptions: [
+                #DEFAULT#
+                t-BreadcrumbRegion--useBreadcrumbTitle
+            ]
+        }
+        config {
+            buildOption: @commented-out
+        }
+        componentAppearance {
+            breadcrumbTemplate: @/breadcrumb
+            templateOptions: #DEFAULT#
+        }
+    )
+
+    region button-bar (
+        name: Button Bar
+        type: staticContent
+        source {
+            htmlCode: <div id="active_facets"></div>
+        }
+        layout {
+            sequence: 10
+            slot: body
+        }
+        appearance {
+            template: @/buttons-container
+            templateOptions: [
+                #DEFAULT#
+                t-ButtonRegion--noPadding
+                t-ButtonRegion--noUI
+            ]
+        }
+    )
+
+    region search (
+        name: Search
+        type: facetedSearch
+        source {
+            filteredRegion: @search-results
+        }
+        layout {
+            sequence: 10
+            slot: leftColumn
+            columnSpan: 4
+        }
+        appearance {
+            template: @/standard
+            templateOptions: [
+                #DEFAULT#
+                t-Region--noPadding
+                t-Region--hideHeader js-addHiddenHeadingRoleDesc
+                t-Region--scrollBody
+            ]
+        }
+        accessibility {
+            landmarkLabel: Filters
+        }
+        settings {
+            compactNosThreshold: 10000
+            showCurrentFacets: selector
+            currentFacetsSelector: #active_facets
+            showTotalRowCount: true
+            displayChartForTopNValues: 10
+        }
+
+        facet P63_SALA_SIGLAS (
+            type: checkboxGroup
+            label {
+                label: Sala
+            }
+            lov {
+                type: distinctValues
+            }
+            layout {
+                sequence: 40
+            }
+            listEntries {
+                maxDisplayedEntries: 7
+            }
+            source {
+                databaseColumn: SALA_SIGLAS
+            }
+        )
+
+        facet P63_SEARCH (
+            type: search
+            label {
+                label: Search
+            }
+            layout {
+                sequence: 10
+            }
+            source {
+                dbColumns: Z_NOMBRE,SITIO_NOMBRE,SITIO_SIGLAS,SALA_NOMBRE,SALA_SIGLAS,RACK_NOMBRE,EQUIPO_NOMBRE,TIPO_EQUIPO_NOMBRE
+            }
+        )
+
+        facet P63_SITIO_SIGLAS (
+            type: checkboxGroup
+            label {
+                label: Sitio
+            }
+            lov {
+                type: distinctValues
+            }
+            layout {
+                sequence: 30
+            }
+            listEntries {
+                maxDisplayedEntries: 7
+            }
+            source {
+                databaseColumn: SITIO_SIGLAS
+            }
+        )
+
+        facet P63_TIPO_EQUIPO_NOMBRE (
+            type: checkboxGroup
+            label {
+                label: Tipo de Equipo
+            }
+            lov {
+                type: distinctValues
+            }
+            layout {
+                sequence: 50
+            }
+            listEntries {
+                maxDisplayedEntries: 7
+            }
+            source {
+                databaseColumn: TIPO_EQUIPO_NOMBRE
+            }
+        )
+
+        facet P63_Z_NOMBRE (
+            type: checkboxGroup
+            label {
+                label: Zona
+            }
+            lov {
+                type: distinctValues
+            }
+            layout {
+                sequence: 20
+            }
+            listEntries {
+                maxDisplayedEntries: 7
+            }
+            source {
+                databaseColumn: Z_NOMBRE
+            }
+        )
+
+    )
+
+    region search-results (
+        name: Search Results
+        type: classicReport
+        source {
+            location: localDatabase
+            tableName: V_ZONAS_VISTA_GENERAL
+        }
+        layout {
+            sequence: 20
+            slot: body
+        }
+        appearance {
+            template: @/standard
+            templateOptions: [
+                #DEFAULT#
+                t-Region--noPadding
+                t-Region--hideHeader js-addHiddenHeadingRoleDesc
+                t-Region--scrollBody
+            ]
+        }
+        headerAndFooter {
+            footerText: Datos obtenidos en: #TIMING# seg
+        }
+        reportLayout {
+            numberOfRows: 50
+        }
+        componentAppearance {
+            template: @/standard
+            templateOptions: [
+                #DEFAULT#
+                t-Report--stretch
+                t-Report--staticRowColors
+                t-Report--rowHighlight
+                t-Report--inline
+                t-Report--hideNoPagination
+            ]
+        }
+        pagination {
+            type: nextAndPreviousLinks
+        }
+        performance {
+            maxRowsToProcess: 100000
+        }
+        messages {
+            whenNoDataFound: no data found
+        }
+
+        column EQUIPO_ID (
+            reportColumnQueryId: 11
+            derivedColumn: N
+            type: hidden
+            layout {
+                sequence: 93
+            }
+        )
+
+        column EQUIPO_NOMBRE (
+            reportColumnQueryId: 12
+            derivedColumn: N
+            type: link
+            heading {
+                heading: Equipo
+                alignment: center
+            }
+            layout {
+                sequence: 103
+            }
+            link {
+                target: {
+                    page: 465
+                    items: {
+                        P465_EQUIPO_ID: #EQUIPO_ID#
+                    }
+                }
+                linkText: #EQUIPO_NOMBRE#
+            }
+            sorting {
+                defaultSequence: 1
+            }
+        )
+
+        column RACK_ID (
+            reportColumnQueryId: 9
+            derivedColumn: N
+            heading {
+                heading: Rack Id
+                alignment: end
+            }
+            layout {
+                sequence: 73
+                columnAlignment: end
+            }
+            config {
+                buildOption: @commented-out
+            }
+        )
+
+        column RACK_NOMBRE (
+            reportColumnQueryId: 10
+            derivedColumn: N
+            type: link
+            heading {
+                heading: Rack
+                alignment: center
+            }
+            layout {
+                sequence: 83
+            }
+            link {
+                target: {
+                    page: 37
+                    items: {
+                        P37_RACK_ID: #RACK_ID#
+                    }
+                }
+                linkText: #RACK_NOMBRE#
+            }
+            sorting {
+                defaultSequence: 1
+            }
+        )
+
+        column SALA_ID (
+            reportColumnQueryId: 6
+            derivedColumn: N
+            heading {
+                heading: Sala Id
+                alignment: end
+            }
+            layout {
+                sequence: 43
+                columnAlignment: end
+            }
+            config {
+                buildOption: @commented-out
+            }
+        )
+
+        column SALA_NOMBRE (
+            reportColumnQueryId: 7
+            derivedColumn: N
+            heading {
+                heading: Sala Nombre
+                alignment: center
+            }
+            layout {
+                sequence: 63
+            }
+            sorting {
+                defaultSequence: 1
+            }
+        )
+
+        column SALA_SIGLAS (
+            reportColumnQueryId: 8
+            derivedColumn: N
+            type: link
+            heading {
+                heading: Sigla Sala
+                alignment: center
+            }
+            layout {
+                sequence: 53
+            }
+            link {
+                target: {
+                    page: 33
+                    items: {
+                        P33_ID: #SALA_ID#
+                    }
+                }
+                linkText: #SALA_SIGLAS#
+            }
+            sorting {
+                defaultSequence: 1
+            }
+        )
+
+        column SITIO_ID (
+            reportColumnQueryId: 3
+            derivedColumn: N
+            heading {
+                heading: Sitio Id
+                alignment: end
+            }
+            layout {
+                sequence: 3
+                columnAlignment: end
+            }
+            config {
+                buildOption: @commented-out
+            }
+        )
+
+        column SITIO_NOMBRE (
+            reportColumnQueryId: 4
+            derivedColumn: N
+            heading {
+                heading: Sitio Nombre
+                alignment: center
+            }
+            layout {
+                sequence: 23
+            }
+            sorting {
+                defaultSequence: 1
+            }
+        )
+
+        column SITIO_SIGLAS (
+            reportColumnQueryId: 5
+            derivedColumn: N
+            type: link
+            heading {
+                heading: Sigla Sitio
+                alignment: center
+            }
+            layout {
+                sequence: 13
+            }
+            link {
+                target: {
+                    page: 9
+                    items: {
+                        P9_ID: #SITIO_ID#
+                    }
+                }
+                linkText: #SITIO_SIGLAS#
+            }
+            sorting {
+                defaultSequence: 1
+            }
+        )
+
+        column TIPO_EQUIPO_ID (
+            reportColumnQueryId: 13
+            derivedColumn: N
+            type: hidden
+            layout {
+                sequence: 113
+            }
+        )
+
+        column TIPO_EQUIPO_NOMBRE (
+            reportColumnQueryId: 14
+            derivedColumn: N
+            heading {
+                heading: Tipo de Equipo
+                alignment: center
+            }
+            layout {
+                sequence: 123
+            }
+            sorting {
+                defaultSequence: 1
+            }
+        )
+
+        column Z_ID (
+            reportColumnQueryId: 1
+            derivedColumn: N
+            heading {
+                heading: Z Id
+                alignment: end
+            }
+            layout {
+                sequence: 1
+                columnAlignment: end
+            }
+            config {
+                buildOption: @commented-out
+            }
+        )
+
+        column Z_NOMBRE (
+            reportColumnQueryId: 2
+            derivedColumn: N
+            heading {
+                heading: Zona
+                alignment: center
+            }
+            layout {
+                sequence: 2
+            }
+            sorting {
+                defaultSequence: 1
+            }
+        )
+
+    )
+
+    region sgt-demo (
+        name: sgt-demo
+        title: ADRI - Administrador de Redes Integradas de la ANDE
+        type: staticContent
+        layout {
+            sequence: 30
+            slot: breadcrumbBar
+        }
+        appearance {
+            template: @/hero
+            templateOptions: #DEFAULT#
+        }
+        image {
+            fileUrl: #APP_FILES#icons/app-icon-512.png
+        }
+    )
+
+    button reset (
+        buttonName: RESET
+        label: Reset
+        layout {
+            sequence: 10
+            region: @button-bar
+            slot: next
+        }
+        appearance {
+            buttonTemplate: @/text-with-icon
+            templateOptions: [
+                #DEFAULT#
+                t-Button--noUI
+                t-Button--iconLeft
+            ]
+            icon: fa-undo
+        }
+        behavior {
+            action: redirectThisApp
+            target: {
+                page: 63
+                clearCache: 63
+                action: resetRegions
+            }
+            warnOnUnsavedChanges: doNotCheck
+        }
+    )
+
+)
+

@@ -1,0 +1,591 @@
+page 400 (
+    name: PruebaTopologia
+    alias: PRUEBATOPOLOGIA
+    title: Visualizar Topología
+    appearance {
+        pageTemplate: @/standard
+        templateOptions: #DEFAULT#
+    }
+    navigation {
+        cursorFocus: doNotFocusCursor
+        warnOnUnsavedChanges: false
+    }
+    javaScript {
+        fileUrls: [
+            https://unpkg.com/vis-network/standalone/umd/vis-network.min.js
+            #APP_FILES#p400_vista_conexiones#MIN#.js
+        ]
+        functionAndGlobalVariableDeclaration:
+            ```javascript-browser
+            generarGrafo = function () {
+            
+                apex.server.process(
+                    'CONEXIONES_V2', { pageItems: ['P400_SERVICIO_ID', 'P400_SELECCIONAR_VISTA'] },
+                    {
+                        success: function (data) {
+                            console.log(data); // Acceder a los datos
+                            console.log("modovista: " + $("#P400_MODO_VISTA").val());
+            
+                            data.nodes.sort((a, b) => a.level - b.level);
+            
+            
+                            if ($("#P400_SELECCIONAR_VISTA").val() === "IFACE" || $("#P400_SELECCIONAR_VISTA").val() === "EQUIPOS") {
+                                console.log("filtrar nodos");
+                                var mapNodos = new Map();
+                                var nodosFiltrados = [];
+                                var level = 0;
+                                var prev_eq = 0;
+                                data.nodes.forEach(nodo => {
+                                    if (!mapNodos.has(nodo.id)) {
+                                        console.log(nodo);
+                                        if (prev_eq !== nodo.eq_id) {
+                                             level++;  
+                                             prev_eq = nodo.eq_id; 
+                                             console.log("subiendo un nivel");
+                                        }
+                                        mapNodos.set(nodo.id, true);
+                                        nodosFiltrados.push({
+                                            id: nodo.id,
+                                            label: nodo.label,
+                                            shape: nodo.shape, // Forma para interfaces
+                                            color: nodo.color,
+                                            level: level
+                                        });
+                                    }
+            
+                                    /*if (!mapNodos.has(nodo.destino_id)) {
+                                        mapNodos.set(nodo.destino_id, true);
+                                        nodosFiltrados.push({
+                                            id: nodo.destino_id,
+                                            label: nodo.destino,
+                                            shape: nodo.shape, // Forma para interfaces
+                                            color: nodo.color,
+                                            level: nodo.level_b
+                                        });
+                                    }*/
+            
+                                    /*edges.push({
+                                        from: nodo.origen_id,
+                                        to: nodo.destino_id,
+                                        arrows: "to", // Flecha indica dirección
+                                        label: "", // Etiqueta del tipo de conexión
+                                        color: "#848484" // Color de la línea
+                                    });*/
+            
+            
+                                });
+                                data.nodes = nodosFiltrados;
+                                //data.edges = edges;
+            
+                            }
+            
+                            var nodes = new vis.DataSet(data.nodes);
+                            var edges = new vis.DataSet(data.edges);
+            
+                            var data = { nodes: nodes, edges: edges };
+            
+                            var container = document.getElementById("network");
+                            var network = new vis.Network(container, data, {
+                                layout: {
+                                    improvedLayout: true,
+                                    hierarchical: {
+                                        enabled: true,
+                                      //  nodeSpacing: 200,
+                                        levelSeparation: 75,
+                                        direction: $("#P400_MODO_VISTA").val()
+                                    }
+                                }
+                                ,physics: { enabled: false, solver: "forceAtlas2Based" }
+                            });
+                        }
+            
+            
+                        ,
+                        error: function (pError) {
+                            console.error('Error:', pError);
+                        }
+                    }
+                );
+            }
+            ```
+    }
+    css {
+        inline:
+            ```css
+            #network {
+                width: auto;
+                height: 800px;
+                border: 1px solid lightgray;
+            }
+            ```
+    }
+    security {
+        pageAccessProtection: argumentsMustHaveChecksum
+        formAutoComplete: false
+    }
+
+    region breadcrumb (
+        name: Breadcrumb
+        type: breadcrumb
+        source {
+            breadcrumb: @breadcrumb
+        }
+        layout {
+            sequence: 10
+            slot: breadcrumbBar
+        }
+        appearance {
+            template: @/title-bar
+            templateOptions: [
+                #DEFAULT#
+                t-BreadcrumbRegion--useBreadcrumbTitle
+            ]
+        }
+        componentAppearance {
+            breadcrumbTemplate: @/breadcrumb
+            templateOptions: #DEFAULT#
+        }
+    )
+
+    region network (
+        name: Network
+        type: staticContent
+        source {
+            htmlCode: <div class="miNetwork" id="network"></div>
+        }
+        layout {
+            sequence: 60
+            slot: body
+        }
+        appearance {
+            template: @/standard
+            templateOptions: [
+                #DEFAULT#
+                t-Region--noPadding
+                t-Region--removeHeader js-removeLandmark
+                t-Region--scrollBody
+            ]
+            cssClasses: miNetwork
+        }
+    )
+
+    pageItem P400_MODO_VISTA (
+        type: selectList
+        label {
+            label: Modo Vista
+            alignment: left
+        }
+        lov {
+            type: staticValues
+            staticValues: STATIC:Arriba para Abajo;UD,Izquierda a Derecha;LR,Derecha a Izquierda;RL
+            displayExtraValues: false
+            displayNullValue: false
+        }
+        layout {
+            sequence: 40
+            slot: body
+            alignment: left
+            startNewRow: false
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+            height: 1
+        }
+    )
+
+    pageItem P400_SELECCIONAR_VISTA (
+        type: selectList
+        label {
+            label: Seleccionar Vista
+            alignment: left
+        }
+        lov {
+            type: staticValues
+            staticValues: STATIC2:Equipos;EQUIPOS,Interfaces;IFACE,Wan;WAN
+            displayNullValue: false
+        }
+        layout {
+            sequence: 30
+            slot: body
+            alignment: left
+            startNewRow: false
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+            height: 1
+        }
+    )
+
+    pageItem P400_SERVICIO_ID (
+        type: popupLov
+        label {
+            label: Servicio
+            alignment: left
+        }
+        lov {
+            type: sharedComponent
+            lov: @servicios-nombre
+        }
+        layout {
+            sequence: 20
+            slot: body
+            alignment: left
+            columnSpan: 8
+        }
+        appearance {
+            template: @/optional-floating
+            templateOptions: #DEFAULT#
+            width: 30
+        }
+    )
+
+    dynamicAction cambiarservicio (
+        name: CambiarServicio
+        execution {
+            sequence: 10
+        }
+        when {
+            selectionType: items
+            items: P400_SERVICIO_ID
+        }
+
+        action native-javascript-code (
+            action: executeJsCode
+            settings {
+                jsCode:
+                    ```javascript-browser
+                    /*
+                    apex.server.process(
+                        'GET_CONEXIONES', { pageItems: ['P400_SERVICIO_ID', 'P400_SELECCIONAR_VISTA'] },
+                        {
+                            success: function (apiData) {
+                                visualizar_conexiones(apiData, $("#P400_MODO_VISTA").val());
+                            }
+                        });
+                    */
+                    
+                    /*
+                    apex.server.process(
+                        'CONEXIONES_V2', { pageItems: ['P400_SERVICIO_ID', 'P400_SELECCIONAR_VISTA'] },
+                        {
+                            success: function (data) {
+                                console.log(data); // Acceder a los datos
+                                console.log("modovista: "+$("#P400_MODO_VISTA").val()); 
+                                    
+                                var nodes = new vis.DataSet(data.nodes);
+                                var edges = new vis.DataSet(data.edges);
+                    
+                                var data = { nodes: nodes, edges: edges };
+                                
+                                var container = document.getElementById("network");
+                                var network = new vis.Network(container, data, {
+                                    layout: { hierarchical: { enabled: true, direction: $("#P400_MODO_VISTA").val() }},
+                                    physics: { enabled: false, solver: "forceAtlas2Based" }
+                                });
+                            }
+                    
+                    
+                            ,
+                            error: function (pError) {
+                                console.error('Error:', pError);
+                            }
+                        }
+                    );
+                    */
+                    generarGrafo();
+                    
+                    
+                    ```
+            }
+            execution {
+                sequence: 10
+                fireOnInit: false
+            }
+        )
+
+    )
+
+    dynamicAction change (
+        name: Change
+        execution {
+            sequence: 20
+        }
+        when {
+            selectionType: items
+            items: P400_MODO_VISTA
+        }
+
+        action native-javascript-code (
+            action: executeJsCode
+            settings {
+                jsCode:
+                    ```javascript-browser
+                    
+                    generarGrafo();
+                    ```
+            }
+            execution {
+                sequence: 10
+                fireOnInit: false
+            }
+        )
+
+    )
+
+    dynamicAction seleccionar-vista-change (
+        name: Seleccionar_Vista_Change
+        execution {
+            sequence: 30
+        }
+        when {
+            selectionType: items
+            items: P400_SELECCIONAR_VISTA
+        }
+
+        action native-javascript-code (
+            action: executeJsCode
+            settings {
+                jsCode:
+                    ```javascript-browser
+                    
+                    generarGrafo();
+                    ```
+            }
+            execution {
+                sequence: 10
+                fireOnInit: false
+            }
+        )
+
+    )
+
+    process conexiones-v (
+        name: CONEXIONES_V2
+        type: executeCode
+        source {
+            plsqlCode:
+                ```plsql
+                declare
+                l_cursor SYS_REFCURSOR;
+                l_nodes CLOB;
+                l_edges CLOB;
+                l_ids TABLA_IDS;
+                begin
+                   
+                   IF (UPPER(:P400_SELECCIONAR_VISTA) = 'IFACE') THEN
+                      l_nodes := GET_NODOS_IFACE(:P400_SERVICIO_ID);
+                      L_EDGES := GET_EDGES_IFACE(:P400_SERVICIO_ID);
+                
+                   END IF;
+                
+                
+                
+                   IF (UPPER(:P400_SELECCIONAR_VISTA) = 'WAN') THEN
+                         apex_debug.message('dmf: Buscando Serivicio_id: %s', :P400_SERVICIO_ID); 
+                         select s.id bulk collect into L_IDS from sgt_sitios s
+                            join sgt_sitios_servicio ss on ss.sitio_id =  s.id
+                            where ss.SERVICIO_ID = :P400_SERVICIO_ID;
+                        for i IN 1 .. L_IDS.count loop
+                            apex_debug.message('dmf: Sitios id : %s', L_IDS(i));
+                        end loop; 
+                        l_nodes := GET_NODOS_SITIOS(l_ids);
+                
+                        apex_debug.message('dmf: Buscando WANs con Serivicio_id: %s', :P400_SERVICIO_ID); 
+                        select w.id bulk collect into L_IDS from sgt_enlaces_wan w
+                            join sgt_enlaces_wan_servicio ws on ws.enlace_id =  w.id
+                            where ws.SERVICIO_ID = :P400_SERVICIO_ID;
+                
+                        l_edges := GET_EDGES_WAN(L_IDS); 
+                
+                
+                   END IF ;
+                   
+                   if (UPPER(:P400_SELECCIONAR_VISTA) = 'EQUIPOS') THEN
+                 
+                
+                   /** SELECT JSON_ARRAYAGG(
+                             JSON_OBJECT('id' VALUE id, 'eq_id' value eq_id, 'label' VALUE label, 'shape' VALUE 'box', 'color' VALUE '#00AAFF', 'level' VALUE seq)
+                           RETURNING CLOB)
+                    INTO l_nodes
+                
+                    FROM (
+                       SELECT C.eq_ID as id, C.eq_ID as,C.EQ as label, (c.seq)/10 seq FROM V_CONEXIONES_GENERAL_V2 C WHERE C.SERV_ID = :P400_SERVICIO_ID
+                        
+                        UNION
+                        SELECT C.eq_B_ID as id, C.eq_b_ID as, C.EQ_B as label, (c.seq + 10) / 10 FROM V_CONEXIONES_GENERAL_V2 C WHERE C.SERV_ID =:P400_SERVICIO_ID
+                
+                        order by seq
+                        
+                    );
+                    **/
+                
+                      l_nodes := GET_NODOS_EQUIPOS(:P400_SERVICIO_ID);
+                      L_EDGES := GET_EDGES_EQUIPOS(:P400_SERVICIO_ID);
+                
+                    IF l_nodes IS NULL THEN
+                      l_nodes := '[]';
+                    END IF;
+                
+                    ---========================
+                    ---Crear los edge
+                    ---=======================
+                    /**SELECT JSON_ARRAYAGG(
+                             JSON_OBJECT(
+                               'from' VALUE origen_id,
+                               'to'   VALUE destino_id,
+                               'label' VALUE edge_label,
+                               'edge_id' VALUE edge_id
+                             ) RETURNING CLOB)
+                    INTO l_edges
+                    from (
+                        select 
+                        eq_id as origen_id,
+                        eq_b_id as destino_id,
+                        fo_nombre as edge_label,
+                        conn_id as edge_id
+                        from v_conexiones_general_v2
+                        where serv_id = :P400_SERVICIO_ID
+                        order by eq_id
+                
+                    );**/
+                
+                    if l_edges is null then 
+                        l_edges := '[]';
+                    end if;    
+                    END IF;
+                
+                    htp.p(
+                      JSON_OBJECT(
+                        'nodes' VALUE l_nodes FORMAT JSON,
+                        'edges' VALUE l_edges FORMAT JSON
+                      ) 
+                    );
+                
+                
+                
+                
+                
+                
+                END;
+                
+                ```
+        }
+        execution {
+            sequence: 20
+            point: ajaxCallback
+        }
+        advanced {
+            executionMappingIdentifier: 88034738227850770425
+        }
+    )
+
+    process get-conexiones (
+        name: GET_CONEXIONES
+        type: executeCode
+        source {
+            plsqlCode:
+                ```plsql
+                /*
+                Obtener todos los equipos que participan en un servicio, tambien todas las 
+                interfaces que participan del servicio.
+                Estos serán los nodos. 
+                
+                las conexiones se quitan de los enlaces logicos y enlaces tramos.
+                
+                la librería se debería de encargar de renderizar todo.
+                
+                */
+                declare
+                l_cursor SYS_REFCURSOR;
+                begin
+                --Consulta para traer los nodos:
+                /*select e.id, e.nombre label from sgt_equipos e where
+                
+                e.id in ( 
+                    SELECT id FROM (
+                    SELECT equipo_a_id id FROM sgt_enlaces_tramos et
+                    LEFT JOIN sgt_servicios_tramos st ON st.tramo_id = et.id 
+                    WHERE st.servicio_id = 1
+                    UNION
+                    SELECT equipo_b_id id FROM sgt_enlaces_tramos et
+                    LEFT JOIN sgt_servicios_tramos st ON st.tramo_id = et.id 
+                    WHERE st.servicio_id = 1
+                    ) t     
+                    )    
+                
+                --consulta para traer las aristas "Edges"
+                --falta obtener los nombres de los enlaces
+                select equipo_a_id ORI, equipo_b_id DEST, interfaz_a_id ||'>'||interfaz_b_id NOMBRE from sgt_enlaces_logicos 
+                left join
+                sgt_servicios_enlaces_logicos
+                on sgt_servicios_enlaces_logicos.enlace_id = sgt_enlaces_logicos.id
+                where sgt_servicios_enlaces_logicos.servicio_id = 1
+                
+                union all
+                
+                select equipo_a_id ORI, equipo_b_id DEST, interfaz_a_id ||'>'||interfaz_b_id NOMBRE from sgt_enlaces_tramos 
+                left join
+                sgt_servicios_tramos
+                on sgt_servicios_tramos.tramo_id = sgt_enlaces_tramos.id
+                where sgt_servicios_tramos.servicio_id = 1
+                
+                SELECT * FROM V_CONEXIONES_GENERALES con
+                
+                WHERE con.servicio_id = :P400_SERVICIO_ID;
+                
+                
+                */
+                BEGIN
+                    IF UPPER(:P400_SELECCIONAR_VISTA)= 'EQUIPOS' THEN
+                        OPEN l_cursor FOR
+                            SELECT equipo_a origen, equipo_a_id origen_id,  equipo_b destino, equipo_b_id destino_id  
+                            FROM V_CONEXIONES_GENERAL 
+                            WHERE servicio_id = :P400_SERVICIO_ID
+                            ORDER BY sitio_a_id;
+                            
+                    ELSIF UPPER(:P400_SELECCIONAR_VISTA) = 'SITIOS' THEN
+                        OPEN l_cursor FOR
+                            SELECT sitio_a origen, sitio_a_id origen_id, sitio_b destino, sitio_b_id destino_id 
+                            FROM V_CONEXIONES_GENERAL 
+                            WHERE servicio_id = :P400_SERVICIO_ID
+                            ORDER BY sitio_a_id;
+                            
+                    ELSIF UPPER(:P400_SELECCIONAR_VISTA)  = 'INTERFACES' THEN
+                        OPEN l_cursor FOR
+                            SELECT interfaz_a origen, interfaz_a_id origen_id, interfaz_b destino, interfaz_b_id destino_id 
+                            FROM V_CONEXIONES_GENERAL 
+                            WHERE servicio_id = :P400_SERVICIO_ID
+                            ORDER BY sitio_a_id;
+                            
+                    ELSE
+                        OPEN l_cursor FOR
+                            SELECT *  
+                            FROM V_CONEXIONES_GENERAL 
+                            WHERE servicio_id = :P400_SERVICIO_ID
+                            ORDER BY sitio_a_id;
+                    END IF;
+                    
+                    APEX_JSON.OPEN_OBJECT;
+                    APEX_JSON.WRITE('data', l_cursor); -- Convierte el cursor a JSON array
+                    APEX_JSON.CLOSE_OBJECT;
+                END;
+                
+                end;
+                ```
+        }
+        execution {
+            sequence: 10
+            point: ajaxCallback
+        }
+        advanced {
+            executionMappingIdentifier: 78443843459088367114
+        }
+        config {
+            buildOption: @commented-out
+        }
+    )
+
+)
+

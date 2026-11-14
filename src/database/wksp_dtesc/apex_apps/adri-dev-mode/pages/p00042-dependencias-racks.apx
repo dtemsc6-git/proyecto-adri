@@ -1,0 +1,113 @@
+page 42 (
+    name: Dependencias Racks
+    alias: DEPENDENCIAS-RACKS
+    title: Dependencias Racks
+    appearance {
+        pageMode: modalDialog
+        dialogTemplate: @/modal-dialog
+        templateOptions: #DEFAULT#
+    }
+    navigation {
+        cursorFocus: doNotFocusCursor
+    }
+    security {
+        pageAccessProtection: argumentsMustHaveChecksum
+        formAutoComplete: false
+    }
+
+    region dependencias (
+        name: Dependencias
+        type: tree
+        source {
+            location: localDatabase
+            type: sqlQuery
+            sqlQuery:
+                ```sql
+                with data as (
+                select ('R') as link_type,'SC-'||to_char(sala_id) as PARENT_ID, 'R-'||to_char(d.id) as ID, d.nombre as name, d.id as sub_id from sgt_racks d  
+                union all 
+                select ('E') as link_type,  'R-'||to_char(rack_id) as parent_id , 'E-'||to_char(e.id) as ID, 'U: '||e.u||', '||e.nombre as name, e.id as sub_id from sgt_equipos e
+                
+                
+                )
+                select case when connect_by_isleaf = 1 then 0
+                            when level = 1             then 1
+                            else                           -1
+                       end as status, 
+                       level,
+                       name as title, 
+                       null as icon, 
+                       "ID" as value, 
+                       null as tooltip, 
+                       null as link 
+                from data 
+                
+                start with "PARENT_ID" = 'R-'||:P42_ID
+                connect by prior "ID" = "PARENT_ID"
+                order siblings by name
+                ```
+        }
+        layout {
+            sequence: 20
+            slot: contentBody
+        }
+        appearance {
+            template: @/standard
+            templateOptions: [
+                #DEFAULT#
+                t-Region--removeHeader js-removeLandmark
+                t-Region--noBorder
+                t-Region--scrollBody
+            ]
+        }
+        settings {
+            nodeLabelColumn: TITLE
+            nodeValueColumn: VALUE
+            hierarchy: notComputed
+            nodeStatusColumn: STATUS
+            hierarchyLevelColumn: LEVEL
+            defaultIconCssClass: icon-tree-folder
+            iconTypeCssClass: a-Icon
+        }
+    )
+
+    region new (
+        name: New
+        type: staticContent
+        source {
+            htmlCode: No se encontraron datos.
+        }
+        layout {
+            sequence: 40
+            slot: contentBody
+        }
+        appearance {
+            template: @/alert
+            templateOptions: [
+                #DEFAULT#
+                t-Alert--horizontal
+                t-Alert--defaultIcons
+                t-Alert--info
+                t-Alert--removeHeading js-removeLandmark
+            ]
+        }
+        serverSideCondition {
+            type: noRowsReturned
+            sqlQuery:
+                ```sql
+                select  id from sgt_equipos
+                where rack_id = :P42_ID
+                ```
+        }
+    )
+
+    pageItem P42_ID (
+        type: hidden
+        layout {
+            sequence: 10
+            slot: contentBody
+        }
+    )
+
+)
+
