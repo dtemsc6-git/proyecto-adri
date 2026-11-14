@@ -6,3 +6,7 @@ var/*
 *.zip
 *.log
 **/.DS_Store
+db/dev/db.describe.md
+db/prod/prod.describe.md
+db/prod/prod.pendientes.md
+AGENTS.md
