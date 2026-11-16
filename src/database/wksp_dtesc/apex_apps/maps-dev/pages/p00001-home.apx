@@ -205,8 +205,8 @@ page 1 (
                        FECHA_FIN,
                        CREADO_POR,
                        CREADO_EL,
-                       MODIFICADO_POR,
-                       MODIFICADO_EL,
+                       ACTUALIZADO_POR,
+                       ACTUALIZADO_EL,
                        srv.servicios,
                        wan.enlaces_wan
                       
@@ -481,10 +481,10 @@ page 1 (
             }
         )
 
-        column MODIFICADO_EL (
+        column ACTUALIZADO_EL (
             type: plainText
             heading {
-                heading: Modificado El
+                heading: Actualizado El
             }
             layout {
                 sequence: 140
@@ -500,10 +500,10 @@ page 1 (
             }
         )
 
-        column MODIFICADO_POR (
+        column ACTUALIZADO_POR (
             type: plainText
             heading {
-                heading: Modificado Por
+                heading: Actualizado Por
             }
             layout {
                 sequence: 130
@@ -1034,8 +1034,8 @@ page 1 (
                            FECHA_FIN,
                            CREADO_POR,
                            CREADO_EL,
-                           MODIFICADO_POR,
-                           MODIFICADO_EL,
+                           ACTUALIZADO_POR,
+                           ACTUALIZADO_EL,
                            COMENTARIOS
                       from SGT_EVENTOS_FO
                        

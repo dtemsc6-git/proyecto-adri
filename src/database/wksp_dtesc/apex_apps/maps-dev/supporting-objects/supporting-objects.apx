@@ -1,4 +1,7 @@
 supportingObject (
+    upgrade {
+        upgradeWhenSqlQuery: SELECT table_name FROM user_tables WHERE table_name = 'SGT_TRAZADOS_FO'
+    }
     deinstall {
         scriptFile: deinstall-script.sql
     }

@@ -328,7 +328,7 @@ page 10 (
     pageItem P10_MODIFICADO_EL (
         type: datePicker
         label {
-            label: Modificado El
+            label: Actualizado El
             alignment: left
         }
         layout {
@@ -347,7 +347,7 @@ page 10 (
         }
         source {
             formRegion: @eventos-form
-            column: MODIFICADO_EL
+            column: ACTUALIZADO_EL
             dataType: date
         }
         config {
@@ -358,7 +358,7 @@ page 10 (
     pageItem P10_MODIFICADO_POR (
         type: textField
         label {
-            label: Modificado Por
+            label: Actualizado Por
             alignment: left
         }
         layout {
@@ -377,7 +377,7 @@ page 10 (
         }
         source {
             formRegion: @eventos-form
-            column: MODIFICADO_POR
+            column: ACTUALIZADO_POR
             dataType: varchar2
         }
         config {

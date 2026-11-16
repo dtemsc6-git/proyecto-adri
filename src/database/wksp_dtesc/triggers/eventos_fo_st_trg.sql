@@ -1,21 +1,12 @@
-create or replace editionable trigger wksp_dtesc.eventos_fo_st_trg before
-    insert or update on wksp_dtesc.sgt_eventos_fo
+create or replace editionable trigger wksp_dtesc.eventos_fo_st_trg
+    before insert or update on wksp_dtesc.SGT_EVENTOS_FO
     for each row
-begin 
-    --actualizar info de  
+begin
     if inserting then
         :new.creado_el := sysdate;
-        :new.creado_por := nvl(wwv_flow.g_user, user);
-        :new.modificado_el := sysdate;
-        :new.modificado_por := nvl(wwv_flow.g_user, user);
-    elsif updating then
-        :new.modificado_el := sysdate;
-        :new.modificado_por := nvl(wwv_flow.g_user, user);
+        :new.creado_por := nvl(sys_context('APEX$SESSION', 'APP_USER'), sys_context('USERENV', 'SESSION_USER'));
     end if;
+    :new.actualizado_el := sysdate;
+    :new.actualizado_por := nvl(sys_context('APEX$SESSION', 'APP_USER'), sys_context('USERENV', 'SESSION_USER'));
 end;
 /
-
-alter trigger wksp_dtesc.eventos_fo_st_trg enable;
-
-
--- sqlcl_snapshot {"hash":"94bfaeeb01a9113886a8ca69d1e971528377adb1","type":"TRIGGER","name":"EVENTOS_FO_ST_TRG","schemaName":"WKSP_DTESC","sxml":""}

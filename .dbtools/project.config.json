@@ -38,7 +38,7 @@
       "expSavedReports" : false,
       "expPubReports" : true,
       "expSubscriptions" : false,
-      "expSupportingObjects" : "N",
+      "expSupportingObjects" : "Y",
       "expTranslations" : false,
       "auditType" : "NULL"
     }

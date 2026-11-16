@@ -650,7 +650,7 @@ page 2 (
                                             -- Conservar L_NAME/L_DESC y demas atributos de los registros existentes.
                                             update sgt_trazados_fo
                                             set sdo_data = l_rows(i).geometry, type = l_rows(i).geometry_type,
-                                                modificado_por = v('APP_USER'), modificado_el = systimestamp
+                                                actualizado_por = v('APP_USER'), actualizado_el = systimestamp
                                             where id = l_rows(i).id and fo_id = l_fo_id;
                                             require(sql%rowcount = 1, 'El registro cambio durante el guardado.');
                                             l_updated := l_updated + 1;

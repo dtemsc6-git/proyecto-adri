@@ -432,8 +432,8 @@ page 3 (
                            FECHA_FIN,
                            CREADO_POR,
                            CREADO_EL,
-                           MODIFICADO_POR,
-                           MODIFICADO_EL,
+                           ACTUALIZADO_POR,
+                           ACTUALIZADO_EL,
                            COMENTARIOS
                       from SGT_EVENTOS_FO
                        
@@ -1431,10 +1431,10 @@ page 3 (
             }
         )
 
-        column MODIFICADO_EL (
+        column ACTUALIZADO_EL (
             type: plainText
             heading {
-                heading: Modificado El
+                heading: Actualizado El
             }
             layout {
                 sequence: 140
@@ -1450,10 +1450,10 @@ page 3 (
             }
         )
 
-        column MODIFICADO_POR (
+        column ACTUALIZADO_POR (
             type: plainText
             heading {
-                heading: Modificado Por
+                heading: Actualizado Por
             }
             layout {
                 sequence: 130
@@ -1552,11 +1552,11 @@ page 3 (
                 sequence: 7
             )
 
-            displayColumn MODIFICADO_EL (
+            displayColumn ACTUALIZADO_EL (
                 sequence: 14
             )
 
-            displayColumn MODIFICADO_POR (
+            displayColumn ACTUALIZADO_POR (
                 sequence: 13
             )
 
