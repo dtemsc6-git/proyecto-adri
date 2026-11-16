@@ -1,9 +1,0 @@
-appItem APP_TZ (
-)
-
-appItem DEPTO_ID (
-    comments {
-        comments: Prueba para pasar parametros a la LOV
-    }
-)
-
